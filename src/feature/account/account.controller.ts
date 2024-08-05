@@ -8,12 +8,15 @@ import { CurrentUser } from "src/core/decorators/current.user";
 import { JwtAuthGuard } from "../auth/jwt.auth.gaurd";
 import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
-import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
+import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 
 @Controller({
   version: '1',
   path: "account",
 })
+@ApiTags('Account')
 export class AccountController {
 
   constructor(private readonly accountService: AccountService) { }
@@ -32,12 +35,28 @@ export class AccountController {
     return await this.accountService.create(body)
   }
 
-  @Patch('')
+  @Patch('name')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update first and last names' })
   @UseGuards(JwtAuthGuard)
-  async updateAccount(@Body() body: AccountUpdateDto, @CurrentUser('id') id: string): Promise<AccountResponseDto> {
+  async updateName(@Body() body: AccountUpdateDto, @CurrentUser('id') id: string): Promise<AccountResponseDto> {
     return await this.accountService.updateAccount(body, id)
+  }
+
+  @Patch('address')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update Address' })
+  @UseGuards(JwtAuthGuard)
+  async updateAddess(@Body() body: AddressUpdateDto, @CurrentUser('id') id: string): Promise<AccountResponseDto> {
+    return await this.accountService.updateAddress(body, id)
+  }
+
+  @Patch('profile')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update dob, phone, photo and proof-of-ID' })
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(@Body() body: AccountProfileDto, @CurrentUser('id') id: string): Promise<AccountResponseDto> {
+    return await this.accountService.updateProfilee(id, body)
   }
 
   @Get('bank')
@@ -46,6 +65,14 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   async getBankAccounts(@CurrentUser('id') user: string): Promise<BankAccountResponseDto[]> {
     return await this.accountService.getBankAccounts(user)
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get Own Account Details' })
+  @UseGuards(JwtAuthGuard)
+  async getOwnAcccount(@CurrentUser('id') id: string): Promise<AccountResponseDto> {
+    return await this.accountService.getOwnAccount(id)
   }
 
   @Get('bank/:id')

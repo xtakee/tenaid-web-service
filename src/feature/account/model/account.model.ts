@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Date, HydratedDocument, Types } from "mongoose";
 import { EmailModel } from "./email.model";
-import { AddressModel } from "./address.model";
+import { Address } from "./address.model";
 import { Type } from "class-transformer";
 
 export type AccountDocument = HydratedDocument<Account>;
 
 @Schema({ timestamps: true })
 export class Account {
-  
+
   @Prop({ required: true })
   firstName: string;
 
@@ -24,7 +24,7 @@ export class Account {
   @Prop()
   phone?: string;
 
-  @Prop({type: Date})
+  @Prop({ type: Date })
   dob?: Date;
 
   @Prop()
@@ -36,9 +36,9 @@ export class Account {
   @Prop()
   proofOfId?: string
 
-  @Prop()
-  @Type(() => AddressModel)
-  address?: AddressModel
+  @Prop({ type: Types.ObjectId, required: true })
+  @Type(() => Address)
+  address?: Address
 
   @Prop({ required: true })
   password: string

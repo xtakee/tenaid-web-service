@@ -2,12 +2,13 @@ import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { BankResponseDto } from 'src/domain/bank/bank.response.dto';
 import { BankService } from './bank.service';
 import { JwtAuthGuard } from '../auth/jwt.auth.gaurd';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller({
   version: '1',
   path: "bank",
 })
+@ApiTags('Bank')
 export class BankController {
 
   constructor(private readonly bankService: BankService) { }

@@ -15,7 +15,7 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
         verified: from.email.verified
       },
       phone: from.phone,
-      photo: from.phone,
+      photo: from.photo,
       dob: from.dob?.toString(),
       proofOfId: from.proofOfId
     }

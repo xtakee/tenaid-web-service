@@ -1,7 +1,7 @@
 import { Prop, Schema } from "@nestjs/mongoose";
 
 @Schema({ timestamps: true })
-export class AddressModel {
+export class Address {
   @Prop()
   address: string;
 

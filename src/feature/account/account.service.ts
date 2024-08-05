@@ -10,6 +10,8 @@ import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.accou
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
 import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
+import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
+import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 
 @Injectable()
 export class AccountService {
@@ -22,6 +24,11 @@ export class AccountService {
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
 
+  /**
+   * 
+   * @param data 
+   * @returns AccountAuthResponseDto
+   */
   async create(data: AccountCreateDto): Promise<AccountAuthResponseDto> {
     let account = await this.accountRepository.getOneByEmail(data.email)
 
@@ -33,6 +40,12 @@ export class AccountService {
     throw new ForbiddenException('Duplicate')
   }
 
+  /**
+   *
+   * @param data 
+   * @param id 
+   * @returns AccountResponseDto
+   */
   async updateAccount(data: AccountUpdateDto, id: string): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateAccount(id, data)
     if (account) {
@@ -41,11 +54,31 @@ export class AccountService {
     throw new NotFoundException()
   }
 
+  /**
+   * 
+   * @param data 
+   * @param id 
+   * @returns AccountResponseDto
+   */
+  async updateAddress(data: AddressUpdateDto, id: string): Promise<AccountResponseDto> {
+    let account = await this.accountRepository.updateAddress(id, data)
+    if (account) {
+      return this.mapper.map(account)
+    }
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param data 
+   * @param id 
+   * @returns BankAccountResponseDto
+   */
   async addBankAccount(data: AddBankAccountDto, id: string): Promise<BankAccountResponseDto> {
     const bank = await this.bankRepository.findOneById(data.bank)
     const existing = await this.accountRepository.getBankAccountByNumber((bank as any)._id, data.number, id)
 
-    if(existing) throw new ForbiddenException('Duplicate')
+    if (existing) throw new ForbiddenException('Duplicate')
 
     if (bank) {
       const account = await this.accountRepository.addBankAccount(id, data.number, bank, data.isPrimary)
@@ -68,9 +101,36 @@ export class AccountService {
     throw new NotFoundException()
   }
 
+  /**
+   * 
+   * @param user 
+   * @returns BankAccountResponseDto[]
+   */
   async getBankAccounts(user: string): Promise<BankAccountResponseDto[]> {
     let accounts = await this.accountRepository.getBankAccounts(user)
     return accounts.map(b => this.bankMapper.map(b))
   }
+
+  /**
+   * AccountResponseDto
+   * @param user 
+   * @returns AccountResponseDto
+   */
+  async getOwnAccount(user: string): Promise<AccountResponseDto> {
+    let account = await this.accountRepository.getOneById(user)
+    return this.mapper.map(account)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns AccountResponseDto
+   */
+  async updateProfilee(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
+    let account = await this.accountRepository.updateProfile(user, data)
+    return this.mapper.map(account)
+  }
+
 
 }

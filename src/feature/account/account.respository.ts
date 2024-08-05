@@ -7,6 +7,9 @@ import { Model, Types } from "mongoose";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
 import { BankAccount } from "./model/bank.account.model";
 import { Bank } from "../bank/model/bank.model";
+import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
+import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
+import { Address } from "./model/address.model";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -26,6 +29,29 @@ export class AccountRepository implements IAccountRepository {
     return this.accountModel.findByIdAndUpdate(id, {
       firstName: data.firstName,
       lastName: data.lastName
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  async updateAddress(id: string, data: AddressUpdateDto): Promise<Account> {
+    const address: Address = {
+      address: data.address,
+      proofOfAddress: data.proofOfAddress,
+      city: data.city,
+      country: data.country,
+      postalCode: data.postalCode
+    } 
+
+    return this.accountModel.findByIdAndUpdate(id, {
+      address: address
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  async updateProfile(id: string, data: AccountProfileDto): Promise<Account> {
+    return this.accountModel.findByIdAndUpdate(id, {
+      dob: data.dob,
+      phone: data.phone,
+      photo: data.photo,
+      proofOfId: data.proofOfId
     }, { returnDocument: 'after' }).exec()
   }
 

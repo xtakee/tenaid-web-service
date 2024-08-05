@@ -6,6 +6,8 @@ import { DatabaseModule } from './core/database/database.module';
 import { PropertyModule } from './feature/property/property.module';
 import { AuthModule } from './feature/auth/auth.module';
 import { BankModule } from './feature/bank/bank.module';
+import { CloudinaryModule } from './services/cloudinary/cloudinary.module';
+import { FileModule } from './feature/file/file.module';
 
 @Module({
   imports: [AccountModule,
@@ -18,6 +20,8 @@ import { BankModule } from './feature/bank/bank.module';
     PropertyModule,
     AuthModule,
     BankModule,
+    CloudinaryModule,
+    FileModule,
   ],
   controllers: [],
   providers: [],
