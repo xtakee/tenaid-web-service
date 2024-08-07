@@ -1,7 +1,7 @@
 import { Prop, Schema } from "@nestjs/mongoose/dist/decorators";
 
 @Schema({ timestamps: true })
-export class EmailModel {
+export class Email {
   @Prop({ required: true })
   value: string;
 

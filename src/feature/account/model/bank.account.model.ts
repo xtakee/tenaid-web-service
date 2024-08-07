@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { Type } from "class-transformer";
 import { Bank } from "src/feature/bank/model/bank.model";
+import { Account } from "./account.model";
 
 export type BankAccountDocument = HydratedDocument<BankAccount>;
 
@@ -18,7 +19,7 @@ export class BankAccount {
   @Type(() => Bank)
   bank: Bank;
 
-  @Prop({ type: Types.ObjectId, ref: 'Account', required: true })
+  @Prop({ type: Types.ObjectId, ref: Account.name, required: true })
   account: Types.ObjectId;
 }
 

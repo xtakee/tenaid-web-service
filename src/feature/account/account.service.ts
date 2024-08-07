@@ -12,6 +12,7 @@ import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
+import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
 
 @Injectable()
 export class AccountService {
@@ -85,6 +86,14 @@ export class AccountService {
       return this.bankMapper.map(account)
     }
     throw new NotFoundException()
+  }
+
+  async setAddOn(data: AddOnRequestDto, id: string): Promise<AccountResponseDto> {
+    const account = await this.accountRepository.setAddOn(id, data.addOn)
+
+    if (account) this.mapper.map(account)
+
+    throw new ForbiddenException()
   }
 
   /**
