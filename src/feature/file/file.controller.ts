@@ -3,7 +3,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileUploadResponseDto } from 'src/domain/file/dto/response/file.response.dto';
 import { CloudinaryService } from 'src/services/cloudinary/cloudinary.service';
-import { JwtAuthGuard } from '../auth/jwt.auth.gaurd';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard/jwt.auth.guard';
 
 @Controller({
   path: 'file',

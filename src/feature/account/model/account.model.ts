@@ -3,7 +3,7 @@ import { Date, HydratedDocument, Types } from "mongoose";
 import { Email } from "./email.model";
 import { Address } from "./address.model";
 import { Type } from "class-transformer";
-import { ACCOUNT_STATUS, ADD_ON_REQUEST_STATUS, DEFAULT_STATUS } from "src/constants";
+import { ACCOUNT_STATUS, ADD_ON_REQUEST_STATUS, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -51,7 +51,7 @@ export class Account {
   @Type(() => AddOn)
   canPublish?: AddOn
 
-  @Prop({ type: Types.ObjectId, required: true })
+  @Prop({ type: Types.ObjectId})
   @Type(() => Address)
   address?: Address
 
@@ -60,6 +60,7 @@ export class Account {
 
   @Prop()
   token?: string
+
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

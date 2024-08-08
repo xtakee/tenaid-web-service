@@ -1,4 +1,4 @@
-import { Module, SetMetadata } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AccountRepository } from '../account/account.respository';
@@ -8,13 +8,15 @@ import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
 import { MongooseModule } from '@nestjs/mongoose/dist/mongoose.module';
 import { Account, AccountSchema } from '../account/model/account.model';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { JwtStrategy } from './auth.jwt.strategy';
+import { JwtStrategy } from './guards/jwt.guard/auth.jwt.strategy';
 import { BankAccount, BankAccountSchema } from '../account/model/bank.account.model';
+import { AuthRepository } from './auth.repository';
+import { ManagedAccount, ManagedAccountSchema } from './model/managed.account';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, AccountRepository, AccountToDtoMapper, AuthHelper, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, AccountRepository, AccountToDtoMapper, AuthHelper, JwtStrategy, AuthRepository],
+  exports: [AuthService, AuthRepository],
   imports: [
     JwtModule.register({
       global: true,
@@ -22,7 +24,8 @@ import { BankAccount, BankAccountSchema } from '../account/model/bank.account.mo
       signOptions: { expiresIn: '60m' },
     }),
     MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
-    MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }])
+    MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
+    MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }])
   ]
 })
 export class AuthModule { }

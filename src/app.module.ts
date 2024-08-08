@@ -8,6 +8,10 @@ import { AuthModule } from './feature/auth/auth.module';
 import { BankModule } from './feature/bank/bank.module';
 import { CloudinaryModule } from './services/cloudinary/cloudinary.module';
 import { FileModule } from './feature/file/file.module';
+import { AgentController } from './feature/agent/agent.controller';
+import { ManagerController } from './feature/manager/manager.controller';
+import { ManagerModule } from './feature/manager/manager.module';
+import { AgentModule } from './feature/agent/agent.module';
 
 @Module({
   imports: [AccountModule,
@@ -22,8 +26,10 @@ import { FileModule } from './feature/file/file.module';
     BankModule,
     CloudinaryModule,
     FileModule,
+    ManagerModule,
+    AgentModule,
   ],
-  controllers: [],
+  controllers: [AgentController, ManagerController],
   providers: [],
 })
 export class AppModule { }

@@ -10,16 +10,11 @@ import { Bank } from "../bank/model/bank.model";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { Address } from "./model/address.model";
-import { AGENT, MANAGER, PENDING_STATUS } from "src/constants";
+import { MANAGER, PENDING_STATUS } from "src/feature/auth/auth.constants";
 
 const defaultAddOn: AddOn = {
   value: false,
   status: PENDING_STATUS
-}
-
-const addOnMapper = {
-  MANAGER: defaultAddOn,
-  AGENT: defaultAddOn
 }
 
 @Injectable()
@@ -160,15 +155,15 @@ export class AccountRepository implements IAccountRepository {
    * @param addOnType 
    * @returns Account
    */
-  async setAddOn(user: string, addOnType: string): Promise<Account> {
+  async requestAddOn(user: string, addOnType: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
-    const addOn = addOnMapper[addOnType]
 
     if (account) {
-      if (addOnType === MANAGER) account.canOwn = addOn
-      else account.canPublish = addOn
+      let toUpdate = {}
+      if (addOnType === MANAGER) toUpdate = { canOwn: defaultAddOn }
+      else toUpdate = { canPublish: defaultAddOn }
 
-      return await this.accountModel.findByIdAndUpdate(user, account)
+      return await this.accountModel.findByIdAndUpdate(user, toUpdate)
     }
 
     return null
@@ -182,7 +177,7 @@ export class AccountRepository implements IAccountRepository {
    */
   async setCanOwnAddOn(user: string, status: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
-   
+
     if (account && account.canOwn) {
       const addOn = account.canOwn
       addOn.status = status
@@ -202,7 +197,7 @@ export class AccountRepository implements IAccountRepository {
    */
   async setCanPublishAddOn(user: string, status: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
-   
+
     if (account && account.canPublish) {
       const addOn = account.canPublish
       addOn.status = status

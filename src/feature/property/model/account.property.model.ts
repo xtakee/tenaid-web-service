@@ -5,10 +5,10 @@ import { Account } from "src/feature/account/model/account.model";
 import { Address } from "src/feature/account/model/address.model";
 import { Apartment } from "./apartment.model";
 
-export type PropertyDocument = HydratedDocument<Property>;
+export type AccountPropertyDocument = HydratedDocument<AccountProperty>;
 
 @Schema({ timestamps: true })
-export class Property {
+export class AccountProperty {
   @Prop({ type: Types.ObjectId, required: true, ref: Account.name })
   @Type(() => Address)
   account?: Types.ObjectId
@@ -34,4 +34,4 @@ export class Property {
   address?: Address
 }
 
-export const PropertySchema = SchemaFactory.createForClass(Property);
+export const AccountPropertySchema = SchemaFactory.createForClass(AccountProperty);

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountRepository } from "./account.respository";
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { AuthService } from "../auth/auth.service";
@@ -35,6 +35,7 @@ export class AccountService {
 
     if (!account) {
       account = await this.accountRepository.create(data)
+      await this.authService.setPersonaPermissions((account as any)._id)
       return await this.authService.sign((account as any)._id)
     }
 
@@ -89,11 +90,14 @@ export class AccountService {
   }
 
   async setAddOn(data: AddOnRequestDto, id: string): Promise<AccountResponseDto> {
-    const account = await this.accountRepository.setAddOn(id, data.addOn)
+    const account = await this.accountRepository.requestAddOn(id, data.addOn)
 
-    if (account) this.mapper.map(account)
+    if (account) {
+      await this.authService.setDefaultOwnerPermissions(data.addOn, id)
+      return this.mapper.map(account)
+    }
 
-    throw new ForbiddenException()
+    throw new BadRequestException()
   }
 
   /**
@@ -104,9 +108,8 @@ export class AccountService {
    */
   async getBankAccount(user: string, bank: string): Promise<BankAccountResponseDto> {
     let account = await this.accountRepository.getBankAccount(bank, user)
-    if (account) {
-      return this.bankMapper.map(account)
-    }
+    if (account) return this.bankMapper.map(account)
+
     throw new NotFoundException()
   }
 

@@ -12,5 +12,7 @@ export class AccountResponseDto {
   phone: string
   photo: string
   dob: string
+  canOwn?: boolean
+  canPublish?: boolean
   proofOfId?: string
 }

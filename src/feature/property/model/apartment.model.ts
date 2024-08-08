@@ -1,12 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
-import { HydratedDocument, Types } from "mongoose";
-import { Property } from "./property.model";
-
-export type ApartmentDocument = HydratedDocument<Apartment>;
 
 @Schema()
-class CustomPayment {
+export class CustomPayment {
   @Prop()
   label?: string
 
@@ -16,10 +12,6 @@ class CustomPayment {
 
 @Schema({ timestamps: true })
 export class Apartment {
-
-  @Prop({ type: Types.ObjectId, required: true, ref: 'Property' })
-  @Type(() => Property)
-  property?: Types.ObjectId
 
   @Prop({ required: true })
   name?: string;
@@ -58,5 +50,3 @@ export class Apartment {
   @Prop([String])
   images?: string[]
 }
-
-export const PropertySchema = SchemaFactory.createForClass(Property);

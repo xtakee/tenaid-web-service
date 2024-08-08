@@ -11,6 +11,8 @@ import { BankAccount, BankAccountSchema } from './model/bank.account.model';
 import { BankAccountToDtoMapper } from './mapper/bank.account.to.dto.mapper';
 import { BankRepository } from '../bank/bank.repository';
 import { Bank, BankSchema } from '../bank/model/bank.model';
+import { AuthRepository } from '../auth/auth.repository';
+import { ManagedAccount, ManagedAccountSchema } from '../auth/model/managed.account';
 
 @Module({
   imports: [MongooseModule.forFeatureAsync([{
@@ -26,6 +28,7 @@ import { Bank, BankSchema } from '../bank/model/bank.model';
     },
   }]),
   MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
+  MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
   MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }])
   ],
   providers: [
@@ -35,7 +38,8 @@ import { Bank, BankSchema } from '../bank/model/bank.model';
     AuthService,
     AuthHelper,
     BankAccountToDtoMapper,
-    BankRepository
+    BankRepository,
+    AuthRepository
   ],
   controllers: [AccountController],
   exports: [

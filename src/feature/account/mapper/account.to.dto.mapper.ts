@@ -14,6 +14,8 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
         value: from.email.value,
         verified: from.email.verified
       },
+      canOwn: from.canOwn?.value,
+      canPublish: from.canPublish?.value,
       phone: from.phone,
       photo: from.photo,
       dob: from.dob?.toString(),

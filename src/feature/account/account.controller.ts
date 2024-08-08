@@ -5,7 +5,7 @@ import { AccountAuthResponseDto } from "src/domain/auth/dto/response/account.aut
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
 import { AccountResponseDto } from "src/domain/account/dto/response/account.response.dto";
 import { CurrentUser } from "src/core/decorators/current.user";
-import { JwtAuthGuard } from "../auth/jwt.auth.gaurd";
+import { JwtAuthGuard } from "../auth/guards/jwt.guard/jwt.auth.guard";
 import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
