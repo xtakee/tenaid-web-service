@@ -2,8 +2,9 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AccountAuthRequestDto } from 'src/domain/auth/dto/request/account.auth.request.dto';
 import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/core/decorators/current.user';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt.guard/jwt.auth.guard';
 
 @Controller({
@@ -21,6 +22,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Logout of a registered account' })
   async logout(@User() id: string): Promise<void> {
