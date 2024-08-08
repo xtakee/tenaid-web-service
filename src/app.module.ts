@@ -14,7 +14,8 @@ import { ManagerModule } from './feature/manager/manager.module';
 import { AgentModule } from './feature/agent/agent.module';
 
 @Module({
-  imports: [AccountModule,
+  imports: [
+    AccountModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,
       limit: 10,
@@ -27,7 +28,7 @@ import { AgentModule } from './feature/agent/agent.module';
     CloudinaryModule,
     FileModule,
     ManagerModule,
-    AgentModule,
+    AgentModule
   ],
   controllers: [AgentController, ManagerController],
   providers: [],

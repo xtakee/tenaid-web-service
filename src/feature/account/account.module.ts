@@ -1,4 +1,4 @@
-import { Module, SetMetadata } from '@nestjs/common';
+import { Global, Module, SetMetadata } from '@nestjs/common';
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,7 +13,11 @@ import { BankRepository } from '../bank/bank.repository';
 import { Bank, BankSchema } from '../bank/model/bank.model';
 import { AuthRepository } from '../auth/auth.repository';
 import { ManagedAccount, ManagedAccountSchema } from '../auth/model/managed.account';
+import { CaslAbilityFactory } from '../auth/guards/casl/casl.ability.factory';
+import { PoliciesGuard } from '../auth/guards/casl/policies.guard';
+import { CacheService } from 'src/services/cache/cache.service';
 
+@Global()
 @Module({
   imports: [MongooseModule.forFeatureAsync([{
     name: Account.name,
@@ -39,13 +43,17 @@ import { ManagedAccount, ManagedAccountSchema } from '../auth/model/managed.acco
     AuthHelper,
     BankAccountToDtoMapper,
     BankRepository,
-    AuthRepository
+    AuthRepository,
+    PoliciesGuard, 
+    CaslAbilityFactory,
+    CacheService
   ],
   controllers: [AccountController],
   exports: [
     AccountRepository,
     MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
-    MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }])
+    MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
+    MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }])
   ]
 })
 export class AccountModule { }

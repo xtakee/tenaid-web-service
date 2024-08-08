@@ -50,9 +50,8 @@ export class AccountService {
    */
   async updateAccount(data: AccountUpdateDto, id: string): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateAccount(id, data)
-    if (account) {
-      return this.mapper.map(account)
-    }
+    if (account) return this.mapper.map(account)
+
     throw new NotFoundException()
   }
 
@@ -64,9 +63,8 @@ export class AccountService {
    */
   async updateAddress(data: AddressUpdateDto, id: string): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateAddress(id, data)
-    if (account) {
-      return this.mapper.map(account)
-    }
+    if (account) return this.mapper.map(account)
+
     throw new NotFoundException()
   }
 
@@ -130,7 +128,9 @@ export class AccountService {
    */
   async getOwnAccount(user: string): Promise<AccountResponseDto> {
     let account = await this.accountRepository.getOneById(user)
-    return this.mapper.map(account)
+    if (account) return this.mapper.map(account)
+
+    throw new NotFoundException()
   }
 
   /**
@@ -141,8 +141,8 @@ export class AccountService {
    */
   async updateProfilee(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateProfile(user, data)
-    return this.mapper.map(account)
+    if (account) return this.mapper.map(account)
+
+    throw new NotFoundException()
   }
-
-
 }

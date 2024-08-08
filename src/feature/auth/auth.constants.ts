@@ -17,7 +17,8 @@ export const ACCEPTED_STATUS = 'accepted'
 
 export enum CLAIM {
   WRITE = 'write',
-  READ = 'read'
+  READ = 'read',
+  DELETE = 'delete'
 }
 
 export enum SYSTEM_FEATURES {
@@ -29,3 +30,13 @@ export enum SYSTEM_FEATURES {
   MESSAGES = 'feature_message',
   LISTING = 'feature_listing'
 }
+
+export type CaslClaim = CLAIM.DELETE | CLAIM.WRITE | CLAIM.READ
+
+export type CaslSubject = SYSTEM_FEATURES.LISTING
+  | SYSTEM_FEATURES.PERSONA
+  | SYSTEM_FEATURES.TENANTS
+  | SYSTEM_FEATURES.TRANSACTIONS
+  | SYSTEM_FEATURES.TICKETS
+  | SYSTEM_FEATURES.MESSAGES
+  | SYSTEM_FEATURES.LISTING

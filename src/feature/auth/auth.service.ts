@@ -8,9 +8,6 @@ import { AuthHelper } from 'src/core/helpers/auth.helper';
 import { Permission } from './model/permission';
 import { ACCEPTED_STATUS, CLAIM, MANAGER, PENDING_STATUS, SYSTEM_FEATURES } from './auth.constants';
 import { AuthRepository } from './auth.repository';
-import { permission } from 'process';
-
-
 
 interface AuthRole {
   permissions: PermissionDto[]
@@ -18,22 +15,25 @@ interface AuthRole {
 }
 
 const defaultManagerPermissions: Permission[] = [
-  { authorization: SYSTEM_FEATURES.MESSAGES, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.TENANTS, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.PERSONA, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.TICKETS, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.PROPERTIES, claim: CLAIM.WRITE }
+  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TENANTS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
 ]
 
 const defaultAgentPermissions: Permission[] = [
-  { authorization: SYSTEM_FEATURES.MESSAGES, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.PERSONA, claim: CLAIM.WRITE },
-  { authorization: SYSTEM_FEATURES.LISTING, claim: CLAIM.WRITE },
+  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.LISTING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
 ]
 
 const defaultPermissions: Permission[] = [
-  { authorization: SYSTEM_FEATURES.PERSONA, claim: CLAIM.WRITE }
+  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
 ]
 
 @Injectable()
@@ -83,12 +83,16 @@ export class AuthService {
     const dto = this.accountToDtoMapper.map(account)
     const manageAccountsAndPermission = await this.getManageAccountAndPermission((account as any)._id)
 
-    const payload = { sub: (account as any)._id, permission: manageAccountsAndPermission.permissions };
-    const auth = this.jwtService.sign(payload)
+    const payload = { sub: (account as any)._id, permissions: manageAccountsAndPermission.permissions };
+    const token = this.jwtService.sign(payload)
+
+    const key = (account as any)._id.toString()
+    const authorization = this.authHelper.encrypt((account as any)._id)
+    await this.authRepository.saveAuthToken(key, token)
 
     return {
       account: dto,
-      authorization: auth,
+      authorization: authorization,
       managedAccounts: manageAccountsAndPermission.accounts.length > 1
         ? manageAccountsAndPermission.accounts
         : null
