@@ -1,8 +1,8 @@
-import { CaslClaim, CaslSubject } from "../auth.constants"
+import { CLAIM, SYSTEM_FEATURES } from "../auth.constants"
 
 export interface CaslPermission {
-  authorization: CaslSubject
-  claim: CaslClaim[]
+  authorization: SYSTEM_FEATURES,
+  claim: CLAIM[]
 }
 /**
  * AuthUser

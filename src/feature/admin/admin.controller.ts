@@ -8,4 +8,7 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('Admin')
 export class AdminController {
   
+  async create() {
+    
+  }
 }

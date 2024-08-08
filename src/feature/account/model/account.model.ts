@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Date, HydratedDocument, Types } from "mongoose";
-import { Email } from "./email.model";
-import { Address } from "./address.model";
+import { Email } from "../../core/model/email.model";
+import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
 import { ACCOUNT_STATUS, ADD_ON_REQUEST_STATUS, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
 

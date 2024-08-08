@@ -16,6 +16,7 @@ import { ManagedAccount, ManagedAccountSchema } from '../auth/model/managed.acco
 import { CaslAbilityFactory } from '../auth/guards/casl/casl.ability.factory';
 import { PoliciesGuard } from '../auth/guards/casl/policies.guard';
 import { CacheService } from 'src/services/cache/cache.service';
+import { AddOnRequest, AddOnRequestSchema } from './model/add.on.request.model';
 
 @Global()
 @Module({
@@ -33,7 +34,8 @@ import { CacheService } from 'src/services/cache/cache.service';
   }]),
   MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
   MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
-  MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }])
+  MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }]),
+  MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }])
   ],
   providers: [
     AccountService,

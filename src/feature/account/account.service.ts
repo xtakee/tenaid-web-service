@@ -87,14 +87,10 @@ export class AccountService {
     throw new NotFoundException()
   }
 
-  async setAddOn(data: AddOnRequestDto, id: string): Promise<AccountResponseDto> {
-    const account = await this.accountRepository.requestAddOn(id, data.addOn)
+  async requestAddOn(data: AddOnRequestDto, id: string): Promise<void> {
+    const request = await this.accountRepository.requestAddOn(id, data.addOn)
 
-    if (account) {
-      await this.authService.setDefaultOwnerPermissions(data.addOn, id)
-      return this.mapper.map(account)
-    }
-
+    if (request) return
     throw new BadRequestException()
   }
 

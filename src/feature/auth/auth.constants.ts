@@ -25,18 +25,20 @@ export enum SYSTEM_FEATURES {
   PROPERTIES = 'feature_property',
   PERSONA = 'feature_persona',
   TENANTS = 'feature_tenant',
+  APPLICATIONS = 'feature_application',
   TRANSACTIONS = 'feature_transaction',
   TICKETS = 'feature_ticket',
   MESSAGES = 'feature_message',
   LISTING = 'feature_listing'
 }
 
-export type CaslClaim = CLAIM.DELETE | CLAIM.WRITE | CLAIM.READ
+export enum ADMIN_SYSTEM_FEATURES {
+  PROPERTIES = 'admin_feature_property',
+  PERSONA = 'admin_feature_persona',
+  TENANTS = 'admin_feature_tenant',
+  APPLICATIONS = 'admin_feature_application',
+  TRANSACTIONS = 'admin_feature_transaction',
+  LISTING = 'admin_feature_listing',
+  DASHBOARD = 'admin_feature_dashboard'
+}
 
-export type CaslSubject = SYSTEM_FEATURES.LISTING
-  | SYSTEM_FEATURES.PERSONA
-  | SYSTEM_FEATURES.TENANTS
-  | SYSTEM_FEATURES.TRANSACTIONS
-  | SYSTEM_FEATURES.TICKETS
-  | SYSTEM_FEATURES.MESSAGES
-  | SYSTEM_FEATURES.LISTING

@@ -122,6 +122,15 @@ export class AuthService {
 
   /**
    * 
+   * @param user 
+   * @returns void
+   */
+  async logout(user: string): Promise<void> {
+    return await this.authRepository.invalidateAuthToken(user)
+  }
+
+  /**
+   * 
    * @param addOnType 
    * @param user 
    */

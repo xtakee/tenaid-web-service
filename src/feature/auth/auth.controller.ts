@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AccountAuthRequestDto } from 'src/domain/auth/dto/request/account.auth.request.dto';
 import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { User } from 'src/core/decorators/current.user';
+import { JwtAuthGuard } from './guards/jwt.guard/jwt.auth.guard';
 
 @Controller({
   version: '1',
@@ -16,5 +18,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Login to a registered account' })
   async login(@Body() data: AccountAuthRequestDto): Promise<AccountAuthResponseDto> {
     return await this.authService.login(data.username, data.password)
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Logout of a registered account' })
+  async logout(@User() id: string): Promise<void> {
+    return await this.authService.logout(id)
   }
 }

@@ -49,8 +49,8 @@ export class AccountController {
   @ApiOperation({ summary: 'Set account type' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
-  async setCanOwnProperty(@Body() body: AddOnRequestDto, @User() id: string): Promise<AccountResponseDto> {
-    return await this.accountService.setAddOn(body, id)
+  async requestAddOn(@Body() body: AddOnRequestDto, @User() id: string): Promise<void> {
+    return await this.accountService.requestAddOn(body, id)
   }
 
   /**
@@ -114,7 +114,7 @@ export class AccountController {
   @Get('bank')
   @ApiOperation({ summary: 'Get all account\'s Bank Accounts' })
   @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
   async getBankAccounts(@User() user: string): Promise<BankAccountResponseDto[]> {
     return await this.accountService.getBankAccounts(user)
   }

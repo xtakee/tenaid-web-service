@@ -9,18 +9,14 @@ import { BankAccount } from "./model/bank.account.model";
 import { Bank } from "../bank/model/bank.model";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
-import { Address } from "./model/address.model";
-import { MANAGER, PENDING_STATUS } from "src/feature/auth/auth.constants";
-
-const defaultAddOn: AddOn = {
-  value: false,
-  status: PENDING_STATUS
-}
+import { Address } from "../core/model/address.model";
+import { AddOnRequest } from "./model/add.on.request.model";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
   constructor(
     @InjectModel(Account.name) private readonly accountModel: Model<Account>,
+    @InjectModel(AddOnRequest.name) private readonly addOnRequestModel: Model<AddOnRequest>,
     @InjectModel(BankAccount.name) private readonly bankAccountModel: Model<BankAccount>) { }
 
   /**
@@ -155,18 +151,14 @@ export class AccountRepository implements IAccountRepository {
    * @param addOnType 
    * @returns Account
    */
-  async requestAddOn(user: string, addOnType: string): Promise<Account> {
-    const account = await this.accountModel.findById(user)
+  async requestAddOn(user: string, addOnType: string): Promise<AddOnRequest> {
 
-    if (account) {
-      let toUpdate = {}
-      if (addOnType === MANAGER) toUpdate = { canOwn: defaultAddOn }
-      else toUpdate = { canPublish: defaultAddOn }
-
-      return await this.accountModel.findByIdAndUpdate(user, toUpdate)
+    const addOn: AddOnRequest = {
+      account: new Types.ObjectId(user),
+      addOn: addOnType
     }
 
-    return null
+    return await this.addOnRequestModel.create(addOn)
   }
 
   /**
