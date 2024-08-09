@@ -3,7 +3,6 @@ import { Reflector } from "@nestjs/core";
 import { CaslAbilityFactory } from "./casl.ability.factory";
 import { MongoAbility } from "@casl/ability";
 
-
 interface IPolicyHandler {
   handle(ability: MongoAbility): boolean;
 }
@@ -29,7 +28,6 @@ export class PoliciesGuard implements CanActivate {
         CHECK_POLICIES_KEY,
         context.getHandler(),
       ) || [];
-
 
     const { user } = context.switchToHttp().getRequest();
     const ability = this.caslAbilityFactory.createForUser(user);

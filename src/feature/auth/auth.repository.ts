@@ -19,15 +19,25 @@ export class AuthRepository {
    * @param status 
    * @returns AuthRole
    */
-  async setOwnerPermissions(user: string, permissions: Permission[], status: string): Promise<ManagedAccount> {
-    const role: ManagedAccount = {
+  async setPermissions(user: string, permissions: Permission[]): Promise<ManagedAccount> {
+    const roles = await this.authModel.findOne({
       account: new Types.ObjectId(user),
-      status: status,
-      owner: new Types.ObjectId(user),
-      permissions: permissions
+      owner: new Types.ObjectId(user)
+    })
+    
+    if (!roles) {
+      const role: ManagedAccount = {
+        account: new Types.ObjectId(user),
+        owner: new Types.ObjectId(user),
+        permissions: permissions
+      }
+
+      return await this.authModel.create(role)
     }
 
-    return await this.authModel.create(role)
+    return await this.authModel.findByIdAndUpdate((roles as any)._id, {
+      permissions: permissions
+    }, { returnDocument: 'after' }).exec()
   }
 
   /**

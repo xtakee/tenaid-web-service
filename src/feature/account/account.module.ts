@@ -17,15 +17,29 @@ import { CaslAbilityFactory } from '../auth/guards/casl/casl.ability.factory';
 import { PoliciesGuard } from '../auth/guards/casl/policies.guard';
 import { CacheService } from 'src/services/cache/cache.service';
 import { AddOnRequest, AddOnRequestSchema } from './model/add.on.request.model';
+import { AdminRepository } from '../admin/admin.repository';
+import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
+import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeatureAsync([{
     name: Account.name,
-    useFactory: () => {
+    useFactory: async () => {
       const schema = AccountSchema;
       schema.pre('save', async function () {
-        if (this.isModified('password')) {
+        if (this.isModified('password') || this.isNew) {
+          this.password = await (new AuthHelper()).hash(this.password)
+        }
+      });
+      return schema;
+    },
+  }]),
+  MongooseModule.forFeatureAsync([{
+    name: AccountAdmin.name, useFactory: async () => {
+      const schema = AccountAdminSchema;
+      schema.pre('save', async function () {
+        if (this.isModified('password') || this.isNew) {
           this.password = await (new AuthHelper()).hash(this.password)
         }
       });
@@ -46,9 +60,11 @@ import { AddOnRequest, AddOnRequestSchema } from './model/add.on.request.model';
     BankAccountToDtoMapper,
     BankRepository,
     AuthRepository,
-    PoliciesGuard, 
+    PoliciesGuard,
     CaslAbilityFactory,
-    CacheService
+    CacheService,
+    AdminRepository,
+    AccountAdminToDtoMapper
   ],
   controllers: [AccountController],
   exports: [

@@ -11,9 +11,11 @@ import { AccountProfileDto } from "src/domain/account/dto/request/account.profil
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
+import { APPROVED_STATUS } from "../auth/auth.constants";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
+
   constructor(
     @InjectModel(Account.name) private readonly accountModel: Model<Account>,
     @InjectModel(AddOnRequest.name) private readonly addOnRequestModel: Model<AddOnRequest>,
@@ -147,6 +149,18 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param id 
+   * @returns AddOnRequest
+   */
+  async reviewAddOnRequest(id: string, status: string, comment: string): Promise<AddOnRequest> {
+    return await this.addOnRequestModel.findByIdAndUpdate(id, {
+      status: status,
+      comment: comment
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
    * @param user 
    * @param addOnType 
    * @returns Account
@@ -167,13 +181,13 @@ export class AccountRepository implements IAccountRepository {
    * @param status 
    * @returns Account
    */
-  async setCanOwnAddOn(user: string, status: string): Promise<Account> {
+  async setCanOwnAddOn(user: StringConstructor): Promise<Account> {
     const account = await this.accountModel.findById(user)
 
     if (account && account.canOwn) {
       const addOn = account.canOwn
-      addOn.status = status
-      account.canOwn = addOn
+      addOn.status = APPROVED_STATUS
+      addOn.value = true
 
       return await this.accountModel.findByIdAndUpdate(user, account)
     }
@@ -187,12 +201,13 @@ export class AccountRepository implements IAccountRepository {
    * @param status 
    * @returns Account
    */
-  async setCanPublishAddOn(user: string, status: string): Promise<Account> {
+  async setCanPublishAddOn(user: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
 
     if (account && account.canPublish) {
       const addOn = account.canPublish
-      addOn.status = status
+      addOn.status = APPROVED_STATUS
+      addOn.value = true
       account.canPublish = addOn
 
       return await this.accountModel.findByIdAndUpdate(user, account)

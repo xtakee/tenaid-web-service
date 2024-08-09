@@ -1,10 +1,9 @@
 import { Prop, Schema } from "@nestjs/mongoose";
 import { CLAIM, SYSTEM_FEATURES } from "../auth.constants";
-import { Types } from "mongoose";
 
 @Schema({ timestamps: true })
 export class Permission {
-  @Prop({ enum: [...Object.values(SYSTEM_FEATURES)], required: true })
+  @Prop({ required: true })
   authorization: string;
 
   @Prop({

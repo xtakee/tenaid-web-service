@@ -1,8 +1,4 @@
-
-interface Email {
-  value: string
-  verified: boolean
- }
+import { Email } from "src/domain/core/model/email"
 
 export class AccountResponseDto {
   id: string

@@ -21,6 +21,7 @@ async function main() {
   const config = new DocumentBuilder()
     .setTitle('Tenaid Api Documentation')
     .setDescription('Tenaid is a tenant, landlord and property management system')
+    .addBearerAuth()
     .setVersion('1.0')
     .build();
 

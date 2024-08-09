@@ -14,6 +14,8 @@ import { ManagedAccount, ManagedAccountSchema } from './model/managed.account';
 import { CaslAbilityFactory } from './guards/casl/casl.ability.factory';
 import { PoliciesGuard } from './guards/casl/policies.guard';
 import { CacheService } from 'src/services/cache/cache.service';
+import { AdminRepository } from '../admin/admin.repository';
+import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 
 @Global()
 @Module({
@@ -26,7 +28,9 @@ import { CacheService } from 'src/services/cache/cache.service';
     AuthRepository,
     CaslAbilityFactory,
     PoliciesGuard,
-    CacheService
+    CacheService,
+    AdminRepository,
+    AccountAdminToDtoMapper
   ],
   exports: [AuthService, AuthRepository, PoliciesGuard, CaslAbilityFactory],
   imports: [

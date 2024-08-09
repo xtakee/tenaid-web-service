@@ -2,39 +2,22 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AccountRepository } from '../account/account.respository';
 import { Account } from '../account/model/account.model';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
-import { AccountAuthResponseDto, PermissionDto, RoleDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
+import { AccountAuthResponseDto, Role } from 'src/domain/auth/dto/response/account.auth.response.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
 import { Permission } from './model/permission';
-import { ACCEPTED_STATUS, CLAIM, MANAGER, PENDING_STATUS, SYSTEM_FEATURES } from './auth.constants';
+import { ACCEPTED_STATUS, CLAIM, MANAGER, PENDING_STATUS, SYSTEM_FEATURES, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
 import { AuthRepository } from './auth.repository';
+import { AdminRepository } from '../admin/admin.repository';
+import { PermissionDto } from 'src/domain/core/model/permission';
+import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
+import { AccountAdmin } from '../admin/model/account.admin.model';
+import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 
 interface AuthRole {
   permissions: PermissionDto[]
-  accounts: RoleDto[]
+  accounts: Role[]
 }
-
-const defaultManagerPermissions: Permission[] = [
-  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.TENANTS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
-]
-
-const defaultAgentPermissions: Permission[] = [
-  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.LISTING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-]
-
-const defaultPermissions: Permission[] = [
-  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-]
 
 @Injectable()
 export class AuthService {
@@ -43,6 +26,8 @@ export class AuthService {
     private readonly accountRepository: AccountRepository,
     private readonly authRepository: AuthRepository,
     private readonly accountToDtoMapper: AccountToDtoMapper,
+    private readonly adminRepository: AdminRepository,
+    private readonly adminAccountMapper: AccountAdminToDtoMapper,
     private readonly jwtService: JwtService,
     private readonly authHelper: AuthHelper
   ) { }
@@ -55,17 +40,17 @@ export class AuthService {
   private async getManageAccountAndPermission(user: string): Promise<AuthRole> {
     const permissions = await this.authRepository.getOwnPermissions(user)
     const accounts = await this.authRepository.getOwnManagedAccounts(user)
-    const manageAccounts = accounts.map(r => {
+    const manageAccounts = accounts.map(response => {
       return {
-        name: `${r.owner.firstName} ${r.owner.lastName}`,
-        photo: r.owner.photo,
-        id: r.owner._id
+        name: `${response.owner.firstName} ${response.owner.lastName}`,
+        photo: response.owner.photo,
+        id: response.owner._id
       }
     })
 
     return {
       accounts: manageAccounts,
-      permissions: permissions.permissions.map(permission => {
+      permissions: permissions.permissions.map((permission: PermissionDto) => {
         return {
           authorization: permission.authorization,
           claim: permission.claim
@@ -87,7 +72,7 @@ export class AuthService {
     const token = this.jwtService.sign(payload)
 
     const key = (account as any)._id.toString()
-    const authorization = this.authHelper.encrypt((account as any)._id)
+    const authorization = this.authHelper.encrypt(key)
     await this.authRepository.saveAuthToken(key, token)
 
     return {
@@ -121,6 +106,27 @@ export class AuthService {
   }
 
   /**
+ * Logs in a registered account
+ * @param username 
+ * @param password 
+ * @returns AccountAdminAuthResponseDto
+ */
+  async loginAdmin(username: string, password: string): Promise<AccountAdminAuthResponseDto> {
+
+    const account: AccountAdmin = await this.adminRepository.getOneByEmail(username)
+
+    if (account) {
+      const isMatch = await this.authHelper.isMatch(password, account.password);
+
+      if (isMatch) {
+        return await this.getAdminAuthorizationResponse(account)
+      }
+    }
+
+    throw new UnauthorizedException();
+  }
+
+  /**
    * 
    * @param user 
    * @returns void
@@ -136,7 +142,7 @@ export class AuthService {
    */
   async setDefaultOwnerPermissions(addOnType: string, user: string): Promise<void> {
     const permissions = addOnType === MANAGER ? defaultManagerPermissions : defaultAgentPermissions
-    await this.authRepository.setOwnerPermissions(user, permissions, PENDING_STATUS)
+    await this.authRepository.setPermissions(user, permissions)
   }
 
   /**
@@ -145,8 +151,7 @@ export class AuthService {
    * @param user 
    */
   async setPersonaPermissions(user: string): Promise<void> {
-    const permissions = defaultPermissions
-    await this.authRepository.setOwnerPermissions(user, permissions, ACCEPTED_STATUS)
+    await this.authRepository.setPermissions(user, defaultPermissions)
   }
 
   /**
@@ -158,5 +163,45 @@ export class AuthService {
     const account: Account = await this.accountRepository.getOneById(id)
     if (account) return await this.getAuthorizationResponse(account)
     throw new UnauthorizedException();
+  }
+
+  /**
+   * 
+   * @param account 
+   * @returns AccountAdminAuthResponseDto
+   */
+  private async getAdminAuthorizationResponse(account: AccountAdmin): Promise<AccountAdminAuthResponseDto> {
+    const dto = this.adminAccountMapper.map(account)
+
+    const permissions: PermissionDto[] = account.permissions?.map((permission => {
+      return {
+        authorization: permission.authorization,
+        claim: permission.claim
+      }
+    }))
+
+    const payload = { sub: (account as any)._id, permissions: permissions };
+    const token = this.jwtService.sign(payload)
+
+    const key = (account as any)._id.toString()
+    const authorization = this.authHelper.encrypt(key)
+    await this.authRepository.saveAuthToken(key, token)
+
+    return {
+      account: dto,
+      authorization: authorization
+    }
+  }
+
+  /**
+   * 
+   * @param id 
+   * @returns AccountAdminAuthResponseDto
+   */
+  async signAdmin(id: string): Promise<AccountAdminAuthResponseDto> {
+    const admin = await this.adminRepository.getOneById(id)
+    if (admin) return await this.getAdminAuthorizationResponse(admin)
+
+    throw new UnauthorizedException()
   }
 }

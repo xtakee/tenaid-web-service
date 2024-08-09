@@ -1,6 +1,9 @@
+import { Permission } from "./model/permission"
+
 export const ACCOUNT_STATUS = ['default', 'pending', 'approved', 'denied', 'suspended']
 export const DEFAULT_STATUS = 'default'
 export const PENDING_STATUS = 'pending'
+export const APPROVED_STATUS = 'pending'
 
 export const MANAGER = 'can-own'
 export const AGENT = 'can-publish'
@@ -39,6 +42,28 @@ export enum ADMIN_SYSTEM_FEATURES {
   APPLICATIONS = 'admin_feature_application',
   TRANSACTIONS = 'admin_feature_transaction',
   LISTING = 'admin_feature_listing',
-  DASHBOARD = 'admin_feature_dashboard'
+  DASHBOARD = 'admin_feature_dashboard',
+  MANAGERS = 'admin_feature_manager'
 }
 
+export const defaultManagerPermissions: Permission[] = [
+  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TENANTS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
+]
+
+export const defaultAgentPermissions: Permission[] = [
+  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.LISTING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+]
+
+export const defaultPermissions: Permission[] = [
+  { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+]
