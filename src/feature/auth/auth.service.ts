@@ -5,7 +5,7 @@ import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
 import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
+import { ADD_ON, MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
 import { AuthRepository } from './auth.repository';
 import { AdminRepository } from '../admin/admin.repository';
 import { PermissionDto } from 'src/domain/core/model/permission';
@@ -13,6 +13,7 @@ import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/accou
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { Role } from 'src/domain/account/dto/response/account.response.dto';
+import { Permission } from './model/permission';
 
 interface AuthRole {
   permissions: PermissionDto[]
@@ -31,6 +32,18 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly authHelper: AuthHelper
   ) { }
+
+  /**
+   * 
+   * @param type 
+   * @returns 
+   */
+  private getPermissons(type: string): Permission[] {
+    switch (type) {
+      case ADD_ON.AGENT: return defaultAgentPermissions
+      case ADD_ON.MANAGER: return defaultManagerPermissions
+    }
+  }
 
   /**
    * 
@@ -84,6 +97,10 @@ export class AuthService {
       account: dto,
       authorization: authorization
     }
+  }
+
+  async setAddOnPermissions(user: string, addOn: string): Promise<void> {
+    this.authRepository.setPermissions(user, this.getPermissons(addOn))
   }
 
   /**

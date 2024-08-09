@@ -12,8 +12,6 @@ import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
-import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
-import { Account } from "./model/account.model";
 import { ADD_ON } from "../auth/auth.constants";
 
 @Injectable()
@@ -96,6 +94,9 @@ export class AccountService {
    * @returns 
    */
   async requestAddOn(type: string, id: string): Promise<void> {
+    const prev = await this.accountRepository.getExistingAddOnRequest(id, type)
+    if (prev) throw new ForbiddenException()
+
     const request = await this.accountRepository.requestAddOn(id, type)
 
     if (request) return

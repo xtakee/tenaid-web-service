@@ -1,7 +1,7 @@
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { IAccountRepository } from "src/domain/account/iaccount.repository";
-import { Account, AddOn } from "./model/account.model";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Account } from "./model/account.model";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
@@ -11,7 +11,6 @@ import { AccountProfileDto } from "src/domain/account/dto/request/account.profil
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
-import { APPROVED_STATUS } from "../auth/auth.constants";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -37,9 +36,16 @@ export class AccountRepository implements IAccountRepository {
    * @returns Account
    */
   async setAccountType(user: string, addOn: string): Promise<Account> {
+    const account = await this.accountModel.findById(user)
+    if (!account) return null
+
+    let types: string[] = account.accountTypes
+    if (account.accountTypes.length === 0) types = [addOn]
+    else types.push(addOn)
+
     return await this.accountModel.findByIdAndUpdate(user, {
       primaryAccountType: addOn,
-      accountTypes: [addOn]
+      accountTypes: types
     }, { returnDocument: 'after' }).exec()
   }
 
@@ -171,6 +177,25 @@ export class AccountRepository implements IAccountRepository {
       status: status,
       comment: comment
     }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param id 
+   * @returns 
+   */
+  async getAddOnRequest(id: string): Promise<AddOnRequest> {
+    return await this.addOnRequestModel.findById(id)
+
+  }
+
+  /**
+ * 
+ * @param id 
+ * @returns AddOnRequest
+ */
+  async getExistingAddOnRequest(id: string, addOn: string): Promise<AddOnRequest> {
+    return await this.addOnRequestModel.findOne({ account: new Types.ObjectId(id), addOn: addOn })
   }
 
   /**

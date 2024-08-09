@@ -39,6 +39,7 @@ export enum SYSTEM_FEATURES {
 export enum ADMIN_SYSTEM_FEATURES {
   PROPERTIES = 'admin_feature_property',
   PERSONA = 'admin_feature_persona',
+  AGENTS = 'admin_feature_agent',
   TENANTS = 'admin_feature_tenant',
   APPLICATIONS = 'admin_feature_application',
   TRANSACTIONS = 'admin_feature_transaction',
