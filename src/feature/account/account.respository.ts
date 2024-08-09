@@ -1,6 +1,6 @@
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { IAccountRepository } from "src/domain/account/iaccount.repository";
-import { Account } from "./model/account.model";
+import { Account, AccountDocument } from "./model/account.model";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -11,12 +11,14 @@ import { AccountProfileDto } from "src/domain/account/dto/request/account.profil
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
+import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
 
   constructor(
     @InjectModel(Account.name) private readonly accountModel: Model<Account>,
+    private readonly paginator: Paginator,
     @InjectModel(AddOnRequest.name) private readonly addOnRequestModel: Model<AddOnRequest>,
     @InjectModel(BankAccount.name) private readonly bankAccountModel: Model<BankAccount>) { }
 
@@ -172,11 +174,22 @@ export class AccountRepository implements IAccountRepository {
    * @param id 
    * @returns AddOnRequest
    */
-  async reviewAddOnRequest(id: string, status: string, comment: string): Promise<AddOnRequest> {
+  async reviewAddOnRequest(id: string, status: string, comment: string, admin: string): Promise<AddOnRequest> {
     return await this.addOnRequestModel.findByIdAndUpdate(id, {
       status: status,
-      comment: comment
+      comment: comment,
+      reviewer: admin
     }, { returnDocument: 'after' }).exec()
+  }
+
+  async getAllAddOnRequests(page?: number, limit?: number): Promise<PaginatedResult<AddOnRequest>> {
+    return await this.paginator.paginate(this.addOnRequestModel, {},
+      {
+        select: '_id account addOn status createdAt',
+        limit: limit,
+        page: page,
+        populate: [{ path: 'account', select: ' _id firstName lastName email.value phone photo' }]
+      })
   }
 
   /**
@@ -187,6 +200,54 @@ export class AccountRepository implements IAccountRepository {
   async getAddOnRequest(id: string): Promise<AddOnRequest> {
     return await this.addOnRequestModel.findById(id)
 
+  }
+
+  /**
+   * 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getAllRegisteredTenants(page?: number, limit?: number): Promise<PaginatedResult<Account>> {
+    return await this.paginator.paginate(this.accountModel,
+      { accountTypes: 'can-lease' },
+      {
+        select: '_id firstName lastName email.value email.verified photo phone createdAt',
+        limit: limit,
+        page: page
+      })
+  }
+
+  /**
+ * 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getAllRegisteredAgents(page?: number, limit?: number): Promise<PaginatedResult<Account>> {
+    return await this.paginator.paginate(this.accountModel,
+      { accountTypes: 'can-publish' },
+      {
+        select: '_id firstName lastName email.value email.verified photo phone createdAt',
+        limit: limit,
+        page: page
+      })
+  }
+
+  /**
+* 
+* @param page 
+* @param limit 
+* @returns 
+*/
+  async getAllRegisteredManagers(page?: number, limit?: number): Promise<PaginatedResult<Account>> {
+    return await this.paginator.paginate(this.accountModel,
+      { accountTypes: 'can-own' },
+      {
+        select: '_id firstName lastName email.value email.verified photo phone createdAt',
+        limit: limit,
+        page: page
+      })
   }
 
   /**

@@ -16,6 +16,7 @@ import { PoliciesGuard } from './guards/casl/policies.guard';
 import { CacheService } from 'src/services/cache/cache.service';
 import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
+import { Paginator } from 'src/core/helpers/paginator';
 
 @Global()
 @Module({
@@ -30,7 +31,8 @@ import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.ma
     PoliciesGuard,
     CacheService,
     AdminRepository,
-    AccountAdminToDtoMapper
+    AccountAdminToDtoMapper,
+    Paginator
   ],
   exports: [AuthService, AuthRepository, PoliciesGuard, CaslAbilityFactory],
   imports: [

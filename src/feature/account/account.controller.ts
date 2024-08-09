@@ -6,7 +6,7 @@ import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.
 import { AccountResponseDto } from "src/domain/account/dto/response/account.response.dto";
 import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";

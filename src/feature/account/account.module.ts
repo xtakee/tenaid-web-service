@@ -20,6 +20,7 @@ import { AddOnRequest, AddOnRequestSchema } from './model/add.on.request.model';
 import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
+import { Paginator } from 'src/core/helpers/paginator';
 
 @Global()
 @Module({
@@ -64,7 +65,8 @@ import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.ma
     CaslAbilityFactory,
     CacheService,
     AdminRepository,
-    AccountAdminToDtoMapper
+    AccountAdminToDtoMapper,
+    Paginator
   ],
   controllers: [AccountController],
   exports: [
