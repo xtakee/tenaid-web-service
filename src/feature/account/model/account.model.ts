@@ -3,7 +3,7 @@ import { Date, HydratedDocument, Types } from "mongoose";
 import { Email } from "../../core/model/email.model";
 import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
-import { ACCOUNT_STATUS, ADD_ON_REQUEST_STATUS, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
+import { ACCOUNT_STATUS, ADD_ON, ADD_ON_REQUEST_STATUS, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -14,6 +14,18 @@ export class AddOn {
 
   @Prop({ required: true, enum: [...ADD_ON_REQUEST_STATUS], default: DEFAULT_STATUS })
   status?: string
+}
+
+@Schema()
+export class KYC {
+  @Prop({ required: true, default: false })
+  profileCompleted?: boolean
+
+  @Prop({ required: true, default: false })
+  addressCompleted?: boolean
+
+  @Prop({ required: true, default: false })
+  bankingCompleted?: boolean
 }
 
 @Schema({ timestamps: true })
@@ -41,17 +53,25 @@ export class Account {
   photo?: string
 
   @Prop()
+  @Type(() => KYC)
+  kyc?: KYC
+
+  @Prop()
+  primaryAccountType?: string
+
+  @Prop()
   proofOfId?: string
 
-  @Prop({ type: AddOn, default: { value: false, status: DEFAULT_STATUS } })
-  @Type(() => AddOn)
-  canOwn?: AddOn
+  @Prop({
+    type: [{ type: String, enum: [...Object.values(ADD_ON)] }], validate: {
+      validator: (value: String[]) => {
+        return value.length === new Set(value).size
+      }
+    }
+  })
+  accountTypes?: string[]
 
-  @Prop({ type: AddOn, default: { value: false, status: DEFAULT_STATUS } })
-  @Type(() => AddOn)
-  canPublish?: AddOn
-
-  @Prop({ type: Types.ObjectId})
+  @Prop({ type: Types.ObjectId })
   @Type(() => Address)
   address?: Address
 

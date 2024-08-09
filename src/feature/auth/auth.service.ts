@@ -2,17 +2,17 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AccountRepository } from '../account/account.respository';
 import { Account } from '../account/model/account.model';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
-import { AccountAuthResponseDto, Role } from 'src/domain/auth/dto/response/account.auth.response.dto';
+import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { Permission } from './model/permission';
-import { ACCEPTED_STATUS, CLAIM, MANAGER, PENDING_STATUS, SYSTEM_FEATURES, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
+import { MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
 import { AuthRepository } from './auth.repository';
 import { AdminRepository } from '../admin/admin.repository';
 import { PermissionDto } from 'src/domain/core/model/permission';
 import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
+import { Role } from 'src/domain/account/dto/response/account.response.dto';
 
 interface AuthRole {
   permissions: PermissionDto[]
@@ -66,10 +66,15 @@ export class AuthService {
    */
   private async getAuthorizationResponse(account: Account): Promise<AccountAuthResponseDto> {
     const dto = this.accountToDtoMapper.map(account)
+
     const manageAccountsAndPermission = await this.getManageAccountAndPermission((account as any)._id)
 
     const payload = { sub: (account as any)._id, permissions: manageAccountsAndPermission.permissions };
     const token = this.jwtService.sign(payload)
+
+    dto.managedAccounts = manageAccountsAndPermission.accounts.length > 1
+      ? manageAccountsAndPermission.accounts
+      : []
 
     const key = (account as any)._id.toString()
     const authorization = this.authHelper.encrypt(key)
@@ -77,10 +82,7 @@ export class AuthService {
 
     return {
       account: dto,
-      authorization: authorization,
-      managedAccounts: manageAccountsAndPermission.accounts.length > 1
-        ? manageAccountsAndPermission.accounts
-        : null
+      authorization: authorization
     }
   }
 

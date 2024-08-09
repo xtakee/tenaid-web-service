@@ -14,12 +14,17 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
         value: from.email.value,
         verified: from.email.verified
       },
-      canOwn: from.canOwn?.value,
-      canPublish: from.canPublish?.value,
-      phone: from.phone,
-      photo: from.photo,
-      dob: from.dob?.toString(),
-      proofOfId: from.proofOfId
+      kyc: {
+        profileCompleted: from.kyc?.profileCompleted,
+        addressCompleted: from.kyc?.addressCompleted,
+        bankingCompleted: from.kyc?.bankingCompleted
+      },
+      primaryAccountType: from.primaryAccountType || null,
+      accountTypes: from.accountTypes,
+      phone: from.phone || null,
+      photo: from.photo || null,
+      dob: from.dob?.toString() || null,
+      proofOfId: from.proofOfId || null
     }
   }
 }

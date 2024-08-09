@@ -13,6 +13,7 @@ import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
+import { Account } from "./model/account.model";
 
 @Injectable()
 export class AccountService {
@@ -87,11 +88,30 @@ export class AccountService {
     throw new NotFoundException()
   }
 
+  /**
+   * 
+   * @param data 
+   * @param id 
+   * @returns 
+   */
   async requestAddOn(data: AddOnRequestDto, id: string): Promise<void> {
     const request = await this.accountRepository.requestAddOn(id, data.addOn)
 
     if (request) return
     throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param addOn 
+   * @returns AccountResponseDto
+   */
+  async setAccountType(user: string, addOn: string): Promise<AccountResponseDto> {
+    const account = await this.accountRepository.setAccountType(user, addOn)
+    if (account) return this.mapper.map(account)
+
+    throw new UnauthorizedException()
   }
 
   /**
@@ -123,7 +143,7 @@ export class AccountService {
    * @returns AccountResponseDto
    */
   async getOwnAccount(user: string): Promise<AccountResponseDto> {
-    let account = await this.accountRepository.getOneById(user)
+    const account = await this.accountRepository.getOneById(user)
     if (account) return this.mapper.map(account)
 
     throw new NotFoundException()

@@ -46,11 +46,19 @@ export class AccountController {
    * @returns 
    */
   @Post('add-on')
-  @ApiOperation({ summary: 'Set account type' })
+  @ApiOperation({ summary: 'Request Account AddOn' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async requestAddOn(@Body() body: AddOnRequestDto, @User() id: string): Promise<void> {
     return await this.accountService.requestAddOn(body, id)
+  }
+
+  @Post('type')
+  @ApiOperation({ summary: 'Set Primary Account Type' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  async setAccountType(@Body() body: AddOnRequestDto, @User() id: string): Promise<AccountResponseDto> {
+    return await this.accountService.setAccountType(id, body.addOn)
   }
 
   /**

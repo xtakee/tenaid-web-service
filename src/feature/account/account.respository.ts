@@ -32,6 +32,19 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param user 
+   * @param addOn 
+   * @returns Account
+   */
+  async setAccountType(user: string, addOn: string): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(user, {
+      primaryAccountType: addOn,
+      accountTypes: [addOn]
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
    * @param id 
    * @returns Account
    */
@@ -138,6 +151,7 @@ export class AccountRepository implements IAccountRepository {
     let account: Account = {
       firstName: data.firstName,
       lastName: data.lastName,
+      kyc: {},
       email: {
         value: data.email
       },
@@ -184,13 +198,13 @@ export class AccountRepository implements IAccountRepository {
   async setCanOwnAddOn(user: StringConstructor): Promise<Account> {
     const account = await this.accountModel.findById(user)
 
-    if (account && account.canOwn) {
-      const addOn = account.canOwn
-      addOn.status = APPROVED_STATUS
-      addOn.value = true
+    // if (account && account.canOwn) {
+    //   const addOn = account.canOwn
+    //   addOn.status = APPROVED_STATUS
+    //   addOn.value = true
 
-      return await this.accountModel.findByIdAndUpdate(user, account)
-    }
+    //   return await this.accountModel.findByIdAndUpdate(user, account)
+    // }
 
     return null
   }
@@ -204,14 +218,14 @@ export class AccountRepository implements IAccountRepository {
   async setCanPublishAddOn(user: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
 
-    if (account && account.canPublish) {
-      const addOn = account.canPublish
-      addOn.status = APPROVED_STATUS
-      addOn.value = true
-      account.canPublish = addOn
+    // if (account && account.canPublish) {
+    //   const addOn = account.canPublish
+    //   addOn.status = APPROVED_STATUS
+    //   addOn.value = true
+    //   account.canPublish = addOn
 
-      return await this.accountModel.findByIdAndUpdate(user, account)
-    }
+    //   return await this.accountModel.findByIdAndUpdate(user, account)
+    // }
 
     return null
   }

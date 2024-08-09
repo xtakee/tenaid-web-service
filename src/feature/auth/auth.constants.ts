@@ -10,7 +10,8 @@ export const AGENT = 'can-publish'
 
 export enum ADD_ON {
   MANAGER = 'can-own',
-  AGENT = 'can-publish'
+  AGENT = 'can-publish',
+  TENANT = 'can-lease'
 }
 
 export const ADD_ON_REQUEST_STATUS = ['default', 'pending', 'approved', 'denied']
