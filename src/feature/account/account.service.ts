@@ -14,6 +14,7 @@ import { AccountProfileDto } from "src/domain/account/dto/request/account.profil
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
 import { Account } from "./model/account.model";
+import { ADD_ON } from "../auth/auth.constants";
 
 @Injectable()
 export class AccountService {
@@ -94,8 +95,8 @@ export class AccountService {
    * @param id 
    * @returns 
    */
-  async requestAddOn(data: AddOnRequestDto, id: string): Promise<void> {
-    const request = await this.accountRepository.requestAddOn(id, data.addOn)
+  async requestAddOn(type: string, id: string): Promise<void> {
+    const request = await this.accountRepository.requestAddOn(id, type)
 
     if (request) return
     throw new BadRequestException()
@@ -109,7 +110,12 @@ export class AccountService {
    */
   async setAccountType(user: string, addOn: string): Promise<AccountResponseDto> {
     const account = await this.accountRepository.setAccountType(user, addOn)
-    if (account) return this.mapper.map(account)
+    if (account) {
+      if (addOn !== ADD_ON.TENANT) {
+        await this.requestAddOn(addOn, user)
+      }
+      return this.mapper.map(account)
+    }
 
     throw new UnauthorizedException()
   }

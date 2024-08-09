@@ -50,7 +50,7 @@ export class AccountController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async requestAddOn(@Body() body: AddOnRequestDto, @User() id: string): Promise<void> {
-    return await this.accountService.requestAddOn(body, id)
+    return await this.accountService.requestAddOn(body.addOn, id)
   }
 
   @Post('type')
