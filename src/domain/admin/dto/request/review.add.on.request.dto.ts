@@ -1,7 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsMongoId, IsNotEmpty } from "class-validator";
 
-export const ADD_ON_REVIEW_STATUS = ['approved', 'denied']
+export enum ADD_ON_REVIEW_STATUS {
+  APPROVED = 'approved',
+  DENIED = 'denied'
+}
 
 export class ReviewAddOnRequestDto {
   @ApiProperty()

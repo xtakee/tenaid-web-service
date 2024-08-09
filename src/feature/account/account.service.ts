@@ -118,7 +118,7 @@ export class AccountService {
       return this.mapper.map(account)
     }
 
-    throw new UnauthorizedException()
+    throw new ForbiddenException()
   }
 
   /**

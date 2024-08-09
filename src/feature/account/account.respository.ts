@@ -1,6 +1,6 @@
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { IAccountRepository } from "src/domain/account/iaccount.repository";
-import { Account, AccountDocument } from "./model/account.model";
+import { Account, AccountDocument, AccountType } from "./model/account.model";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -12,6 +12,7 @@ import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
+import { ADD_ON } from "../auth/auth.constants";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -39,11 +40,18 @@ export class AccountRepository implements IAccountRepository {
    */
   async setAccountType(user: string, addOn: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
+    console.log(account)
     if (!account) return null
+    // Only tenants accounts are approved by default
+    const type = { type: addOn, approved: addOn === ADD_ON.TENANT ? true : false }
 
-    let types: string[] = account.accountTypes
-    if (account.accountTypes.length === 0) types = [addOn]
-    else types.push(addOn)
+    let types: AccountType[] = account.accountTypes
+    if (types.length === 0) types = [type]
+    else {
+      // prevent duplicate account types
+      if (types.find(t => t.type === addOn)) return null
+      types.push(type)
+    }
 
     return await this.accountModel.findByIdAndUpdate(user, {
       primaryAccountType: addOn,
@@ -271,48 +279,8 @@ export class AccountRepository implements IAccountRepository {
       account: new Types.ObjectId(user),
       addOn: addOnType
     }
-
+    
     return await this.addOnRequestModel.create(addOn)
   }
 
-  /**
-   * 
-   * @param user 
-   * @param status 
-   * @returns Account
-   */
-  async setCanOwnAddOn(user: StringConstructor): Promise<Account> {
-    const account = await this.accountModel.findById(user)
-
-    // if (account && account.canOwn) {
-    //   const addOn = account.canOwn
-    //   addOn.status = APPROVED_STATUS
-    //   addOn.value = true
-
-    //   return await this.accountModel.findByIdAndUpdate(user, account)
-    // }
-
-    return null
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param status 
-   * @returns Account
-   */
-  async setCanPublishAddOn(user: string): Promise<Account> {
-    const account = await this.accountModel.findById(user)
-
-    // if (account && account.canPublish) {
-    //   const addOn = account.canPublish
-    //   addOn.status = APPROVED_STATUS
-    //   addOn.value = true
-    //   account.canPublish = addOn
-
-    //   return await this.accountModel.findByIdAndUpdate(user, account)
-    // }
-
-    return null
-  }
 }

@@ -20,7 +20,12 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
         bankingCompleted: from.kyc?.bankingCompleted
       },
       primaryAccountType: from.primaryAccountType || null,
-      accountTypes: from.accountTypes,
+      accountTypes: from.accountTypes.map((t) => {
+        return {
+          type: t.type,
+          approved: t.approved
+        }
+      }),
       phone: from.phone || null,
       photo: from.photo || null,
       dob: from.dob?.toString() || null,

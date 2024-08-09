@@ -15,6 +15,11 @@ export interface Role {
   photo: string
 }
 
+interface AccType {
+  type: string,
+  approved: boolean
+}
+
 export class AccountResponseDto {
   id: string
   firstName: string
@@ -24,7 +29,7 @@ export class AccountResponseDto {
   photo: string
   dob: string
   primaryAccountType?: string
-  accountTypes?: string[]
+  accountTypes?: AccType[]
   proofOfId?: string
   kyc?: _KYC
   managedAccounts?: Role[]

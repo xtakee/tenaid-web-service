@@ -3,17 +3,17 @@ import { Date, HydratedDocument, Types } from "mongoose";
 import { Email } from "../../core/model/email.model";
 import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
-import { ACCOUNT_STATUS, ADD_ON, ADD_ON_REQUEST_STATUS, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
+import { ACCOUNT_STATUS, ADD_ON, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
 
 export type AccountDocument = HydratedDocument<Account>;
 
 @Schema()
-export class AddOn {
-  @Prop({ required: true, default: false })
-  value: boolean
+export class AccountType {
+  @Prop({ default: false })
+  approved?: boolean
 
-  @Prop({ required: true, enum: [...ADD_ON_REQUEST_STATUS], default: DEFAULT_STATUS })
-  status?: string
+  @Prop({ enum: [...Object.values(ADD_ON)] })
+  type?: string
 }
 
 @Schema()
@@ -56,20 +56,14 @@ export class Account {
   @Type(() => KYC)
   kyc?: KYC
 
-  @Prop()
+  @Prop({ enum: [...Object.values(ADD_ON)] })
   primaryAccountType?: string
 
   @Prop()
   proofOfId?: string
 
-  @Prop({
-    type: [{ type: String, enum: [...Object.values(ADD_ON)] }], validate: {
-      validator: (value: String[]) => {
-        return value.length === new Set(value).size
-      }
-    }
-  })
-  accountTypes?: string[]
+  @Prop([AccountType])
+  accountTypes?: AccountType[]
 
   @Prop({ type: Types.ObjectId })
   @Type(() => Address)

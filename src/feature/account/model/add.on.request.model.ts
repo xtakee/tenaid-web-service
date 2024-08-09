@@ -17,7 +17,7 @@ export class AddOnRequest {
   @Prop({ required: true, enum: [...ADD_ON_REQUEST_STATUS], default: PENDING_STATUS })
   status?: string
 
-  @Prop({ type: Types.ObjectId, required: true, ref: AccountAdmin.name })
+  @Prop({ type: Types.ObjectId, ref: AccountAdmin.name })
   reviewer?: string
 }
 
