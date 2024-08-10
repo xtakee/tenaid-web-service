@@ -12,7 +12,6 @@ import { PermissionDto } from 'src/domain/core/model/permission';
 import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
-import { isMongoId } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -196,9 +195,11 @@ export class AuthService {
     throw new UnauthorizedException()
   }
 
-  async signManagedAccount(id: string): Promise<AccountAuthResponseDto> {
+  async signManagedAccount(user: string, id: string): Promise<AccountAuthResponseDto> {
     const permissions = await this.getManageAccountPermissions(id)
     if (permissions) {
+      if (permissions[0].account !== user) throw new UnauthorizedException()
+
       const account = await this.accountRepository.getOneById(permissions[0].account)
       const owner = await this.accountRepository.getOneById(permissions[0].owner)
       if (account && owner) {

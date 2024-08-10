@@ -61,8 +61,8 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Switch to a registered account' })
-  async switchAccount(@Param('account') account: string): Promise<AccountAuthResponseDto> {
+  async switchAccount(@Param('account') account: string, @User() user: string): Promise<AccountAuthResponseDto> {
     if (!isMongoId(account)) throw new BadRequestException()
-    return await this.authService.signManagedAccount(account)
+    return await this.authService.signManagedAccount(user, account)
   }
 }
