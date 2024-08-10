@@ -40,7 +40,7 @@ import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.m
     JwtModule.register({
       global: true,
       secret: JwtConstants.Jwt_Secret,
-      signOptions: { expiresIn: '60m' },
+      signOptions: { expiresIn: '24h' },
     }),
     MongooseModule.forFeatureAsync([{
       name: Account.name,
