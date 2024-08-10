@@ -93,7 +93,10 @@ export class AccountService {
    */
   async updateAddress(data: AddressUpdateDto, id: string): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateAddress(id, data)
-    if (account) return this.mapper.map(account)
+    if (account) {
+      this.accountRepository.setAddressKyc(id)
+      return this.mapper.map(account)
+    }
 
     throw new NotFoundException()
   }
@@ -112,6 +115,7 @@ export class AccountService {
 
     if (bank) {
       const account = await this.accountRepository.addBankAccount(id, data.number, bank, data.isPrimary)
+      this.accountRepository.setBankingKyc(id)
       return this.bankMapper.map(account)
     }
     throw new NotFoundException()
@@ -230,7 +234,10 @@ export class AccountService {
    */
   async updateProfilee(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateProfile(user, data)
-    if (account) return this.mapper.map(account)
+    if (account) {
+      this.accountRepository.setProfileKyc(user)
+      return this.mapper.map(account)
+    }
 
     throw new NotFoundException()
   }

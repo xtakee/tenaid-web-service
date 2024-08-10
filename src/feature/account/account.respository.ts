@@ -43,7 +43,7 @@ export class AccountRepository implements IAccountRepository {
    */
   async setAccountType(user: string, addOn: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
- 
+
     if (!account) return null
     // Only tenants accounts are approved by default
     const type = { type: addOn, approved: addOn === ADD_ON.TENANT ? true : false }
@@ -166,6 +166,33 @@ export class AccountRepository implements IAccountRepository {
     }
 
     return await this.bankAccountModel.create(bankAccount)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
+  async setBankingKyc(user: string): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(user, { 'kyc.bankingCompleted': true }, { returnDocument: 'after' })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
+  async setProfileKyc(user: string): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(user, { 'kyc.profileCompleted': true }, { returnDocument: 'after' })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
+  async setAddressKyc(user: string): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(user, { 'kyc.addressCompleted': true }, { returnDocument: 'after' })
   }
 
   /**
