@@ -1,7 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountRepository } from "./account.respository";
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
-import { AuthService } from "../auth/auth.service";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
 import { AccountResponseDto, Role } from "src/domain/account/dto/response/account.response.dto";
 import { AccountToDtoMapper } from "./mapper/account.to.dto.mapper";
@@ -14,6 +13,7 @@ import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.
 import { ADD_ON, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
 import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
 import { Permission } from "../auth/model/permission";
+import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR } from "src/core/strings";
 
 @Injectable()
 export class AccountService {
@@ -51,7 +51,7 @@ export class AccountService {
       return this.mapper.map(account)
     }
 
-    throw new ForbiddenException('Duplicate')
+    throw new ForbiddenException(DUPLICATE_ACCOUNT_ERROR)
   }
 
   /**
@@ -108,7 +108,7 @@ export class AccountService {
     const bank = await this.bankRepository.findOneById(data.bank)
     const existing = await this.accountRepository.getBankAccountByNumber((bank as any)._id, data.number, id)
 
-    if (existing) throw new ForbiddenException('Duplicate')
+    if (existing) throw new ForbiddenException(DUPLICATE_BANK_ERROR)
 
     if (bank) {
       const account = await this.accountRepository.addBankAccount(id, data.number, bank, data.isPrimary)
@@ -161,7 +161,7 @@ export class AccountService {
    */
   async requestAddOn(type: string, id: string): Promise<void> {
     const prev = await this.accountRepository.getExistingAddOnRequest(id, type)
-    if (prev) throw new ForbiddenException()
+    if (prev) throw new ForbiddenException(DUPLICATE_ADD_ON_REQUEST_ERROR)
 
     const request = await this.accountRepository.requestAddOn(id, type)
 
@@ -184,7 +184,7 @@ export class AccountService {
       return this.mapper.map(account)
     }
 
-    throw new ForbiddenException()
+    throw new ForbiddenException(DUPLICATE_ADD_ON_REQUEST_ERROR)
   }
 
   /**

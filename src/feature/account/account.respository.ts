@@ -43,7 +43,7 @@ export class AccountRepository implements IAccountRepository {
    */
   async setAccountType(user: string, addOn: string): Promise<Account> {
     const account = await this.accountModel.findById(user)
-    console.log(account)
+ 
     if (!account) return null
     // Only tenants accounts are approved by default
     const type = { type: addOn, approved: addOn === ADD_ON.TENANT ? true : false }
