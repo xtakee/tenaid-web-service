@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Get, NotImplementedException, Param, Patch, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
 import { AccountCreateDto } from "../../domain/account/dto/request/account.create.dto";
 import { AccountService } from "./account.service";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
@@ -7,15 +7,19 @@ import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.accou
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
+import { AddressUpdateDto } from "src/domain/core/dto/address.update.dto";
 import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
-import { User } from "src/core/decorators/current.user";
+import { RootUser, User } from "src/core/decorators/current.user";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
 import { CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
 import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
 import { isMongoId } from "class-validator";
+import { ForgotPasswordDto } from "src/domain/account/dto/request/forgot.password.dto";
+import { ForgotPasswordResponseDto } from "src/domain/account/dto/response/forgot.password.response.dto";
+import { ResetForgotPasswordDto } from "src/domain/account/dto/request/reset.password.dto";
+import { ChangePasswordDto } from "src/domain/account/dto/request/change.password.dto";
 
 @Controller({
   version: '1',
@@ -126,7 +130,7 @@ export class AccountController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async updateProfile(@Body() body: AccountProfileDto, @User() id: string): Promise<AccountResponseDto> {
-    return await this.accountService.updateProfilee(id, body)
+    return await this.accountService.updateProfile(id, body)
   }
 
   @Get('managed')
@@ -176,5 +180,40 @@ export class AccountController {
   async getBankAccount(@Param('id') bank: string, @User() user: string): Promise<BankAccountResponseDto> {
     if (!isMongoId(bank)) throw new BadRequestException()
     return await this.accountService.getBankAccount(user, bank)
+  }
+
+  /**
+   * 
+   * @param body 
+   * @returns 
+   */
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Forgot Password' })
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<ForgotPasswordResponseDto> {
+    return await this.accountService.forgotPassword(body.email)
+  }
+
+  /**
+   * 
+   * @param body 
+   * @returns 
+   */
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset Password' })
+  async resetPassword(@Body() body: ResetForgotPasswordDto): Promise<void> {
+    return await this.accountService.resetPassword(body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param body 
+   * @returns 
+   */
+  @Post('change-password')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  async changePassword(@RootUser() user: string, @Body() body: ChangePasswordDto): Promise<void> {
+    return await this.accountService.changePassword(user, body.password)
   }
 }

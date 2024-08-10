@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsPostalCode, IsUrl } from "class-validator"
+import { IsNotEmpty, IsUrl } from "class-validator"
 
 export class AddressUpdateDto {
   @ApiProperty()

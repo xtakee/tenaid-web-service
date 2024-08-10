@@ -41,11 +41,8 @@ export class Apartment {
   @Prop()
   cautionFeePercent?: number
 
-  @Prop({ enum: ['monthly', 'yearly'] })
+  @Prop({ enum: ['weekly', 'monthly', 'yearly', 'semi-annual'] })
   leasePeriod?: string
-
-  @Prop({ enum: ['furnished', 'semi-furnished', 'unfurnished'] })
-  furnishing?: string
 
   @Prop([String])
   images?: string[]

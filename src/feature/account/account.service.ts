@@ -9,11 +9,15 @@ import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.acc
 import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
+import { AddressUpdateDto } from "src/domain/core/dto/address.update.dto";
 import { ADD_ON, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
 import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
 import { Permission } from "../auth/model/permission";
-import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR } from "src/core/strings";
+import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings";
+import { ForgotPasswordResponseDto } from "src/domain/account/dto/response/forgot.password.response.dto";
+import { AuthHelper } from "src/core/helpers/auth.helper";
+import { Types } from "mongoose";
+import { ResetForgotPasswordDto } from "src/domain/account/dto/request/reset.password.dto";
 
 @Injectable()
 export class AccountService {
@@ -21,6 +25,7 @@ export class AccountService {
   constructor(
     private readonly accountRepository: AccountRepository,
     private readonly mapper: AccountToDtoMapper,
+    private readonly authHelper: AuthHelper,
     private readonly bankRepository: BankRepository,
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
@@ -232,7 +237,7 @@ export class AccountService {
    * @param data 
    * @returns AccountResponseDto
    */
-  async updateProfilee(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
+  async updateProfile(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateProfile(user, data)
     if (account) {
       this.accountRepository.setProfileKyc(user)
@@ -240,5 +245,56 @@ export class AccountService {
     }
 
     throw new NotFoundException()
+  }
+
+  async forgotPassword(email: string): Promise<ForgotPasswordResponseDto> {
+    const account = await this.accountRepository.getOneByEmail(email)
+    let signature: string = ''
+    const otp: string = this.authHelper.randomDigits(6)
+
+    if (account) {
+      const key = (account as any)._id.toString()
+      signature = this.authHelper.encrypt(key)
+      await this.accountRepository.saveOtp(key, otp)
+      // send otp to user email address
+    } else {
+      signature = this.authHelper.encrypt((new Types.ObjectId()).toString())
+    }
+
+    return {
+      signature
+    }
+  }
+
+  /**
+   * 
+   * @param signature 
+   * @param otp 
+   */
+  async resetPassword(data: ResetForgotPasswordDto): Promise<void> {
+    try {
+      const key = this.authHelper.decrypt(data.signature)
+      const savedOtp = await this.accountRepository.getOtp(key)
+
+      if (savedOtp === data.otp) {
+        const account = await this.accountRepository.updatePassword(key, data.password)
+        if (account) return
+      }
+
+    } catch (error) { }
+
+    throw new BadRequestException(INVALID_OTP)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param password 
+   */
+  async changePassword(user: string, password: string): Promise<void> {
+    const account = await this.accountRepository.updatePassword(user, password)
+    if (account) return
+
+    throw new UnauthorizedException()
   }
 }

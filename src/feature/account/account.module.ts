@@ -1,4 +1,4 @@
-import { Global, Module, SetMetadata } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -30,6 +30,13 @@ import { Paginator } from 'src/core/helpers/paginator';
         if (this.isModified('password') || this.isNew) {
           this.password = await (new AuthHelper()).hash(this.password)
         }
+      });
+
+      schema.pre('findOneAndUpdate', async function (next) {
+        if ((this.getUpdate() as any).password) {
+          (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
+        }
+        next()
       });
       return schema;
     },

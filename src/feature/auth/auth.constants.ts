@@ -5,6 +5,8 @@ export const DEFAULT_STATUS = 'default'
 export const PENDING_STATUS = 'pending'
 export const APPROVED_STATUS = 'pending'
 
+export const PASSWORD_MIN_LENGTH = 8
+
 export const MANAGER = 'can-own'
 export const AGENT = 'can-publish'
 

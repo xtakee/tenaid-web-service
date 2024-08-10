@@ -1,6 +1,6 @@
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { IAccountRepository } from "src/domain/account/iaccount.repository";
-import { Account, AccountDocument, AccountType } from "./model/account.model";
+import { Account, AccountType } from "./model/account.model";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -8,13 +8,14 @@ import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.
 import { BankAccount } from "./model/bank.account.model";
 import { Bank } from "../bank/model/bank.model";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
+import { AddressUpdateDto } from "src/domain/core/dto/address.update.dto";
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 import { ADD_ON } from "../auth/auth.constants";
 import { ManagedAccount } from "./model/managed.account";
 import { Permission } from "../auth/model/permission";
+import { CacheService } from "src/services/cache/cache.service";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -22,6 +23,7 @@ export class AccountRepository implements IAccountRepository {
   constructor(
     @InjectModel(Account.name) private readonly accountModel: Model<Account>,
     private readonly paginator: Paginator,
+    private readonly cache: CacheService,
     @InjectModel(AddOnRequest.name) private readonly addOnRequestModel: Model<AddOnRequest>,
     @InjectModel(ManagedAccount.name) private readonly managedAccountModel: Model<ManagedAccount>,
     @InjectModel(BankAccount.name) private readonly bankAccountModel: Model<BankAccount>) { }
@@ -376,6 +378,34 @@ export class AccountRepository implements IAccountRepository {
     return await this.managedAccountModel.findById(id, '_id permissions account owner')
   }
 
+  /**
+   * 
+   * @param key 
+   * @param otp 
+   */
+  async saveOtp(key: string, otp: string): Promise<void> {
+    // expires in 10 minutes
+    await this.cache.set(key, otp, 600)
+  }
+
+  /**
+   * 
+   * @param key 
+   */
+  async getOtp(key: string): Promise<string> {
+    // expires in 10 minutes
+    return await this.cache.get(key)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param password 
+   * @returns 
+   */
+  async updatePassword(user: string, password: string): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(user, { password: password }, { returnDocument: 'after' })
+  }
 
   /**
  * 

@@ -36,8 +36,17 @@ export class AuthHelper {
    * 
    * @returns 
    */
-  random(): string {
-    return crypto.randomBytes(16).toString('hex')
+  random(length: number = 16): string {
+    return crypto.randomBytes(length).toString('hex')
+  }
+
+  /**
+   * 
+   * @param length 
+   * @returns 
+   */
+  randomDigits(length: number) {
+    return Array.from({ length: length }, () => Math.floor(Math.random() * 10).toString()).join('')
   }
 
   /**

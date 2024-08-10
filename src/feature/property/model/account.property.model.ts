@@ -20,6 +20,9 @@ export class AccountProperty {
   contactPhone?: string;
 
   @Prop()
+  floors?: number;
+
+  @Prop()
   allowPets?: boolean;
 
   @Prop({ type: Boolean, default: false })
