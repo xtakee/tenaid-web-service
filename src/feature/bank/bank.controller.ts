@@ -1,8 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { BankResponseDto } from 'src/domain/bank/bank.response.dto';
 import { BankService } from './bank.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard/jwt.auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { isMongoId } from 'class-validator';
 
 @Controller({
   version: '1',
@@ -26,6 +27,7 @@ export class BankController {
   @ApiOperation({ summary: 'Get a bank' })
   @UseGuards(JwtAuthGuard)
   async getOne(@Param('id') id: string): Promise<BankResponseDto> {
+    if (!isMongoId(id)) throw new BadRequestException()
     return await this.bankService.getOne(id)
   }
 }

@@ -13,6 +13,8 @@ import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 import { ADD_ON } from "../auth/auth.constants";
+import { ManagedAccount } from "./model/managed.account";
+import { Permission } from "../auth/model/permission";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -21,6 +23,7 @@ export class AccountRepository implements IAccountRepository {
     @InjectModel(Account.name) private readonly accountModel: Model<Account>,
     private readonly paginator: Paginator,
     @InjectModel(AddOnRequest.name) private readonly addOnRequestModel: Model<AddOnRequest>,
+    @InjectModel(ManagedAccount.name) private readonly managedAccountModel: Model<ManagedAccount>,
     @InjectModel(BankAccount.name) private readonly bankAccountModel: Model<BankAccount>) { }
 
   /**
@@ -148,7 +151,14 @@ export class AccountRepository implements IAccountRepository {
    * @returns BankAccount
    */
   async addBankAccount(id: string, number: string, bank: Bank, isPrimary: boolean): Promise<BankAccount> {
-    let bankAccount: BankAccount = {
+    if (isPrimary) {
+      // set all primary to false
+      await this.bankAccountModel.findOneAndUpdate({ account: new Types.ObjectId(id) }, {
+        isPrimary: false
+      }, { returnDocument: 'after' })
+    }
+
+    const bankAccount: BankAccount = {
       number: number,
       isPrimary: isPrimary,
       bank: bank,
@@ -160,11 +170,33 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param id 
+   * @param number 
+   * @param bank 
+   * @param isPrimary 
+   */
+  async updateBankAccount(user: string, account: string, number: string, bank: Bank, isPrimary: boolean): Promise<BankAccount> {
+    if (isPrimary) {
+      // set all primary to false
+      await this.bankAccountModel.findOneAndUpdate({ account: new Types.ObjectId(user) }, {
+        isPrimary: false
+      }, { returnDocument: 'after' })
+    }
+
+    return await this.bankAccountModel.findByIdAndUpdate(account, {
+      isPrimary: isPrimary,
+      bank: bank,
+      number: number
+    }, { returnDocument: 'after' })
+  }
+
+  /**
+   * 
    * @param data 
    * @returns Account
    */
   async create(data: AccountCreateDto): Promise<Account> {
-    let account: Account = {
+    const account: Account = {
       firstName: data.firstName,
       lastName: data.lastName,
       kyc: {},
@@ -279,8 +311,72 @@ export class AccountRepository implements IAccountRepository {
       account: new Types.ObjectId(user),
       addOn: addOnType
     }
-    
+
     return await this.addOnRequestModel.create(addOn)
   }
+
+  /**
+  * 
+  * @param user 
+  * @returns 
+  */
+  async getOwnManagedAccounts(user: string): Promise<any> {
+    return await this.managedAccountModel.find({ account: new Types.ObjectId(user) }, '_id owner account')
+      .populate({
+        path: 'owner',
+        select: '_id firstName lastName photo email.value',
+        strictPopulate: false
+      }
+      ).exec()
+  }
+
+  /**
+  * 
+  * @param user 
+  * @returns 
+  */
+  async getOwnPermissions(user: string): Promise<ManagedAccount> {
+    return await this.managedAccountModel
+      .findOne({ account: new Types.ObjectId(user), owner: new Types.ObjectId(user), }, '_id permissions')
+  }
+
+  /**
+* 
+* @param id 
+* @returns 
+*/
+  async getManagedAccountById(id: string): Promise<ManagedAccount> {
+    return await this.managedAccountModel.findById(id, '_id permissions account owner')
+  }
+
+
+  /**
+ * 
+ * @param user 
+ * @param addOnType 
+ * @param status 
+ * @returns AuthRole
+ */
+  async setPermissions(user: string, permissions: Permission[]): Promise<ManagedAccount> {
+    const roles = await this.managedAccountModel.findOne({
+      account: new Types.ObjectId(user),
+      owner: new Types.ObjectId(user)
+    })
+
+    if (!roles) {
+      const role: ManagedAccount = {
+        account: new Types.ObjectId(user),
+        owner: new Types.ObjectId(user),
+        permissions: permissions
+      }
+
+      return await this.managedAccountModel.create(role)
+    }
+
+    return await this.managedAccountModel.findByIdAndUpdate((roles as any)._id, {
+      permissions: permissions
+    }, { returnDocument: 'after' }).exec()
+  }
+
 
 }

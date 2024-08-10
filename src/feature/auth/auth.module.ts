@@ -10,13 +10,14 @@ import { Account, AccountSchema } from '../account/model/account.model';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
 import { BankAccount, BankAccountSchema } from '../account/model/bank.account.model';
 import { AuthRepository } from './auth.repository';
-import { ManagedAccount, ManagedAccountSchema } from './model/managed.account';
+import { ManagedAccount, ManagedAccountSchema } from '../account/model/managed.account';
 import { CaslAbilityFactory } from './guards/casl/casl.ability.factory';
 import { PoliciesGuard } from './guards/casl/policies.guard';
 import { CacheService } from 'src/services/cache/cache.service';
 import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { Paginator } from 'src/core/helpers/paginator';
+import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
 
 @Global()
 @Module({
@@ -41,7 +42,29 @@ import { Paginator } from 'src/core/helpers/paginator';
       secret: JwtConstants.Jwt_Secret,
       signOptions: { expiresIn: '60m' },
     }),
-    MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
+    MongooseModule.forFeatureAsync([{
+      name: Account.name,
+      useFactory: async () => {
+        const schema = AccountSchema;
+        schema.pre('save', async function () {
+          if (this.isModified('password') || this.isNew) {
+            this.password = await (new AuthHelper()).hash(this.password)
+          }
+        });
+        return schema;
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
+      name: AccountAdmin.name, useFactory: async () => {
+        const schema = AccountAdminSchema;
+        schema.pre('save', async function () {
+          if (this.isModified('password') || this.isNew) {
+            this.password = await (new AuthHelper()).hash(this.password)
+          }
+        });
+        return schema;
+      },
+    }]),
     MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
     MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }])
   ]

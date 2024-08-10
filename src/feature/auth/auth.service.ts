@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { AccountRepository } from '../account/account.respository';
 import { Account } from '../account/model/account.model';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
@@ -12,13 +12,7 @@ import { PermissionDto } from 'src/domain/core/model/permission';
 import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
-import { Role } from 'src/domain/account/dto/response/account.response.dto';
-import { Permission } from './model/permission';
-
-interface AuthRole {
-  permissions: PermissionDto[]
-  accounts: Role[]
-}
+import { isMongoId } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -35,41 +29,36 @@ export class AuthService {
 
   /**
    * 
-   * @param type 
-   * @returns 
+   * @param user 
+   * @returns PermissionDto[]
    */
-  private getPermissons(type: string): Permission[] {
-    switch (type) {
-      case ADD_ON.AGENT: return defaultAgentPermissions
-      case ADD_ON.MANAGER: return defaultManagerPermissions
-    }
+  private async getUserManageAccountPermissions(user: string): Promise<PermissionDto[]> {
+    const permissions = await this.accountRepository.getOwnPermissions(user)
+
+    return permissions.permissions.map((permission: PermissionDto) => {
+      return {
+        authorization: permission.authorization,
+        claim: permission.claim
+      }
+    })
   }
 
   /**
-   * 
-   * @param user 
-   * @returns AuthRole
-   */
-  private async getManageAccountAndPermission(user: string): Promise<AuthRole> {
-    const permissions = await this.authRepository.getOwnPermissions(user)
-    const accounts = await this.authRepository.getOwnManagedAccounts(user)
-    const manageAccounts = accounts.map(response => {
+ * 
+ * @param user 
+ * @returns PermissionDto[]
+ */
+  private async getManageAccountPermissions(id: string): Promise<PermissionDto[]> {
+    const managedAccounts = await this.accountRepository.getManagedAccountById(id)
+
+    return managedAccounts.permissions.map((permission: PermissionDto) => {
       return {
-        name: `${response.owner.firstName} ${response.owner.lastName}`,
-        photo: response.owner.photo,
-        id: response.owner._id
+        authorization: permission.authorization,
+        claim: permission.claim,
+        account: managedAccounts.account.toString(),
+        owner: managedAccounts.owner.toString()
       }
     })
-
-    return {
-      accounts: manageAccounts,
-      permissions: permissions.permissions.map((permission: PermissionDto) => {
-        return {
-          authorization: permission.authorization,
-          claim: permission.claim
-        }
-      })
-    }
   }
 
   /**
@@ -80,27 +69,19 @@ export class AuthService {
   private async getAuthorizationResponse(account: Account): Promise<AccountAuthResponseDto> {
     const dto = this.accountToDtoMapper.map(account)
 
-    const manageAccountsAndPermission = await this.getManageAccountAndPermission((account as any)._id)
+    const permissions = await this.getUserManageAccountPermissions((account as any)._id)
 
-    const payload = { sub: (account as any)._id, permissions: manageAccountsAndPermission.permissions };
+    const payload = { sub: (account as any)._id, permissions: permissions };
     const token = this.jwtService.sign(payload)
-
-    dto.managedAccounts = manageAccountsAndPermission.accounts.length > 1
-      ? manageAccountsAndPermission.accounts
-      : []
 
     const key = (account as any)._id.toString()
     const authorization = this.authHelper.encrypt(key)
-    await this.authRepository.saveAuthToken(key, token)
+    this.authRepository.saveAuthToken(key, token)
 
     return {
       account: dto,
       authorization: authorization
     }
-  }
-
-  async setAddOnPermissions(user: string, addOn: string): Promise<void> {
-    this.authRepository.setPermissions(user, this.getPermissons(addOn))
   }
 
   /**
@@ -161,16 +142,7 @@ export class AuthService {
    */
   async setDefaultOwnerPermissions(addOnType: string, user: string): Promise<void> {
     const permissions = addOnType === MANAGER ? defaultManagerPermissions : defaultAgentPermissions
-    await this.authRepository.setPermissions(user, permissions)
-  }
-
-  /**
-   * 
-   * @param addOnType 
-   * @param user 
-   */
-  async setPersonaPermissions(user: string): Promise<void> {
-    await this.authRepository.setPermissions(user, defaultPermissions)
+    await this.accountRepository.setPermissions(user, permissions)
   }
 
   /**
@@ -204,7 +176,7 @@ export class AuthService {
 
     const key = (account as any)._id.toString()
     const authorization = this.authHelper.encrypt(key)
-    await this.authRepository.saveAuthToken(key, token)
+    this.authRepository.saveAuthToken(key, token)
 
     return {
       account: dto,
@@ -222,5 +194,35 @@ export class AuthService {
     if (admin) return await this.getAdminAuthorizationResponse(admin)
 
     throw new UnauthorizedException()
+  }
+
+  async signManagedAccount(id: string): Promise<AccountAuthResponseDto> {
+    const permissions = await this.getManageAccountPermissions(id)
+    if (permissions) {
+      const account = await this.accountRepository.getOneById(permissions[0].account)
+      const owner = await this.accountRepository.getOneById(permissions[0].owner)
+      if (account && owner) {
+        account.primaryAccountType = owner.primaryAccountType
+        account.accountTypes = owner.accountTypes
+
+        const dto = this.accountToDtoMapper.map(account)
+        const payload = { sub: (account as any)._id, permissions: permissions };
+
+        const token = this.jwtService.sign(payload)
+
+        const key = (account as any)._id.toString()
+        const authorization = this.authHelper.encrypt(key)
+        this.authRepository.saveAuthToken(key, token)
+
+        return {
+          account: dto,
+          authorization: authorization
+        }
+      }
+
+      throw new UnauthorizedException()
+    }
+
+    throw new NotFoundException()
   }
 }

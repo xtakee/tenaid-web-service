@@ -13,6 +13,8 @@ export interface Role {
   id: string
   name: string
   photo: string
+  email: string
+  isOwner: boolean
 }
 
 interface AccType {

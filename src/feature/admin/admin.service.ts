@@ -1,15 +1,16 @@
 import { Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { AdminRepository } from './admin.repository';
 import { CreateAdminDto } from 'src/domain/admin/dto/request/create.admin.dto';
-import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
 import { Permission } from '../auth/model/permission';
 import { ADMIN_SYSTEM_FEATURES, CLAIM } from '../auth/auth.constants';
-import { AuthService } from '../auth/auth.service';
 import { ReviewAddOnRequestDto } from 'src/domain/admin/dto/request/review.add.on.request.dto';
 import { AccountRepository } from '../account/account.respository';
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { Account } from '../account/model/account.model';
 import { AddOnRequest } from '../account/model/add.on.request.model';
+import { AccountAdminResponseDto } from 'src/domain/admin/dto/response/account.admin.response.dto';
+import { AccountAdminToDtoMapper } from './mapper/account.admin.to.dto.mapper';
+import { AccountService } from '../account/account.service';
 
 const adminPermissions: Permission[] = [
   { authorization: ADMIN_SYSTEM_FEATURES.APPLICATIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
@@ -27,7 +28,8 @@ const adminPermissions: Permission[] = [
 export class AdminService {
   constructor(
     private readonly adminRepository: AdminRepository,
-    private readonly authService: AuthService,
+    private readonly mapper: AccountAdminToDtoMapper,
+    private readonly accountService: AccountService,
     private readonly accountRepository: AccountRepository
   ) { }
 
@@ -36,10 +38,10 @@ export class AdminService {
    * @param data 
    * @returns 
    */
-  async create(data: CreateAdminDto): Promise<AccountAdminAuthResponseDto> {
+  async create(data: CreateAdminDto): Promise<AccountAdminResponseDto> {
     const admin = await this.adminRepository.create(data, adminPermissions)
 
-    return await this.authService.signAdmin((admin as any)._id)
+    return this.mapper.map(admin)
   }
 
   /**
@@ -51,7 +53,7 @@ export class AdminService {
     const request = await this.accountRepository.reviewAddOnRequest(data.request, data.status, data.comment, admin)
     if (!request) throw new NotFoundException()
 
-    this.authService.setAddOnPermissions(request.account.toString(), request.addOn)
+    this.accountService.setAddOnPermissions(request.account.toString(), request.addOn)
   }
 
   /**

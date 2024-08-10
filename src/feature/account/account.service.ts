@@ -2,9 +2,8 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException,
 import { AccountRepository } from "./account.respository";
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { AuthService } from "../auth/auth.service";
-import { AccountAuthResponseDto } from "src/domain/auth/dto/response/account.auth.response.dto";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
-import { AccountResponseDto } from "src/domain/account/dto/response/account.response.dto";
+import { AccountResponseDto, Role } from "src/domain/account/dto/response/account.response.dto";
 import { AccountToDtoMapper } from "./mapper/account.to.dto.mapper";
 import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
@@ -12,14 +11,15 @@ import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
-import { ADD_ON } from "../auth/auth.constants";
+import { ADD_ON, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
+import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
+import { Permission } from "../auth/model/permission";
 
 @Injectable()
 export class AccountService {
 
   constructor(
     private readonly accountRepository: AccountRepository,
-    private readonly authService: AuthService,
     private readonly mapper: AccountToDtoMapper,
     private readonly bankRepository: BankRepository,
     private readonly bankMapper: BankAccountToDtoMapper
@@ -27,19 +27,49 @@ export class AccountService {
 
   /**
    * 
+   * @param type 
+   * @returns 
+   */
+  private getPermissons(type: string): Permission[] {
+    switch (type) {
+      case ADD_ON.AGENT: return defaultAgentPermissions
+      case ADD_ON.MANAGER: return defaultManagerPermissions
+    }
+  }
+
+  /**
+   * 
    * @param data 
    * @returns AccountAuthResponseDto
    */
-  async create(data: AccountCreateDto): Promise<AccountAuthResponseDto> {
+  async create(data: AccountCreateDto): Promise<AccountResponseDto> {
     let account = await this.accountRepository.getOneByEmail(data.email)
 
     if (!account) {
       account = await this.accountRepository.create(data)
-      await this.authService.setPersonaPermissions((account as any)._id)
-      return await this.authService.sign((account as any)._id)
+      await this.setPersonaPermissions((account as any)._id)
+      return this.mapper.map(account)
     }
 
     throw new ForbiddenException('Duplicate')
+  }
+
+  /**
+ * 
+ * @param addOnType 
+ * @param user 
+ */
+  async setPersonaPermissions(user: string): Promise<void> {
+    await this.accountRepository.setPermissions(user, defaultPermissions)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param addOn 
+   */
+  async setAddOnPermissions(user: string, addOn: string): Promise<void> {
+    this.accountRepository.setPermissions(user, this.getPermissons(addOn))
   }
 
   /**
@@ -85,6 +115,42 @@ export class AccountService {
       return this.bankMapper.map(account)
     }
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param data 
+   * @param user 
+   * @returns 
+   */
+  async updateBankAccount(data: UpdateBankAccountDto, user: string): Promise<BankAccountResponseDto> {
+    const bank = await this.bankRepository.findOneById(data.bank)
+
+    if (bank) {
+      const account = await this.accountRepository.updateBankAccount(user, data.account, data.number, bank, data.isPrimary)
+      return this.bankMapper.map(account)
+    }
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
+  async getManagedAccounts(user: string): Promise<Role[]> {
+    const accounts = await this.accountRepository.getOwnManagedAccounts(user)
+
+    return accounts.map(response => {
+      return {
+        name: `${response.owner.firstName} ${response.owner.lastName}`,
+        photo: response.owner.photo,
+        email: response.owner.email.value,
+        id: response._id,
+        isOwner: response.owner._id.toString() === user
+      }
+    })
   }
 
   /**

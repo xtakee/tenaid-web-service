@@ -1,12 +1,11 @@
-import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, ForbiddenException, Get, NotImplementedException, Param, Patch, Post } from "@nestjs/common";
 import { AccountCreateDto } from "../../domain/account/dto/request/account.create.dto";
 import { AccountService } from "./account.service";
-import { AccountAuthResponseDto } from "src/domain/auth/dto/response/account.auth.response.dto";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
-import { AccountResponseDto } from "src/domain/account/dto/response/account.response.dto";
+import { AccountResponseDto, Role } from "src/domain/account/dto/response/account.response.dto";
 import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressUpdateDto } from "src/domain/account/dto/request/address.update.dto";
 import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
@@ -15,6 +14,8 @@ import { CheckPolicies } from "../auth/guards/casl/policies.guard";
 import { CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
+import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
+import { isMongoId } from "class-validator";
 
 @Controller({
   version: '1',
@@ -37,6 +38,20 @@ export class AccountController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async addBankAccount(@Body() body: AddBankAccountDto, @User() id: string): Promise<BankAccountResponseDto> {
     return await this.accountService.addBankAccount(body, id)
+  }
+
+  /**
+ * 
+ * @param body 
+ * @param id 
+ * @returns BankAccountResponseDto
+ */
+  @Patch('bank')
+  @ApiOperation({ summary: 'Update a bank account' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  async updateBankAccount(@Body() body: UpdateBankAccountDto, @User() id: string): Promise<BankAccountResponseDto> {
+    return await this.accountService.updateBankAccount(body, id)
   }
 
   /**
@@ -68,7 +83,7 @@ export class AccountController {
    */
   @Post('')
   @ApiOperation({ summary: 'Create an account' })
-  async create(@Body() body: AccountCreateDto): Promise<AccountAuthResponseDto> {
+  async create(@Body() body: AccountCreateDto): Promise<AccountResponseDto> {
     return await this.accountService.create(body)
   }
 
@@ -114,6 +129,14 @@ export class AccountController {
     return await this.accountService.updateProfilee(id, body)
   }
 
+  @Get('managed')
+  @ApiOperation({ summary: 'Get Managed Accounts' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
+  async getManagedAccounts(@User() id: string): Promise<Role[]> {
+    return await this.accountService.getManagedAccounts(id)
+  }
+
   /**
    * 
    * @param user 
@@ -151,6 +174,7 @@ export class AccountController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
   async getBankAccount(@Param('id') bank: string, @User() user: string): Promise<BankAccountResponseDto> {
+    if (!isMongoId(bank)) throw new BadRequestException()
     return await this.accountService.getBankAccount(user, bank)
   }
 }
