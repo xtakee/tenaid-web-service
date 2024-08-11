@@ -37,7 +37,7 @@ export class Account {
   @Prop({ required: true })
   lastName: string;
 
-  @Prop({ required: true, enum: [...ACCOUNT_STATUS], default: DEFAULT_STATUS })
+  @Prop({ required: true, enum: ACCOUNT_STATUS, default: DEFAULT_STATUS })
   status?: string
 
   @Prop({ required: true, lowercase: true, index: true, unique: true })
@@ -56,7 +56,7 @@ export class Account {
   @Type(() => KYC)
   kyc?: KYC
 
-  @Prop({ enum: [...Object.values(ADD_ON)] })
+  @Prop({ enum: ADD_ON })
   primaryAccountType?: string
 
   @Prop()

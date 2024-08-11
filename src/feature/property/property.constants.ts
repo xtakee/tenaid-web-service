@@ -20,3 +20,23 @@ export enum UTITLITY {
   SEWAGE = 'Sewage',
   INTERNET = 'Internet'
 }
+
+export enum EMPLOYED_STATUS {
+  SELF = 'self-employed',
+  EMPLOYED = 'employed'
+}
+
+export enum APPLICATION_STATUS {
+  EDITING = 'editing',
+  DRAFT = 'draft',
+  SUBMITTED = 'submitted',
+  OFFER = 'offer',
+  REJECTED = 'rejected'
+}
+
+
+export enum RELATIONSHIP {
+  COLLEAGUE = 'colleagues',
+  CLERGY = 'clergy',
+  EMPLOYER = 'employer'
+}

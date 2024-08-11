@@ -12,6 +12,7 @@ import { AgentController } from './feature/agent/agent.controller';
 import { ManagerController } from './feature/manager/manager.controller';
 import { ManagerModule } from './feature/manager/manager.module';
 import { AgentModule } from './feature/agent/agent.module';
+import { ListingModule } from './feature/listing/listing.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { AgentModule } from './feature/agent/agent.module';
     CloudinaryModule,
     FileModule,
     ManagerModule,
-    AgentModule
+    AgentModule,
+    ListingModule
   ],
   controllers: [AgentController, ManagerController],
   providers: [],
