@@ -39,7 +39,7 @@ export class AccountController {
   @Post('bank')
   @ApiOperation({ summary: 'Add a bank account' })
   @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.BANK_ACCOUNT))
   async addBankAccount(@Body() body: AddBankAccountDto, @User() id: string): Promise<BankAccountResponseDto> {
     return await this.accountService.addBankAccount(body, id)
   }
@@ -53,7 +53,7 @@ export class AccountController {
   @Patch('bank')
   @ApiOperation({ summary: 'Update a bank account' })
   @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.BANK_ACCOUNT))
   async updateBankAccount(@Body() body: UpdateBankAccountDto, @User() id: string): Promise<BankAccountResponseDto> {
     return await this.accountService.updateBankAccount(body, id)
   }

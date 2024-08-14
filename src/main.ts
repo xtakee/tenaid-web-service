@@ -6,6 +6,7 @@ import { TransformResponseInterceptor } from './interceptor/transform.response.i
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './feature/core/exception/http.exception.filter';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ENV } from './core/util/env';
 
 async function main() {
   const app = await NestFactory.create(AppModule);
@@ -26,11 +27,13 @@ async function main() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  });
+  if (process.env.NODE_ENV === ENV.DEV) {
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
+  }
 
   app.use(helmet())
   app.enableCors();

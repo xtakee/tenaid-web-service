@@ -16,4 +16,10 @@ export class Address {
 
   @Prop()
   proofOfAddress: string;
+
+  @Prop()
+  latitude?: string;
+
+  @Prop()
+  longitude?: string;
 }

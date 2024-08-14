@@ -33,6 +33,7 @@ export enum SYSTEM_FEATURES {
   TENANTS = 'feature_tenant',
   APPLICATIONS = 'feature_application',
   TRANSACTIONS = 'feature_transaction',
+  BANK_ACCOUNT = 'feature_bank_account',
   TICKETS = 'feature_ticket',
   MESSAGES = 'feature_message',
   LISTING = 'feature_listing'
@@ -56,12 +57,14 @@ export const defaultManagerPermissions: Permission[] = [
   { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.BANK_ACCOUNT, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
 ]
 
 export const defaultAgentPermissions: Permission[] = [
   { authorization: SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.BANK_ACCOUNT, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.LISTING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
 ]
 

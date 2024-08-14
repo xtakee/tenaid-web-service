@@ -34,6 +34,17 @@ export enum APPLICATION_STATUS {
   REJECTED = 'rejected'
 }
 
+export enum APARTMENT_CONDITION {
+  NEW = 'newly_built',
+  RENOVATED = 'renovated',
+  FAIRLY_USED = 'fairly_used'
+}
+
+export enum APARTMENT_TYPE {
+  BLOCKS = 'blocks',
+  RENOVATED = 'renovated',
+  FAIRLY_USED = 'fairly_used'
+}
 
 export enum RELATIONSHIP {
   COLLEAGUE = 'colleagues',

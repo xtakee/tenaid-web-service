@@ -107,11 +107,12 @@ export class AccountRepository implements IAccountRepository {
    * @returns Account
    */
   async updateProfile(id: string, data: AccountProfileDto): Promise<Account> {
-    return this.accountModel.findByIdAndUpdate(id, {
+    return await this.accountModel.findByIdAndUpdate(id, {
       dob: data.dob,
       phone: data.phone,
       photo: data.photo,
-      proofOfId: data.proofOfId
+      proofOfId: data.proofOfId,
+      'kyc.profileCompleted': true
     }, { returnDocument: 'after' }).exec()
   }
 
