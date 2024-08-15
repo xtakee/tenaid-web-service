@@ -8,7 +8,7 @@ import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.
 import { BankAccount } from "./model/bank.account.model";
 import { Bank } from "../bank/model/bank.model";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressUpdateDto } from "src/domain/core/dto/address.update.dto";
+import { AddressDto } from "src/domain/core/dto/address.dto";
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
@@ -43,12 +43,40 @@ export class AccountRepository implements IAccountRepository {
    * @param addOn 
    * @returns Account
    */
-  async setAccountType(user: string, addOn: string): Promise<Account> {
+  // async setAccountType(user: string, addOn: string): Promise<Account> {
+  //   const account = await this.accountModel.findById(user)
+
+  //   if (!account) return null
+  //   // Only tenants accounts are approved by default
+  //   const type = { type: addOn, approved: addOn === ADD_ON.TENANT ? true : false }
+
+  //   let types: AccountType[] = account.accountTypes
+  //   if (types.length === 0) types = [type]
+  //   else {
+  //     // prevent duplicate account types
+  //     if (types.find(t => t.type === addOn)) return null
+  //     types.push(type)
+  //   }
+
+  //   return await this.accountModel.findByIdAndUpdate(user, {
+  //     primaryAccountType: addOn,
+  //     accountTypes: types
+  //   }, { returnDocument: 'after' }).exec()
+  // }
+
+  /**
+   * 
+   * @param user 
+   * @param addOn 
+   * @param status 
+   * @returns 
+   */
+  async setAccountType(user: string, addOn: string, status: boolean): Promise<Account> {
     const account = await this.accountModel.findById(user)
 
     if (!account) return null
     // Only tenants accounts are approved by default
-    const type = { type: addOn, approved: addOn === ADD_ON.TENANT ? true : false }
+    const type = { type: addOn, approved: status }
 
     let types: AccountType[] = account.accountTypes
     if (types.length === 0) types = [type]
@@ -86,7 +114,7 @@ export class AccountRepository implements IAccountRepository {
    * @param data 
    * @returns Account
    */
-  async updateAddress(id: string, data: AddressUpdateDto): Promise<Account> {
+  async updateAddress(id: string, data: AddressDto): Promise<Account> {
     const address: Address = {
       address: data.address,
       proofOfAddress: data.proofOfAddress,
@@ -269,7 +297,6 @@ export class AccountRepository implements IAccountRepository {
    */
   async getAddOnRequest(id: string): Promise<AddOnRequest> {
     return await this.addOnRequestModel.findById(id)
-
   }
 
   /**
@@ -435,6 +462,5 @@ export class AccountRepository implements IAccountRepository {
       permissions: permissions
     }, { returnDocument: 'after' }).exec()
   }
-
 
 }

@@ -53,7 +53,8 @@ export class AdminService {
     const request = await this.accountRepository.reviewAddOnRequest(data.request, data.status, data.comment, admin)
     if (!request) throw new NotFoundException()
 
-    this.accountService.setAddOnPermissions(request.account.toString(), request.addOn)
+    await this.accountService.setAddOnPermissions(request.account.toString(), request.addOn)
+    await this.accountService.setAccountType(request.account.toString(), request.addOn, true)
   }
 
   /**

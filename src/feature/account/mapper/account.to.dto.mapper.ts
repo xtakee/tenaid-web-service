@@ -3,6 +3,7 @@ import { Account } from "../model/account.model";
 import { AccountResponseDto, _KYC } from "src/domain/account/dto/response/account.response.dto";
 import { Injectable } from "@nestjs/common";
 import { ADD_ON } from "src/feature/auth/auth.constants";
+import { AddressToDtoMapper } from "src/feature/core/mapper/address.to.dto.mapper";
 
 function isKycCompleted(accountType?: string, kyc?: _KYC) {
   switch (accountType) {
@@ -29,6 +30,7 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
         value: from.email.value,
         verified: from.email.verified
       },
+      address: (new AddressToDtoMapper()).map(from.address),
       kyc: {
         profileCompleted: from.kyc?.profileCompleted,
         addressCompleted: from.kyc?.addressCompleted,

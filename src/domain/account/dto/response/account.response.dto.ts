@@ -1,3 +1,4 @@
+import { AddressDto } from "src/domain/core/dto/address.dto"
 import { Email } from "src/domain/core/model/email"
 
 
@@ -36,4 +37,5 @@ export class AccountResponseDto {
   proofOfId?: string
   kyc?: _KYC
   managedAccounts?: Role[]
+  address?: AddressDto
 }

@@ -4,32 +4,29 @@ import { HydratedDocument, Types } from "mongoose";
 import { Account } from "src/feature/account/model/account.model";
 import { Address } from "src/feature/core/model/address.model";
 
-export type AccountPropertyDocument = HydratedDocument<AccountProperty>;
+export type AccountPropertyDocument = HydratedDocument<PropertyComplex>;
 
 @Schema({ timestamps: true })
-export class AccountProperty {
+export class PropertyComplex {
   @Prop({ type: Types.ObjectId, required: true, ref: Account.name })
   @Type(() => Address)
   account?: Types.ObjectId
 
-  @Prop()
-  contactEmail?: string;
+  @Prop({ required: true })
+  name?: string;
 
   @Prop()
-  contactPhone?: string;
+  media?: string[];
 
-  @Prop()
-  floors?: number;
+  @Prop({ required: true })
+  description?: string;
 
   @Prop()
   allowPets?: boolean;
-
-  @Prop({ type: Boolean, default: false })
-  isMultiple?: boolean
 
   @Prop({ type: Types.ObjectId, required: true })
   @Type(() => Address)
   address?: Address
 }
 
-export const AccountPropertySchema = SchemaFactory.createForClass(AccountProperty);
+export const PropertyComplexSchema = SchemaFactory.createForClass(PropertyComplex);

@@ -22,8 +22,8 @@ export enum UTITLITY {
 }
 
 export enum EMPLOYED_STATUS {
-  SELF = 'self-employed',
-  EMPLOYED = 'employed'
+  SELF = 'Self Employed',
+  EMPLOYED = 'Employed'
 }
 
 export enum APPLICATION_STATUS {
@@ -34,20 +34,34 @@ export enum APPLICATION_STATUS {
   REJECTED = 'rejected'
 }
 
-export enum APARTMENT_CONDITION {
-  NEW = 'newly_built',
-  RENOVATED = 'renovated',
-  FAIRLY_USED = 'fairly_used'
+export enum PROPERTY_CONDITION {
+  NEW = 'Newly Built',
+  RENOVATED = 'Renovated',
+  FAIRLY_USED = 'Fairly Used'
 }
 
-export enum APARTMENT_TYPE {
-  BLOCKS = 'blocks',
-  RENOVATED = 'renovated',
-  FAIRLY_USED = 'fairly_used'
+export enum PROPERTY_TYPE {
+  BLOCKS = 'Block of Flats',
+  BUNGALOW = 'Bungalow',
+  DUPLEX = 'Duplex',
+  MINIFLAT = 'Mini Flat',
+  BEDSITTER = 'Bedsitter',
+  CHARLET = 'Charlet',
+  MANSION = 'Mansion',
+  MAISONETTE = 'Maisonette',
+  PENTHOUSE = 'Penthouse',
+  SHARED = 'Shared Apartment',
+  STUDIO = 'Studio Apartment',
+  VILLA = 'Villa',
 }
 
 export enum RELATIONSHIP {
-  COLLEAGUE = 'colleagues',
-  CLERGY = 'clergy',
-  EMPLOYER = 'employer'
+  COLLEAGUE = 'Colleagues',
+  CLERGY = 'Clergy',
+  EMPLOYER = 'Employer'
+}
+
+export enum PROPERTY_AVAILABILITY {
+  RENTED = 'Rented',
+  AVAILABLE = 'Available'
 }

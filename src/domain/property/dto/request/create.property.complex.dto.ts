@@ -1,8 +1,9 @@
+
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 import { AddressDto } from "src/domain/core/dto/address.dto";
 
-export class CreatePropertyDto {
+export class CreatePropertyComplexDto {
   @ApiProperty()
   @IsNotEmpty()
   name: string
@@ -10,10 +11,6 @@ export class CreatePropertyDto {
   @ApiProperty()
   @IsNotEmpty()
   description: string
-
-  @ApiProperty()
-  @IsNotEmpty()
-  isMultiple: boolean
 
   @ApiProperty()
   @IsNotEmpty()
@@ -25,5 +22,5 @@ export class CreatePropertyDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  floors: number
+  media: string[]
 }

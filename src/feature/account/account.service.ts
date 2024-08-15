@@ -9,7 +9,7 @@ import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.acc
 import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressUpdateDto } from "src/domain/core/dto/address.update.dto";
+import { AddressDto } from "src/domain/core/dto/address.dto";
 import { ADD_ON, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
 import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
 import { Permission } from "../auth/model/permission";
@@ -96,7 +96,7 @@ export class AccountService {
    * @param id 
    * @returns AccountResponseDto
    */
-  async updateAddress(data: AddressUpdateDto, id: string): Promise<AccountResponseDto> {
+  async updateAddress(data: AddressDto, id: string): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateAddress(id, data)
     if (account) {
       account = await this.accountRepository.setAddressKyc(id)
@@ -184,8 +184,8 @@ export class AccountService {
    * @param addOn 
    * @returns AccountResponseDto
    */
-  async setAccountType(user: string, addOn: string): Promise<AccountResponseDto> {
-    const account = await this.accountRepository.setAccountType(user, addOn)
+  async setAccountType(user: string, addOn: string, status: boolean): Promise<AccountResponseDto> {
+    const account = await this.accountRepository.setAccountType(user, addOn, status)
     if (account) {
       if (addOn !== ADD_ON.TENANT) {
         await this.requestAddOn(addOn, user)

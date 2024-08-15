@@ -7,11 +7,10 @@ import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.accou
 import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressUpdateDto } from "src/domain/core/dto/address.update.dto";
 import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
 import { RootUser, User } from "src/core/decorators/current.user";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
-import { CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
+import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
 import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
@@ -20,6 +19,7 @@ import { ForgotPasswordDto } from "src/domain/account/dto/request/forgot.passwor
 import { ForgotPasswordResponseDto } from "src/domain/account/dto/response/forgot.password.response.dto";
 import { ResetForgotPasswordDto } from "src/domain/account/dto/request/reset.password.dto";
 import { ChangePasswordDto } from "src/domain/account/dto/request/change.password.dto";
+import { AddressDto } from "src/domain/core/dto/address.dto";
 
 @Controller({
   version: '1',
@@ -77,7 +77,7 @@ export class AccountController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async setAccountType(@Body() body: AddOnRequestDto, @User() id: string): Promise<AccountResponseDto> {
-    return await this.accountService.setAccountType(id, body.addOn)
+    return await this.accountService.setAccountType(id, body.addOn, body.addOn === ADD_ON.TENANT)
   }
 
   /**
@@ -115,7 +115,7 @@ export class AccountController {
   @ApiOperation({ summary: 'Update Address' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
-  async updateAddess(@Body() body: AddressUpdateDto, @User() id: string): Promise<AccountResponseDto> {
+  async updateAddess(@Body() body: AddressDto, @User() id: string): Promise<AccountResponseDto> {
     return await this.accountService.updateAddress(body, id)
   }
 

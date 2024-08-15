@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsNotEmpty, IsUrl } from "class-validator"
 
-export class AddressUpdateDto {
+export class AddressDto {
   @ApiProperty()
   @IsNotEmpty()
   address: string
@@ -22,4 +22,12 @@ export class AddressUpdateDto {
   @IsNotEmpty()
   @IsUrl()
   proofOfAddress: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  latitude?: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  longitude?: string
 }

@@ -3,13 +3,13 @@ import { Type } from "class-transformer";
 import { Types } from "mongoose";
 import { Account } from "src/feature/account/model/account.model";
 import { Financial } from "src/feature/property/model/financial.model";
-import { PropertyApartment } from "./property.apartment";
 import { APPLICATION_STATUS } from "../property.constants";
+import { Property } from "./property.model";
 
 @Schema({ timestamps: true })
 export class PropertyApplication {
 
-  @Prop({ type: Types.ObjectId, ref: PropertyApartment.name })
+  @Prop({ type: Types.ObjectId, ref: Property.name })
   apartment?: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: Account.name })
