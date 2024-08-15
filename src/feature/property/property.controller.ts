@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PropertyComplexResponeDto } from 'src/domain/property/dto/response/property.complex.response.dto';
 import { PropertyService } from './property.service';
@@ -27,7 +27,7 @@ export class PropertyController {
     return this.propertyService.createComplex(user, data)
   }
 
-  @Post('complex/:complex')
+  @Patch('complex/:complex')
   @ApiOperation({ summary: 'Update a Property Complex' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
