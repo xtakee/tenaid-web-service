@@ -27,7 +27,7 @@ export class PropertyController {
     return this.propertyService.createComplex(user, data)
   }
 
-  @Post('/:complex')
+  @Post('complex/:complex')
   @ApiOperation({ summary: 'Update a Property Complex' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
