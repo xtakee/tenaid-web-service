@@ -61,7 +61,7 @@ export class PropertyController {
     return await this.propertyService.getPropertyAvailabilities()
   }
 
-  @Get('availabilities')
+  @Get('ammenities')
   @ApiOperation({ summary: 'Get Property Ammenities' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
