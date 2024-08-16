@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
 import { PropertyComplex } from "./property.complex.model";
 import { HydratedDocument, Types } from "mongoose";
-import { PROPERTY_AVAILABILITY, PROPERTY_TYPE } from "../property.constants";
+import { AMENITIES, PROPERTY_AVAILABILITY, PROPERTY_STATUS, PROPERTY_TYPE } from "../property.constants";
 
 @Schema()
 export class CustomPayment {
@@ -23,6 +23,9 @@ export class Property {
 
   @Prop({ required: true })
   name?: string;
+
+  @Prop({ enum: PROPERTY_STATUS, default: PROPERTY_STATUS.DRAFT })
+  status?: string;
 
   @Prop()
   contactEmail?: string;
@@ -45,7 +48,7 @@ export class Property {
   @Prop()
   price?: number;
 
-  @Prop([String])
+  @Prop([{ type: String, enum: AMENITIES }])
   amenities?: string[]
 
   @Prop([CustomPayment])

@@ -34,6 +34,13 @@ export enum APPLICATION_STATUS {
   REJECTED = 'rejected'
 }
 
+export enum PROPERTY_STATUS {
+  EDITING = 'editing',
+  DRAFT = 'draft',
+  SUBMITTED = 'submitted',
+  REJECTED = 'rejected'
+}
+
 export enum PROPERTY_CONDITION {
   NEW = 'Newly Built',
   RENOVATED = 'Renovated',

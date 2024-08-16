@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './feature/core/exception/http.exception.filter';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ENV } from './core/util/env';
+import * as basicAuth from "express-basic-auth";
 
 async function main() {
   const app = await NestFactory.create(AppModule);
@@ -26,8 +27,14 @@ async function main() {
     .setVersion('1.0')
     .build();
 
+  const users = { developer_tenaid: 'developer_2024' };
+
   const document = SwaggerModule.createDocument(app, config);
   if (process.env.NODE_ENV === ENV.DEV) {
+
+    app.use("/docs", basicAuth({ users, challenge: true }));
+    app.use("/docs-json", basicAuth({ users, challenge: true }));
+
     SwaggerModule.setup('docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,

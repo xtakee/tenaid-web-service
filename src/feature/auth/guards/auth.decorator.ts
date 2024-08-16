@@ -10,3 +10,10 @@ export function Auth() {
     UseGuards(PoliciesGuard)
   );
 }
+
+export function BasicAuth() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    UseGuards(JwtAuthGuard)
+  );
+}

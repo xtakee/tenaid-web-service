@@ -12,7 +12,7 @@ export class AccountType {
   @Prop({ default: false })
   approved?: boolean
 
-  @Prop({ enum: [...Object.values(ADD_ON)] })
+  @Prop({ enum: ADD_ON })
   type?: string
 }
 
