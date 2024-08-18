@@ -72,3 +72,10 @@ export enum PROPERTY_AVAILABILITY {
   RENTED = 'Rented',
   AVAILABLE = 'Available'
 }
+
+export enum LEASE_PERIOD {
+  WEEKLY = 'Weekly',
+  MONTHLY = 'Monthly',
+  YEARLY = 'Yearly',
+  SEMIYEARLY = 'Semi-Yearly'
+}

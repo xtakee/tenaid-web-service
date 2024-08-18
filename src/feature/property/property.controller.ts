@@ -9,6 +9,8 @@ import { MongoAbility } from '@casl/ability';
 import { CLAIM, SYSTEM_FEATURES } from '../auth/auth.constants';
 import { Auth } from '../auth/guards/auth.decorator';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
+import { BasicPropertyInfoDto } from 'src/domain/property/dto/request/basic.property.info.dto';
+import { PropertyFinanceDto } from 'src/domain/property/dto/request/property.finance.dto';
 
 @Controller({
   version: '1',
@@ -19,6 +21,12 @@ export class PropertyController {
 
   constructor(private readonly propertyService: PropertyService) { }
 
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
   @Post('complex')
   @ApiOperation({ summary: 'Create a Property Complex' })
   @Auth()
@@ -27,6 +35,42 @@ export class PropertyController {
     return this.propertyService.createComplex(user, data)
   }
 
+  /**
+   * 
+   * @param user \
+   * @param data 
+   * @returns 
+   */
+  @Post('')
+  @ApiOperation({ summary: 'Create/Update Basic Property Information' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
+  async createPropertyBasicInfo(@User() user: string, @Body() data: BasicPropertyInfoDto): Promise<PropertyComplexResponeDto> {
+    return this.propertyService.createBasicPropertyInfo(user, data)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @param property 
+   * @returns 
+   */
+  @Patch('finance/:property')
+  @ApiOperation({ summary: 'Add Property Finance/Payment' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
+  async addPropertyFinance(@User() user: string, @Body() data: PropertyFinanceDto, @Param('property') property: string): Promise<PropertyFinanceDto> {
+    return this.propertyService.createPropertyFinanceInfo(data, property, user)
+  }
+
+/**
+ * 
+ * @param user 
+ * @param complex 
+ * @param data 
+ * @returns 
+ */
   @Patch('complex/:complex')
   @ApiOperation({ summary: 'Update a Property Complex' })
   @Auth()
@@ -61,12 +105,12 @@ export class PropertyController {
     return await this.propertyService.getPropertyAvailabilities()
   }
 
-  @Get('ammenities')
-  @ApiOperation({ summary: 'Get Property Ammenities' })
+  @Get('amenities')
+  @ApiOperation({ summary: 'Get Property Amenities' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
-  async getPropertyAmmenities(): Promise<string[]> {
-    return await this.propertyService.getPropertyAmmenities()
+  async getPropertyAmenities(): Promise<string[]> {
+    return await this.propertyService.getPropertyAmenities()
   }
 
   /**

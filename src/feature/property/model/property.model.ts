@@ -2,15 +2,25 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
 import { PropertyComplex } from "./property.complex.model";
 import { HydratedDocument, Types } from "mongoose";
-import { AMENITIES, PROPERTY_AVAILABILITY, PROPERTY_STATUS, PROPERTY_TYPE } from "../property.constants";
+import { AMENITIES, LEASE_PERIOD, PROPERTY_AVAILABILITY, PROPERTY_STATUS, PROPERTY_TYPE } from "../property.constants";
 
-@Schema()
-export class CustomPayment {
+export class CustomFee {
   @Prop()
   label?: string
 
   @Prop()
   value?: number
+
+  @Prop({ default: true })
+  oneOff: boolean
+}
+
+export class Size {
+  @Prop()
+  length?: number
+
+  @Prop()
+  breadth?: number
 }
 
 export type PropertyDocument = HydratedDocument<Property>;
@@ -20,6 +30,9 @@ export class Property {
 
   @Prop({ type: Types.ObjectId, ref: PropertyComplex.name })
   complex?: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: PropertyComplex.name })
+  account?: Types.ObjectId
 
   @Prop({ required: true })
   name?: string;
@@ -51,30 +64,34 @@ export class Property {
   @Prop([{ type: String, enum: AMENITIES }])
   amenities?: string[]
 
-  @Prop([CustomPayment])
-  @Type(() => CustomPayment)
-  customPayments?: CustomPayment[]
+  @Prop({ type: CustomFee })
+  @Type(() => CustomFee)
+  customFees?: CustomFee[]
 
   @Prop()
   pets?: boolean
 
-  @Prop()
-  size?: string
+  @Prop({ type: Size })
+  @Type(() => Size)
+  size?: Size
 
   @Prop()
-  cautionFeePercent?: number
+  caution?: number
 
-  @Prop({ enum: ['weekly', 'monthly', 'yearly', 'semi-annual'] })
-  leasePeriod: string
+  @Prop()
+  legal?: number
+
+  @Prop({ enum: LEASE_PERIOD })
+  leasePeriod?: string
 
   @Prop([String])
-  images: string[]
+  images?: string[]
 
   @Prop({ enum: PROPERTY_TYPE })
-  type: string
+  type?: string
 
   @Prop({ enum: PROPERTY_AVAILABILITY })
-  availability: string
+  availability?: string
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property);
