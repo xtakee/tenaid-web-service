@@ -11,6 +11,7 @@ import { Auth } from '../auth/guards/auth.decorator';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
 import { BasicPropertyInfoDto } from 'src/domain/property/dto/request/basic.property.info.dto';
 import { PropertyFinanceDto } from 'src/domain/property/dto/request/property.finance.dto';
+import { PropertyAmenitiesDto } from 'src/domain/property/dto/request/property.amenities.dto';
 
 @Controller({
   version: '1',
@@ -64,13 +65,28 @@ export class PropertyController {
     return this.propertyService.createPropertyFinanceInfo(data, property, user)
   }
 
-/**
- * 
- * @param user 
- * @param complex 
- * @param data 
- * @returns 
- */
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @param property 
+   * @returns PropertyFinanceDto
+   */
+  @Patch('amenities/:property')
+  @ApiOperation({ summary: 'Add Property Amenities' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PROPERTIES))
+  async addPropertyAmenities(@User() user: string, @Body() data: PropertyAmenitiesDto, @Param('property') property: string): Promise<PropertyFinanceDto> {
+    return this.propertyService.createPropertyAmenities(data, property, user)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param complex 
+   * @param data 
+   * @returns PropertyFinanceDto
+   */
   @Patch('complex/:complex')
   @ApiOperation({ summary: 'Update a Property Complex' })
   @Auth()

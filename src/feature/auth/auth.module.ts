@@ -18,6 +18,9 @@ import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { Paginator } from 'src/core/helpers/paginator';
 import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
+import { Counter, CounterSchema } from '../core/counter/model/counter.model';
+import { CounterRepository } from '../core/counter/counter.repository';
+import { CodeGenerator } from 'src/core/helpers/code.generator';
 
 @Global()
 @Module({
@@ -33,7 +36,8 @@ import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.m
     CacheService,
     AdminRepository,
     AccountAdminToDtoMapper,
-    Paginator
+    Paginator,
+    CodeGenerator
   ],
   exports: [AuthService, AuthRepository, PoliciesGuard, CaslAbilityFactory],
   imports: [

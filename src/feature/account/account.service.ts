@@ -10,7 +10,7 @@ import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
 import { AddressDto } from "src/domain/core/dto/address.dto";
-import { ADD_ON, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
+import { ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
 import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
 import { Permission } from "../auth/model/permission";
 import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings";
@@ -100,6 +100,12 @@ export class AccountService {
     let account = await this.accountRepository.updateAddress(id, data)
     if (account) {
       account = await this.accountRepository.setAddressKyc(id)
+
+      // community permissions
+      await this.accountRepository.addPermission(id, {
+        authorization: SYSTEM_FEATURES.COMMUNITIES,
+        claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE]
+      })
       return this.mapper.map(account)
     }
 

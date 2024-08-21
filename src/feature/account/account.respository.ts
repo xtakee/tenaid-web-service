@@ -1,7 +1,7 @@
 import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
 import { IAccountRepository } from "src/domain/account/iaccount.repository";
 import { Account, AccountType } from "./model/account.model";
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
@@ -12,10 +12,10 @@ import { AddressDto } from "src/domain/core/dto/address.dto";
 import { Address } from "../core/model/address.model";
 import { AddOnRequest } from "./model/add.on.request.model";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
-import { ADD_ON } from "../auth/auth.constants";
 import { ManagedAccount } from "./model/managed.account";
 import { Permission } from "../auth/model/permission";
 import { CacheService } from "src/services/cache/cache.service";
+import { mergeArray } from "src/core/helpers/array.helper";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -36,33 +36,6 @@ export class AccountRepository implements IAccountRepository {
   async getOneByEmail(email: string): Promise<Account> {
     return await this.accountModel.findOne({ "email.value": email }).exec();
   }
-
-  /**
-   * 
-   * @param user 
-   * @param addOn 
-   * @returns Account
-   */
-  // async setAccountType(user: string, addOn: string): Promise<Account> {
-  //   const account = await this.accountModel.findById(user)
-
-  //   if (!account) return null
-  //   // Only tenants accounts are approved by default
-  //   const type = { type: addOn, approved: addOn === ADD_ON.TENANT ? true : false }
-
-  //   let types: AccountType[] = account.accountTypes
-  //   if (types.length === 0) types = [type]
-  //   else {
-  //     // prevent duplicate account types
-  //     if (types.find(t => t.type === addOn)) return null
-  //     types.push(type)
-  //   }
-
-  //   return await this.accountModel.findByIdAndUpdate(user, {
-  //     primaryAccountType: addOn,
-  //     accountTypes: types
-  //   }, { returnDocument: 'after' }).exec()
-  // }
 
   /**
    * 
@@ -461,6 +434,39 @@ export class AccountRepository implements IAccountRepository {
     return await this.managedAccountModel.findByIdAndUpdate((roles as any)._id, {
       permissions: permissions
     }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param permission 
+   * @returns 
+   */
+  async addPermission(user: string, permission: Permission): Promise<ManagedAccount> {
+    const accountsManaged = await this.managedAccountModel.findOne({
+      account: new Types.ObjectId(user),
+      owner: new Types.ObjectId(user)
+    })
+
+    if (accountsManaged) {
+      const permissions = accountsManaged.permissions
+      const existing: Permission = permissions?.find((p) => p.authorization === permission.authorization)
+      console.log(existing)
+
+      if (!existing) permissions.push(permission)
+      else {
+        const index = permissions.indexOf(existing)
+        existing.claim = mergeArray(existing.claim, permission.claim)
+        permissions[index] = existing
+      }
+
+      return await this.managedAccountModel.findByIdAndUpdate(
+        (accountsManaged as any)._id,
+        { permissions: permissions }, { returnDocument: 'after' })
+
+    }
+
+    throw new BadRequestException()
   }
 
 }

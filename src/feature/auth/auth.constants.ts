@@ -1,9 +1,15 @@
 import { Permission } from "./model/permission"
 
-export const ACCOUNT_STATUS = ['default', 'pending', 'approved', 'denied', 'suspended']
-export const DEFAULT_STATUS = 'default'
-export const PENDING_STATUS = 'pending'
-export const APPROVED_STATUS = 'pending'
+export enum ACCOUNT_STATUS {
+  DEFAULT = 'default',
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  APPROVED = 'approved',
+  DENIED = 'denied',
+  SUSPENDED = 'suspended',
+  REJECTED = 'rejected',
+  REVOKED = 'revoked'
+}
 
 export const PASSWORD_MIN_LENGTH = 8
 
@@ -15,11 +21,6 @@ export enum ADD_ON {
   AGENT = 'can-publish',
   TENANT = 'can-lease'
 }
-
-export const ADD_ON_REQUEST_STATUS = ['default', 'pending', 'approved', 'denied']
-export const ACCOUNT_PERMISSION_STATUS = ['pending', 'accepted', 'rejected', 'revoked']
-
-export const ACCEPTED_STATUS = 'accepted'
 
 export enum CLAIM {
   WRITE = 'write',
@@ -36,6 +37,8 @@ export enum SYSTEM_FEATURES {
   BANK_ACCOUNT = 'feature_bank_account',
   TICKETS = 'feature_ticket',
   MESSAGES = 'feature_message',
+  COMMUNITIES = 'feature_community',
+  ACCESS_CONTROL = 'feature_community_access',
   LISTING = 'feature_listing'
 }
 

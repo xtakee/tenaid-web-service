@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
 import { PropertyComplex } from "./property.complex.model";
 import { HydratedDocument, Types } from "mongoose";
-import { AMENITIES, LEASE_PERIOD, PROPERTY_AVAILABILITY, PROPERTY_STATUS, PROPERTY_TYPE } from "../property.constants";
+import { ACCESSIBILITY, AMENITIES, LEASE_PERIOD, PROPERTY_AVAILABILITY, PROPERTY_CONDITION, PROPERTY_CREATE_STAGE, PROPERTY_STATUS, PROPERTY_TYPE, UTITLITY } from "../property.constants";
 
 export class CustomFee {
   @Prop()
@@ -64,6 +64,12 @@ export class Property {
   @Prop([{ type: String, enum: AMENITIES }])
   amenities?: string[]
 
+  @Prop([{ type: String, enum: UTITLITY }])
+  utilities?: string[]
+
+  @Prop([{ type: String, enum: ACCESSIBILITY }])
+  accessibilities?: string[]
+
   @Prop({ type: CustomFee })
   @Type(() => CustomFee)
   customFees?: CustomFee[]
@@ -79,10 +85,16 @@ export class Property {
   caution?: number
 
   @Prop()
-  legal?: number
+  legal?: number  
 
   @Prop({ enum: LEASE_PERIOD })
   leasePeriod?: string
+
+  @Prop({ enum: PROPERTY_CREATE_STAGE })
+  stage?: string
+
+  @Prop({ enum: PROPERTY_CONDITION })
+  condition?: string
 
   @Prop([String])
   images?: string[]

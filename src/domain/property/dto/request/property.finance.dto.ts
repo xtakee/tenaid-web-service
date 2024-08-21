@@ -19,6 +19,8 @@ export class CustomFee {
 }
 
 export class PropertyFinanceDto {
+  id?: string
+  
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()

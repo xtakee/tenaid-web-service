@@ -1,17 +1,18 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { AccountRepository } from '../account/account.respository';
 import { Account } from '../account/model/account.model';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
 import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { ADD_ON, MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
+import { MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
 import { AuthRepository } from './auth.repository';
 import { AdminRepository } from '../admin/admin.repository';
 import { PermissionDto } from 'src/domain/core/model/permission';
 import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
+import { CodeGenerator } from 'src/core/helpers/code.generator';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,8 @@ export class AuthService {
     private readonly adminRepository: AdminRepository,
     private readonly adminAccountMapper: AccountAdminToDtoMapper,
     private readonly jwtService: JwtService,
-    private readonly authHelper: AuthHelper
+    private readonly authHelper: AuthHelper,
+    private readonly codeGenerator: CodeGenerator
   ) { }
 
   /**
@@ -90,7 +92,6 @@ export class AuthService {
    * @returns AccountAuthResponseDto
    */
   async login(username: string, password: string): Promise<AccountAuthResponseDto> {
-
     const account: Account = await this.accountRepository.getOneByEmail(username)
 
     if (account) {

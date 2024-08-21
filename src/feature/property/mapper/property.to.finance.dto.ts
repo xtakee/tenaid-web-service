@@ -7,6 +7,7 @@ import { PropertyFinanceDto } from "src/domain/property/dto/request/property.fin
 export class PropertyToFinanceDto implements Mapper<Property, PropertyFinanceDto> {
   map(from: Property): PropertyFinanceDto {
     return {
+      id: (from as any)._id,
       price: from.price,
       legal: from.legal,
       leasePeriod: from.leasePeriod,

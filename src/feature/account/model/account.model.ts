@@ -3,7 +3,7 @@ import { Date, HydratedDocument, Types } from "mongoose";
 import { Email } from "../../core/model/email.model";
 import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
-import { ACCOUNT_STATUS, ADD_ON, DEFAULT_STATUS } from "src/feature/auth/auth.constants";
+import { ACCOUNT_STATUS, ADD_ON } from "src/feature/auth/auth.constants";
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -37,7 +37,7 @@ export class Account {
   @Prop({ required: true })
   lastName: string;
 
-  @Prop({ required: true, enum: ACCOUNT_STATUS, default: DEFAULT_STATUS })
+  @Prop({ required: true, enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.DEFAULT })
   status?: string
 
   @Prop({ required: true, lowercase: true, index: true, unique: true })

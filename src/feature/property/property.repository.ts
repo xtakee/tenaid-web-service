@@ -6,6 +6,8 @@ import { Property } from "./model/property.model";
 import { CreatePropertyComplexDto } from "src/domain/property/dto/request/create.property.complex.dto";
 import { BasicPropertyInfoDto } from "src/domain/property/dto/request/basic.property.info.dto";
 import { PropertyFinanceDto } from "src/domain/property/dto/request/property.finance.dto";
+import { PropertyAmenitiesDto } from "src/domain/property/dto/request/property.amenities.dto";
+import { PROPERTY_CREATE_STAGE } from "./property.constants";
 
 @Injectable()
 export class PropertyRepository {
@@ -103,6 +105,7 @@ export class PropertyRepository {
       description: data.description,
       bathrooms: data.bathrooms,
       bedrooms: data.bedrooms,
+      stage: PROPERTY_CREATE_STAGE.BASIC,
       size: data.size,
       type: data.type
     }
@@ -127,8 +130,31 @@ export class PropertyRepository {
         price: data.price,
         customFees: data.customFees,
         caution: data.caution,
+        stage: PROPERTY_CREATE_STAGE.FINANCE,
         legal: data.legal,
         leasePeriod: data.leasePeriod
+      }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param data 
+   * @param property 
+   * @param user 
+   * @returns 
+   */
+  async createProperyAmenities(data: PropertyAmenitiesDto, property: string, user: string): Promise<Property> {
+    return await this.propertyModel.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(property),
+        account: new Types.ObjectId(user)
+      },
+      {
+        condition: data.condition,
+        accessibilities: data.accessibilities,
+        amenities: data.amenities,
+        stage: PROPERTY_CREATE_STAGE.AMENITIES,
+        utilities: data.utilities
       }, { returnDocument: 'after' }).exec()
   }
 }

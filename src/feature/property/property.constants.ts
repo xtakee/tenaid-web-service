@@ -41,6 +41,16 @@ export enum PROPERTY_STATUS {
   REJECTED = 'rejected'
 }
 
+export enum PROPERTY_CREATE_STAGE {
+  ADDRESS = 'address',
+  BASIC = 'basic',
+  FINANCE = 'finance',
+  AMENITIES = 'amenities',
+  MEDIA = 'media',
+  SUMMARY = 'summary',
+  SUBMITTED = 'submitted'
+}
+
 export enum PROPERTY_CONDITION {
   NEW = 'Newly Built',
   RENOVATED = 'Renovated',

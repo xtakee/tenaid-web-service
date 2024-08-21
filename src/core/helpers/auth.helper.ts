@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { totp } from 'otplib';
 
 const ENC_SALT = 10
 export const SEPERATOR = '?'
@@ -30,6 +31,16 @@ export class AuthHelper {
    */
   async hash(data: string): Promise<string> {
     return await bcrypt.hash(data, ENC_SALT)
+  }
+
+  /**
+   * 
+   * @param secret 
+   * @param code 
+   * @returns 
+   */
+  isValidateAccessToken(secret: string, code: string): boolean {
+    return totp.check(code, secret)
   }
 
   /**

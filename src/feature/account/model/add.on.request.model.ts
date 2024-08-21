@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { Account } from "src/feature/account/model/account.model";
 import { AccountAdmin } from "src/feature/admin/model/account.admin.model";
-import { ADD_ON, ADD_ON_REQUEST_STATUS, PENDING_STATUS } from "src/feature/auth/auth.constants";
+import { ACCOUNT_STATUS, ADD_ON } from "src/feature/auth/auth.constants";
 
 export type AddOnRequestDocument = HydratedDocument<AddOnRequest>;
 
@@ -14,7 +14,7 @@ export class AddOnRequest {
   @Prop({ required: true, enum: [...Object.values(ADD_ON)] })
   addOn?: string
 
-  @Prop({ required: true, enum: [...ADD_ON_REQUEST_STATUS], default: PENDING_STATUS })
+  @Prop({ required: true, enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.ACCEPTED })
   status?: string
 
   @Prop({ type: Types.ObjectId, ref: AccountAdmin.name })

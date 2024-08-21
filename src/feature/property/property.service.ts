@@ -11,6 +11,7 @@ import { isMongoId } from 'class-validator';
 import { PropertyToBasicDtoMapper } from './mapper/property.to.basic.dto.mapper';
 import { PropertyFinanceDto } from 'src/domain/property/dto/request/property.finance.dto';
 import { PropertyToFinanceDto } from './mapper/property.to.finance.dto';
+import { PropertyAmenitiesDto } from 'src/domain/property/dto/request/property.amenities.dto';
 
 @Injectable()
 export class PropertyService {
@@ -100,6 +101,19 @@ export class PropertyService {
    */
   async createPropertyFinanceInfo(data: PropertyFinanceDto, property: string, user: string): Promise<PropertyFinanceDto> {
     const props: Property = await this.propertyRepository.createProperyFinanceInfo(data, property, user)
+    if (props) return this.financeMapper.map(props)
+    throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param data 
+   * @param property 
+   * @param user 
+   * @returns 
+   */
+  async createPropertyAmenities(data: PropertyAmenitiesDto, property: string, user: string): Promise<PropertyFinanceDto> {
+    const props: Property = await this.propertyRepository.createProperyAmenities(data, property, user)
     if (props) return this.financeMapper.map(props)
     throw new BadRequestException()
   }

@@ -14,6 +14,7 @@ import { ManagerModule } from './feature/manager/manager.module';
 import { AgentModule } from './feature/agent/agent.module';
 import { ListingModule } from './feature/listing/listing.module';
 import { LocationModule } from './feature/location/location.module';
+import { CommunityModule } from './feature/community/community.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { LocationModule } from './feature/location/location.module';
     ManagerModule,
     AgentModule,
     ListingModule,
-    LocationModule
+    LocationModule,
+    CommunityModule
   ],
   controllers: [AgentController, ManagerController],
   providers: [],

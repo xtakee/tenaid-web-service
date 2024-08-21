@@ -30,8 +30,8 @@ export class AccountResponseDto {
   email: Email
   phone: string
   photo: string
-  dob: string
-  kycCompleted: boolean
+  dob?: string
+  kycCompleted?: boolean
   primaryAccountType?: string
   accountTypes?: AccType[]
   proofOfId?: string
