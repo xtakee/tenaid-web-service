@@ -51,6 +51,8 @@ export enum ADMIN_SYSTEM_FEATURES {
   TRANSACTIONS = 'admin_feature_transaction',
   LISTING = 'admin_feature_listing',
   DASHBOARD = 'admin_feature_dashboard',
+  COMMUNITIES = 'admin_feature_community',
+  ACCESS_CONTROL = 'admin_feature_community_access',
   MANAGERS = 'admin_feature_manager'
 }
 
@@ -61,7 +63,9 @@ export const defaultManagerPermissions: Permission[] = [
   { authorization: SYSTEM_FEATURES.TICKETS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.BANK_ACCOUNT, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
+  { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.COMMUNITIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: SYSTEM_FEATURES.ACCESS_CONTROL, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
 ]
 
 export const defaultAgentPermissions: Permission[] = [

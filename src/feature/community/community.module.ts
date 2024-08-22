@@ -16,6 +16,9 @@ import { CommunityInvite, CommunityInviteSchema } from './model/community.invite
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CacheService } from 'src/services/cache/cache.service';
+import { CommunityMemberToDtoMapper } from './mapper/community.member.to.dto.mapper';
+import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
+import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
 
 @Module({
   providers: [
@@ -25,9 +28,12 @@ import { CacheService } from 'src/services/cache/cache.service';
     CommunityToDtoMapper,
     CodeGenerator,
     AuthHelper,
+    CommunityVisitorsToDtoMapper,
     InviteToDtoMapper,
     CacheService,
+    AccountToDtoMapper,
     CommunityInviteToDtoMapper,
+    CommunityMemberToDtoMapper,
     AddressToDtoMapper],
   controllers: [CommunityController],
   imports: [

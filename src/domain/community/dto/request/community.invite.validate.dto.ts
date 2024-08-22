@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty } from "class-validator";
+import { IsDateString, IsMongoId, IsNotEmpty } from "class-validator";
 
 export class CommunityInviteValidateDto {
   @ApiProperty()
@@ -10,4 +10,9 @@ export class CommunityInviteValidateDto {
   @ApiProperty()
   @IsNotEmpty()
   code: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString()
+  checkIn: string
 }

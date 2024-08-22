@@ -28,10 +28,17 @@ export class CodeGenerator {
     totp.options = {
       digits: CODE_LEN_6,            // 6-digit code
       step: TOTP_VALIDITY._12HRS,             // 30-second time step, 43200 - 12hr, 86400 - 24hr
-      window: 1             // Accepts OTPs from current, previous, and next time step
+      window: 0             // Accepts OTPs from current, previous, and next time step
     }
   }
 
+  /**
+   * 
+   * @param counter 
+   * @param length 
+   * @param store 
+   * @returns 
+   */
   private unique(counter: number, length: number, store: string): string {
     const hrTime = process.hrtime();// Convert to microseconds
     const microseconds = hrTime[0] * 1e6 + hrTime[1] / 1e3;
@@ -110,6 +117,12 @@ export class CodeGenerator {
     return code.slice(0, 3) + '-' + code.slice(3)
   }
 
+  /**
+   * 
+   * @param secret 
+   * @param prefix 
+   * @returns 
+   */
   async totp(secret: string, prefix: string = ''): Promise<string> {
 
     let suffixIndex = await this.cache.get(secret)

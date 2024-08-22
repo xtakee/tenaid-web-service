@@ -9,6 +9,8 @@ import { CommunityMemberDto } from "src/domain/community/dto/community.member.dt
 import { CommunityInvite } from "./model/community.invite";
 import { CommunityInviteDto } from "src/domain/community/dto/community.invite.dto";
 import { ACCOUNT_STATUS } from "../auth/auth.constants";
+import { CommunityInviteRevokeDto } from "src/domain/community/dto/request/community.invite.revoke.dto";
+import { CommunityInviteValidateDto } from "src/domain/community/dto/request/community.invite.validate.dto";
 
 @Injectable()
 export class CommunityRepository {
@@ -132,7 +134,7 @@ export class CommunityRepository {
   async getHost(code: string, community: string): Promise<any> {
     return await this.communityInviteModel.findOne(
       { community: new Types.ObjectId(community), code: code },
-      '_id name code expected status member community account')
+      '_id name code photo expected status checkIn checkOut member community account')
       .populate([
         {
           path: 'member',
@@ -143,14 +145,21 @@ export class CommunityRepository {
             select: '_id firstName lastName phone country photo email',
             strictPopulate: false,
           }
-        },
-        {
-          path: 'community',
-          select: '_id name account description image address code',
-          strictPopulate: false
         }
       ]
       ).exec()
+  }
+
+  /**
+   * 
+   * @param data 
+   * @returns 
+   */
+  async checkIn(data: CommunityInviteValidateDto): Promise<void> {
+    return await this.communityInviteModel.findOneAndUpdate(
+      { community: new Types.ObjectId(data.community), code: data.code },
+      { checkIn: data.checkIn }, { returnDocument: 'after' }
+    )
   }
 
   /**
@@ -161,5 +170,92 @@ export class CommunityRepository {
    */
   async getMemberByCode(code: string, community: string): Promise<CommunityMember> {
     return await this.communityMemberModel.findOne({ code: code, community: new Types.ObjectId(community) })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async revokeInvite(user: string, data: CommunityInviteRevokeDto): Promise<CommunityInvite> {
+    return await this.communityInviteModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(data.invite), account: new Types.ObjectId(user) },
+      { status: ACCOUNT_STATUS.REVOKED, summary: data.reason },
+      { returnDocument: 'after' }
+    ).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   */
+  async getCommunityVisitors(community: string): Promise<any> {
+    return await this.communityInviteModel.find(
+      { community: new Types.ObjectId(community) },
+      '_id name code expected photo checkIn checkOut status member community account')
+      .populate([
+        {
+          path: 'member',
+          select: '_id account description path point code isAdmin',
+          strictPopulate: false,
+          populate: {
+            path: 'account',
+            select: '_id firstName lastName phone country photo email',
+            strictPopulate: false,
+          }
+        }
+      ]
+      ).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityMemberVisitors(user: string, community: string): Promise<any> {
+    return await this.communityInviteModel.find(
+      { account: new Types.ObjectId(user), community: new Types.ObjectId(community) },
+      '_id name code photo expected checkIn checkOut status member community account')
+      .populate([
+        {
+          path: 'member',
+          select: '_id account description path point code isAdmin',
+          strictPopulate: false,
+          populate: {
+            path: 'account',
+            select: '_id firstName lastName phone country photo email',
+            strictPopulate: false,
+          }
+        }
+      ]
+      ).exec()
+  }
+
+  /**
+   * 
+   * @param invite 
+   * @returns 
+   */
+  async getCommunityMemberVisitor(invite: string): Promise<any> {
+    return await this.communityInviteModel.findOne(
+      { _id: new Types.ObjectId(invite) },
+      '_id name code photo expected checkIn checkOut status member community account')
+      .populate([
+        {
+          path: 'member',
+          select: '_id account description path point code isAdmin',
+          strictPopulate: false,
+          populate: {
+            path: 'account',
+            select: '_id firstName lastName phone country photo email',
+            strictPopulate: false,
+          }
+        }
+      ]
+      ).exec()
   }
 }

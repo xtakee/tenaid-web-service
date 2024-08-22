@@ -30,8 +30,17 @@ export class CommunityInvite {
   @Prop()
   expected?: string
 
+  @Prop()
+  checkIn?: string
+
+  @Prop()
+  checkOut?: string
+
   @Prop({ enum: INVITE_STATUS, default: INVITE_STATUS.PENDING })
   status?: string
+
+  @Prop()
+  summary?: string
 }
 
 export const CommunityInviteSchema = SchemaFactory.createForClass(CommunityInvite);

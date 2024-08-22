@@ -12,6 +12,10 @@ import { isWithin24Hours } from 'src/core/helpers/date.helper';
 import { INVALID_ACCESS_TIME } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CommunityInviteResponseDto } from 'src/domain/community/dto/response/community.invite.response.dto';
+import { CommunityInviteRevokeDto } from 'src/domain/community/dto/request/community.invite.revoke.dto';
+import { CommunityInviteValidateDto } from 'src/domain/community/dto/request/community.invite.validate.dto';
+import { CommunityVisitorsDto } from 'src/domain/community/dto/response/community.visitors.dto';
+import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
 
 @Injectable()
 export class CommunityService {
@@ -20,6 +24,7 @@ export class CommunityService {
     private readonly counterRepository: CounterRepository,
     private readonly codeGenerator: CodeGenerator,
     private readonly inviteMapper: InviteToDtoMapper,
+    private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper
   ) { }
@@ -105,24 +110,75 @@ export class CommunityService {
    * @param community 
    * @param code 
    */
-  async validateInvite(user: string, community: string, code: string): Promise<CommunityInviteResponseDto> {
-    const realCode = this.codeGenerator.fromBase32(code.substring(1, code.length)).toString()
+  async validateInvite(user: string, body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
+    const realCode = this.codeGenerator.fromBase32(body.code.substring(1, body.code.length)).toString()
 
     const memberCode = realCode.substring(0, 5)
-    const member = await this.communityRepository.getMemberByCode(memberCode, community)
+    const member = await this.communityRepository.getMemberByCode(memberCode, body.community)
 
     if (member) {
       const secret = (member as any)._id
 
-      if (!(this.codeGenerator.isValidTotp(secret.toString(), code)))
+      if (!(this.codeGenerator.isValidTotp(secret.toString(), body.code)))
         throw new NotFoundException()
     } else throw new NotFoundException()
 
-    const host = await this.communityRepository.getHost(code, community)
+    const host = await this.communityRepository.getHost(body.code, body.community)
     if (host) {
       if (host.community.account.toString() !== user) throw new ForbiddenException()
+
+      // checkin visitor
+      this.communityRepository.checkIn(body)
       return this.hostMapper.map(host)
     }
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async revokeInvite(user: string, data: CommunityInviteRevokeDto): Promise<void> {
+    const invite = await this.communityRepository.revokeInvite(user, data)
+
+    if (!invite) throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityVisitors(community: string): Promise<CommunityVisitorsDto[]> {
+    const visitors = await this.communityRepository.getCommunityVisitors(community)
+    if (visitors) return visitors.map((visitor: any) => this.visitorsMapper.map(visitor))
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param invite 
+   * @returns 
+   */
+  async getCommunityVisitor(invite: string): Promise<CommunityVisitorsDto> {
+    const visitor = await this.communityRepository.getCommunityMemberVisitor(invite)
+    if (visitor) return this.visitorsMapper.map(visitor)
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityMemberVisitors(user: string, community: string): Promise<CommunityVisitorsDto[]> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community)
+    if (visitors) return visitors.map((visitor: any) => this.visitorsMapper.map(visitor))
 
     throw new NotFoundException()
   }
