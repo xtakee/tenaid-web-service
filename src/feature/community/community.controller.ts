@@ -150,6 +150,7 @@ export class CommunityController {
    * @param body 
    */
   @Post('path')
+  @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
   @ApiOperation({ summary: 'Create community path/street' })
   async createCommunityPath(@User() user: string, @Body() body: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
