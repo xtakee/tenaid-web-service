@@ -1,6 +1,6 @@
 import { Mapper } from "src/core/util/mapper";
 import { PropertyComplex } from "../model/property.complex.model";
-import { PropertyComplexResponeDto } from "src/domain/property/dto/response/property.complex.response.dto";
+import { PropertyComplexResponeDto } from "src/feature/property/dto/response/property.complex.response.dto";
 import { Injectable } from "@nestjs/common";
 import { AddressToDtoMapper } from "src/feature/core/mapper/address.to.dto.mapper";
 

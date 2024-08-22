@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BankResponseDto } from 'src/domain/bank/bank.response.dto';
+import { BankResponseDto } from 'src/feature/bank/dto/bank.response.dto';
 import { BankRepository } from './bank.repository';
 import { BankModelToDtoMapper } from './mapper/bank.mode.to.dto.mapper';
 

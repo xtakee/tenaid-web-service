@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Mapper } from "src/core/util/mapper";
-import { Member } from "src/domain/community/dto/response/community.invite.response.dto";
+import { Member } from "src/feature/community/dto/response/community.invite.response.dto";
 import { AccountToDtoMapper } from "src/feature/account/mapper/account.to.dto.mapper";
 
 @Injectable()

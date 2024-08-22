@@ -2,14 +2,14 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { AccountRepository } from '../account/account.respository';
 import { Account } from '../account/model/account.model';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
-import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
+import { AccountAuthResponseDto } from 'src/feature/auth/dto/response/account.auth.response.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
 import { MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
 import { AuthRepository } from './auth.repository';
 import { AdminRepository } from '../admin/admin.repository';
-import { PermissionDto } from 'src/domain/core/model/permission';
-import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
+import { PermissionDto } from 'src/feature/core/model/permission';
+import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response';
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { CodeGenerator } from 'src/core/helpers/code.generator';

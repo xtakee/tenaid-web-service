@@ -1,23 +1,23 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountRepository } from "./account.respository";
-import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
-import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
-import { AccountResponseDto, Role } from "src/domain/account/dto/response/account.response.dto";
+import { AccountCreateDto } from "src/feature/account/dto/request/account.create.dto";
+import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto";
+import { AccountResponseDto, Role } from "src/feature/account/dto/response/account.response.dto";
 import { AccountToDtoMapper } from "./mapper/account.to.dto.mapper";
-import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
-import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
+import { AddBankAccountDto } from "src/feature/account/dto/request/add.bank.account.dto";
+import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts";
 import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
-import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddressDto } from "src/domain/core/dto/address.dto";
+import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
+import { AddressDto } from "src/feature/core/dto/address.dto";
 import { ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
-import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
+import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
 import { Permission } from "../auth/model/permission";
 import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings";
-import { ForgotPasswordResponseDto } from "src/domain/account/dto/response/forgot.password.response.dto";
+import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
 import { AuthHelper } from "src/core/helpers/auth.helper";
 import { Types } from "mongoose";
-import { ResetForgotPasswordDto } from "src/domain/account/dto/request/reset.password.dto";
+import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
 
 @Injectable()
 export class AccountService {

@@ -19,6 +19,7 @@ import { CacheService } from 'src/services/cache/cache.service';
 import { CommunityMemberToDtoMapper } from './mapper/community.member.to.dto.mapper';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
+import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper';
 
 @Module({
   providers: [
@@ -30,6 +31,7 @@ import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto
     AuthHelper,
     CommunityVisitorsToDtoMapper,
     InviteToDtoMapper,
+    CommunityPathToDtoMapper,
     CacheService,
     AccountToDtoMapper,
     CommunityInviteToDtoMapper,

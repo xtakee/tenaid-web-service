@@ -1,18 +1,20 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CommunityDto } from 'src/domain/community/dto/community.dto';
+import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { User } from 'src/core/decorators/current.user';
 import { CommunityService } from './community.service';
 import { MongoAbility } from '@casl/ability';
 import { CLAIM, SYSTEM_FEATURES } from '../auth/auth.constants';
 import { Auth, BasicAuth } from '../auth/guards/auth.decorator';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
-import { CommunityInviteDto } from 'src/domain/community/dto/community.invite.dto';
-import { CommunityInviteValidateDto } from 'src/domain/community/dto/request/community.invite.validate.dto';
-import { CommunityInviteResponseDto } from 'src/domain/community/dto/response/community.invite.response.dto';
-import { CommunityInviteRevokeDto } from 'src/domain/community/dto/request/community.invite.revoke.dto';
-import { CommunityVisitorsDto } from 'src/domain/community/dto/response/community.visitors.dto';
+import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
+import { CommunityInviteValidateDto } from 'src/feature/community/dto/request/community.invite.validate.dto';
+import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
+import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
+import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { isMongoId } from 'class-validator';
+import { CommunityPathRequestDto } from './dto/request/community.path.request.dto';
+import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
 
 @Controller({
   version: '1',
@@ -140,6 +142,44 @@ export class CommunityController {
   async getCommunityVisitor(@Param('invite') invite: string): Promise<CommunityVisitorsDto> {
     if (!isMongoId(invite)) throw new BadRequestException()
     return this.communityService.getCommunityVisitor(invite)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param body 
+   */
+  @Post('path')
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @ApiOperation({ summary: 'Create community path/street' })
+  async createCommunityPath(@User() user: string, @Body() body: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
+    return await this.communityService.createCommunityPath(user, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  @Get('/:community/path')
+  @Auth()
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community paths/streets' })
+  async getAllCommunityPath(@Param('community') community: string): Promise<CommunityPathResponseDto[]> {
+    return await this.communityService.getAllCommunityPaths(community)
+  }
+
+  /**
+   * 
+   * @param path 
+   * @returns 
+   */
+  @Get('path/:path')
+  @Auth()
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community path/street' })
+  async getCommunityPath(@Param('path') path: string): Promise<CommunityPathResponseDto> {
+    return await this.communityService.getCommunityPath(path)
   }
 
 }

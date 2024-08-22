@@ -1,4 +1,4 @@
-import { AddressDto } from "src/domain/core/dto/address.dto";
+import { AddressDto } from "src/feature/core/dto/address.dto";
 
 export class PropertyComplexResponeDto {
   name?: string;

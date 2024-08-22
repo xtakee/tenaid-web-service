@@ -1,21 +1,26 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
-import { CommunityDto } from 'src/domain/community/dto/community.dto';
+import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
 import { CounterRepository } from '../core/counter/counter.repository';
 import { COUNTER_TYPE } from '../core/counter/constants';
 import { CODE_LEN_5, CODE_LEN_8, CodeGenerator } from 'src/core/helpers/code.generator';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
-import { CommunityInviteDto } from 'src/domain/community/dto/community.invite.dto';
+import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
 import { isWithin24Hours } from 'src/core/helpers/date.helper';
 import { INVALID_ACCESS_TIME } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
-import { CommunityInviteResponseDto } from 'src/domain/community/dto/response/community.invite.response.dto';
-import { CommunityInviteRevokeDto } from 'src/domain/community/dto/request/community.invite.revoke.dto';
-import { CommunityInviteValidateDto } from 'src/domain/community/dto/request/community.invite.validate.dto';
-import { CommunityVisitorsDto } from 'src/domain/community/dto/response/community.visitors.dto';
+import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
+import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
+import { CommunityInviteValidateDto } from 'src/feature/community/dto/request/community.invite.validate.dto';
+import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
+import { CommunityPathRequestDto } from './dto/request/community.path.request.dto';
+import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
+import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper';
+import { CommunityPath } from './model/community.path';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class CommunityService {
@@ -24,6 +29,7 @@ export class CommunityService {
     private readonly counterRepository: CounterRepository,
     private readonly codeGenerator: CodeGenerator,
     private readonly inviteMapper: InviteToDtoMapper,
+    private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper
@@ -179,6 +185,48 @@ export class CommunityService {
   async getCommunityMemberVisitors(user: string, community: string): Promise<CommunityVisitorsDto[]> {
     const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community)
     if (visitors) return visitors.map((visitor: any) => this.visitorsMapper.map(visitor))
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async createCommunityPath(user: string, data: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
+    const community = await this.communityRepository.getCommunityByUser(user, data.community)
+
+    if (community) {
+      const path: CommunityPath = await this.communityRepository.createPath(user, data)
+      return this.pathMapper.map(path)
+    }
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getAllCommunityPaths(community: string): Promise<CommunityPathResponseDto[]> {
+    const paths = await this.communityRepository.getAllCommunityPaths(community)
+
+    if (paths) return paths.map((path) => this.pathMapper.map(path))
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param path 
+   * @returns 
+   */
+  async getCommunityPath(path: string): Promise<CommunityPathResponseDto> {
+    const result = await this.communityRepository.getCommunityPath(path)
+
+    if (path) return this.pathMapper.map(result)
 
     throw new NotFoundException()
   }

@@ -1,4 +1,4 @@
-import { AccountCreateDto } from "src/domain/account/dto/request/account.create.dto";
+import { AccountCreateDto } from "src/feature/account/dto/request/account.create.dto";
 import { Account } from "src/feature/account/model/account.model";
 
 export interface IAccountRepository {

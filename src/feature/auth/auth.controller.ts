@@ -1,12 +1,12 @@
 import { BadRequestException, Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AccountAuthRequestDto } from 'src/domain/auth/dto/request/account.auth.request.dto';
-import { AccountAuthResponseDto } from 'src/domain/auth/dto/response/account.auth.response.dto';
+import { AccountAuthRequestDto } from 'src/feature/auth/dto/request/account.auth.request.dto';
+import { AccountAuthResponseDto } from 'src/feature/auth/dto/response/account.auth.response.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/core/decorators/current.user';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt.guard/jwt.auth.guard';
-import { AccountAdminAuthResponseDto } from 'src/domain/admin/dto/response/account.admin.auth.response';
+import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response';
 import { isMongoId } from 'class-validator';
 import { BasicAuth } from './guards/auth.decorator';
 

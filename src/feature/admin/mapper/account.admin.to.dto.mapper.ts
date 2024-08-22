@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { AccountAdmin } from "../model/account.admin.model";
 import { Mapper } from "src/core/util/mapper";
-import { AccountAdminResponseDto } from "src/domain/admin/dto/response/account.admin.response.dto";;
+import { AccountAdminResponseDto } from "src/feature/admin/dto/response/account.admin.response.dto";;
 
 @Injectable()
 export class AccountAdminToDtoMapper implements Mapper<AccountAdmin, AccountAdminResponseDto> {

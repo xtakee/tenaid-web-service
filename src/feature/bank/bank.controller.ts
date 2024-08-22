@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Get, Param, UseGuards } from '@nestjs/common';
-import { BankResponseDto } from 'src/domain/bank/bank.response.dto';
+import { BankResponseDto } from 'src/feature/bank/dto/bank.response.dto';
 import { BankService } from './bank.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard/jwt.auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';

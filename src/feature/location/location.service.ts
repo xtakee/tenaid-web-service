@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { LocationDto } from 'src/domain/core/dto/location.dto';
+import { LocationDto } from 'src/feature/core/dto/location.dto';
 import { GoogleService } from 'src/services/google/google.service';
 
 @Injectable()

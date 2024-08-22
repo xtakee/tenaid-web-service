@@ -1,5 +1,5 @@
-import { AddressDto } from "src/domain/core/dto/address.dto"
-import { Email } from "src/domain/core/model/email"
+import { AddressDto } from "src/feature/core/dto/address.dto"
+import { Email } from "src/feature/core/model/email"
 
 
 export class _KYC {

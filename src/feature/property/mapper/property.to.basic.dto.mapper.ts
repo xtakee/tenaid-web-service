@@ -1,6 +1,6 @@
 import { Mapper } from "src/core/util/mapper";;
 import { Property } from "../model/property.model";
-import { BasicPropertyInfoResponseDto } from "src/domain/property/dto/response/basic.property.info.response.dto";
+import { BasicPropertyInfoResponseDto } from "src/feature/property/dto/response/basic.property.info.response.dto";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()

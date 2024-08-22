@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { Email } from "src/domain/core/model/email"
+import { Email } from "src/feature/core/model/email"
 
 export class AccountAdminResponseDto {
   @ApiProperty()

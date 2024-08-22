@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PropertyRepository } from './property.repository';
-import { CreatePropertyComplexDto } from 'src/domain/property/dto/request/create.property.complex.dto';
-import { PropertyComplexResponeDto } from 'src/domain/property/dto/response/property.complex.response.dto';
+import { CreatePropertyComplexDto } from 'src/feature/property/dto/request/create.property.complex.dto';
+import { PropertyComplexResponeDto } from 'src/feature/property/dto/response/property.complex.response.dto';
 import { PropertyComplexToDtoMapper } from './mapper/property.complex.to.dto.mapper';
 import { ACCESSIBILITY, AMENITIES, PROPERTY_AVAILABILITY, PROPERTY_CONDITION, PROPERTY_TYPE, UTITLITY } from './property.constants';
-import { BasicPropertyInfoDto } from 'src/domain/property/dto/request/basic.property.info.dto';
-import { BasicPropertyInfoResponseDto } from 'src/domain/property/dto/response/basic.property.info.response.dto';
+import { BasicPropertyInfoDto } from 'src/feature/property/dto/request/basic.property.info.dto';
+import { BasicPropertyInfoResponseDto } from 'src/feature/property/dto/response/basic.property.info.response.dto';
 import { Property } from './model/property.model';
 import { isMongoId } from 'class-validator';
 import { PropertyToBasicDtoMapper } from './mapper/property.to.basic.dto.mapper';
-import { PropertyFinanceDto } from 'src/domain/property/dto/request/property.finance.dto';
+import { PropertyFinanceDto } from 'src/feature/property/dto/request/property.finance.dto';
 import { PropertyToFinanceDto } from './mapper/property.to.finance.dto';
-import { PropertyAmenitiesDto } from 'src/domain/property/dto/request/property.amenities.dto';
+import { PropertyAmenitiesDto } from 'src/feature/property/dto/request/property.amenities.dto';
 
 @Injectable()
 export class PropertyService {

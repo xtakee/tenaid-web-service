@@ -1,6 +1,6 @@
 import { Mapper } from "src/core/util/mapper";
 import { CommunityInvite } from "../model/community.invite";
-import { CommunityInviteDto } from "src/domain/community/dto/community.invite.dto";
+import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()

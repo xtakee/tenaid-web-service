@@ -1,16 +1,17 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotImplementedException } from "@nestjs/common";
 import { Community } from "./model/community";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { CommunityPath } from "./model/community.path";
-import { CommunityDto } from "src/domain/community/dto/community.dto";
+import { CommunityDto } from "src/feature/community/dto/community.dto";
 import { CommunityMember } from "./model/community.member";
-import { CommunityMemberDto } from "src/domain/community/dto/community.member.dto";
+import { CommunityMemberDto } from "src/feature/community/dto/community.member.dto";
 import { CommunityInvite } from "./model/community.invite";
-import { CommunityInviteDto } from "src/domain/community/dto/community.invite.dto";
+import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto";
 import { ACCOUNT_STATUS } from "../auth/auth.constants";
-import { CommunityInviteRevokeDto } from "src/domain/community/dto/request/community.invite.revoke.dto";
-import { CommunityInviteValidateDto } from "src/domain/community/dto/request/community.invite.validate.dto";
+import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto";
+import { CommunityInviteValidateDto } from "src/feature/community/dto/request/community.invite.validate.dto";
+import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto";
 
 @Injectable()
 export class CommunityRepository {
@@ -63,6 +64,21 @@ export class CommunityRepository {
   /**
    * 
    * @param user 
+   * @param data 
+   * @returns 
+   */
+  async createPath(user: string, data: CommunityPathRequestDto): Promise<CommunityPath> {
+    return await this.communityPathModel.create({
+      community: new Types.ObjectId(data.community),
+      account: new Types.ObjectId(user),
+      name: data.name,
+      description: data.description
+    })
+  }
+
+  /**
+   * 
+   * @param user 
    * @param community 
    * @param data 
    */
@@ -89,6 +105,34 @@ export class CommunityRepository {
    */
   async getCommunityByCode(code: string): Promise<Community> {
     return await this.communityModel.findOne({ code: code })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityByUser(user: string, community: string): Promise<Community> {
+    return await this.communityModel.findOne({ account: new Types.ObjectId(user), _id: new Types.ObjectId(community) })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getAllCommunityPaths(community: string): Promise<CommunityPath[]> {
+    return await this.communityPathModel.find({ community: new Types.ObjectId(community) })
+  }
+
+  /**
+   * 
+   * @param path 
+   * @returns 
+   */
+  async getCommunityPath(path: string): Promise<CommunityPath> {
+    return await this.communityPathModel.findById(path)
   }
 
   /**

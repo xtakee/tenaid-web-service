@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Mapper } from "src/core/util/mapper";
 import { Community } from "../model/community";
-import { CommunityDto } from "src/domain/community/dto/community.dto";
+import { CommunityDto } from "src/feature/community/dto/community.dto";
 import { AddressToDtoMapper } from "src/feature/core/mapper/address.to.dto.mapper";
 
 @Injectable()

@@ -3,10 +3,10 @@ import { PropertyComplex } from "./model/property.complex.model";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { Property } from "./model/property.model";
-import { CreatePropertyComplexDto } from "src/domain/property/dto/request/create.property.complex.dto";
-import { BasicPropertyInfoDto } from "src/domain/property/dto/request/basic.property.info.dto";
-import { PropertyFinanceDto } from "src/domain/property/dto/request/property.finance.dto";
-import { PropertyAmenitiesDto } from "src/domain/property/dto/request/property.amenities.dto";
+import { CreatePropertyComplexDto } from "src/feature/property/dto/request/create.property.complex.dto";
+import { BasicPropertyInfoDto } from "src/feature/property/dto/request/basic.property.info.dto";
+import { PropertyFinanceDto } from "src/feature/property/dto/request/property.finance.dto";
+import { PropertyAmenitiesDto } from "src/feature/property/dto/request/property.amenities.dto";
 import { PROPERTY_CREATE_STAGE } from "./property.constants";
 
 @Injectable()

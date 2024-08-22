@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { AccountAdmin } from "./model/account.admin.model";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { CreateAdminDto } from "src/domain/admin/dto/request/create.admin.dto";
+import { CreateAdminDto } from "src/feature/admin/dto/request/create.admin.dto";
 import { Permission } from "../auth/model/permission";
 
 @Injectable()

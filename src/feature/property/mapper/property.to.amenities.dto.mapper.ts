@@ -1,4 +1,4 @@
-import { PropertyAmenitiesDto } from "src/domain/property/dto/request/property.amenities.dto";
+import { PropertyAmenitiesDto } from "src/feature/property/dto/request/property.amenities.dto";
 import { Property } from "../model/property.model";
 import { Mapper } from "src/core/util/mapper";
 

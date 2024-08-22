@@ -1,7 +1,7 @@
 
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
-import { AddressDto } from "src/domain/core/dto/address.dto";
+import { AddressDto } from "src/feature/core/dto/address.dto";
 
 export class CreatePropertyComplexDto {
   @ApiProperty()

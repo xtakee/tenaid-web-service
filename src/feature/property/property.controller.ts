@@ -1,17 +1,17 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PropertyComplexResponeDto } from 'src/domain/property/dto/response/property.complex.response.dto';
+import { PropertyComplexResponeDto } from 'src/feature/property/dto/response/property.complex.response.dto';
 import { PropertyService } from './property.service';
 import { User } from 'src/core/decorators/current.user';
-import { CreatePropertyComplexDto } from 'src/domain/property/dto/request/create.property.complex.dto';
+import { CreatePropertyComplexDto } from 'src/feature/property/dto/request/create.property.complex.dto';
 import { isMongoId } from 'class-validator';
 import { MongoAbility } from '@casl/ability';
 import { CLAIM, SYSTEM_FEATURES } from '../auth/auth.constants';
 import { Auth } from '../auth/guards/auth.decorator';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
-import { BasicPropertyInfoDto } from 'src/domain/property/dto/request/basic.property.info.dto';
-import { PropertyFinanceDto } from 'src/domain/property/dto/request/property.finance.dto';
-import { PropertyAmenitiesDto } from 'src/domain/property/dto/request/property.amenities.dto';
+import { BasicPropertyInfoDto } from 'src/feature/property/dto/request/basic.property.info.dto';
+import { PropertyFinanceDto } from 'src/feature/property/dto/request/property.finance.dto';
+import { PropertyAmenitiesDto } from 'src/feature/property/dto/request/property.amenities.dto';
 
 @Controller({
   version: '1',

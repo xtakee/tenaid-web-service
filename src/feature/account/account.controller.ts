@@ -1,25 +1,25 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
-import { AccountCreateDto } from "../../domain/account/dto/request/account.create.dto";
+import { AccountCreateDto } from "./dto/request/account.create.dto";
 import { AccountService } from "./account.service";
-import { AccountUpdateDto } from "src/domain/account/dto/request/account.update.dto";
-import { AccountResponseDto, Role } from "src/domain/account/dto/response/account.response.dto";
-import { AddBankAccountDto } from "src/domain/account/dto/request/add.bank.account.dto";
-import { BankAccountResponseDto } from "src/domain/account/dto/response/bank.account.response.dts";
+import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto";
+import { AccountResponseDto, Role } from "src/feature/account/dto/response/account.response.dto";
+import { AddBankAccountDto } from "src/feature/account/dto/request/add.bank.account.dto";
+import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { AccountProfileDto } from "src/domain/account/dto/request/account.profile.dto";
-import { AddOnRequestDto } from "src/domain/account/dto/request/add.on.request.dto";
+import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
+import { AddOnRequestDto } from "src/feature/account/dto/request/add.on.request.dto";
 import { RootUser, User } from "src/core/decorators/current.user";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
 import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
-import { UpdateBankAccountDto } from "src/domain/account/dto/request/update.bank.account.dto";
+import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
 import { isMongoId } from "class-validator";
-import { ForgotPasswordDto } from "src/domain/account/dto/request/forgot.password.dto";
-import { ForgotPasswordResponseDto } from "src/domain/account/dto/response/forgot.password.response.dto";
-import { ResetForgotPasswordDto } from "src/domain/account/dto/request/reset.password.dto";
-import { ChangePasswordDto } from "src/domain/account/dto/request/change.password.dto";
-import { AddressDto } from "src/domain/core/dto/address.dto";
+import { ForgotPasswordDto } from "src/feature/account/dto/request/forgot.password.dto";
+import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
+import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
+import { ChangePasswordDto } from "src/feature/account/dto/request/change.password.dto";
+import { AddressDto } from "src/feature/core/dto/address.dto";
 
 @Controller({
   version: '1',

@@ -1,6 +1,6 @@
 import { Mapper } from "src/core/util/mapper";
 import { Address } from "../model/address.model";
-import { AddressDto } from "src/domain/core/dto/address.dto";
+import { AddressDto } from "src/feature/core/dto/address.dto";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()

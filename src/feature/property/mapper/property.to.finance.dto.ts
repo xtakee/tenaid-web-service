@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Mapper } from "src/core/util/mapper";
 import { Property } from "../model/property.model";
-import { PropertyFinanceDto } from "src/domain/property/dto/request/property.finance.dto";
+import { PropertyFinanceDto } from "src/feature/property/dto/request/property.finance.dto";
 
 @Injectable()
 export class PropertyToFinanceDto implements Mapper<Property, PropertyFinanceDto> {

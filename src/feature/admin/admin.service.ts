@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { AdminRepository } from './admin.repository';
-import { CreateAdminDto } from 'src/domain/admin/dto/request/create.admin.dto';
+import { CreateAdminDto } from 'src/feature/admin/dto/request/create.admin.dto';
 import { Permission } from '../auth/model/permission';
 import { ADMIN_SYSTEM_FEATURES, CLAIM } from '../auth/auth.constants';
-import { ReviewAddOnRequestDto } from 'src/domain/admin/dto/request/review.add.on.request.dto';
+import { ReviewAddOnRequestDto } from 'src/feature/admin/dto/request/review.add.on.request.dto';
 import { AccountRepository } from '../account/account.respository';
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { Account } from '../account/model/account.model';
 import { AddOnRequest } from '../account/model/add.on.request.model';
-import { AccountAdminResponseDto } from 'src/domain/admin/dto/response/account.admin.response.dto';
+import { AccountAdminResponseDto } from 'src/feature/admin/dto/response/account.admin.response.dto';
 import { AccountAdminToDtoMapper } from './mapper/account.admin.to.dto.mapper';
 import { AccountService } from '../account/account.service';
 
