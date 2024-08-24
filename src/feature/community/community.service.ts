@@ -8,7 +8,6 @@ import { CODE_LEN_5, CODE_LEN_8, CodeGenerator } from 'src/core/helpers/code.gen
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { isWithin24Hours } from 'src/core/helpers/date.helper';
 import { DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
@@ -99,9 +98,6 @@ export class CommunityService {
    */
   async invite(user: string, data: CommunityInviteDto): Promise<CommunityInviteDto> {
     const member = await this.communityRepository.getApprovedCommunityMember(user, data.community)
-
-    // ensure time is within 24 hours
-    if (!isWithin24Hours(data.expected)) throw new BadRequestException(INVALID_ACCESS_TIME)
 
     if (member) {
       const key = (member as any)._id.toString()
