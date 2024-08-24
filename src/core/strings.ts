@@ -6,4 +6,5 @@ export const DUPLICATE_ADD_ON_REQUEST_ERROR: string = "A pending request was fou
 export const INVALID_OTP: string = "You have entered an invalid (O)ne (T)ime (P)assword"
 export const INVALID_ACCESS_TIME: string = "You must set time within 24 hours"
 export const PAST_ACCESS_TIME: string = "You can not set time in the past"
-export const INVALID_DATE: string = "expected must be of type IsoDateTime"
+export const DUPLICATE_COMMUNITY_JOIN_REQUEST: string = "You have a pending request. Kindly wait until its approved or contact the community admin"
+export const DUPLICATE_COMMUNITY_MEMBER_REQUEST: string = "You are already a member of this residential/social community"

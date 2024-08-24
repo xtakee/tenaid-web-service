@@ -1,10 +1,20 @@
-import { AccountResponseDto } from "src/feature/account/dto/response/account.response.dto";
-import { CommunityDto } from "../community.dto";
+import { Email } from "src/feature/core/model/email";
+import { CommunityPathResponseDto } from "./community.path.response.dto";
+
+export class MemberAccountDto {
+  id: string
+  firstName: string
+  lastName: string
+  photo: string
+  phone: string
+  country: string
+  email: Email
+}
 
 export class Member {
   id?: string
-  account: AccountResponseDto
-  path?: string
+  account: MemberAccountDto
+  path?: CommunityPathResponseDto
   description?: string
   point?: number
   isAdmin?: boolean

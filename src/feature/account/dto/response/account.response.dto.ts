@@ -29,6 +29,7 @@ export class AccountResponseDto {
   lastName: string
   email: Email
   phone: string
+  country?: string
   photo: string
   dob?: string
   kycCompleted?: boolean

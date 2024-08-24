@@ -11,6 +11,15 @@ export class AccountCreateDto {
   @ApiProperty()
   email: string
 
+  @ApiProperty()
+  @IsNotEmpty()
+  phone: string
+
+
+  @ApiProperty()
+  @IsNotEmpty()
+  country: string
+
   @IsNotEmpty()
   @ApiProperty()
   firstName: string

@@ -230,6 +230,8 @@ export class AccountRepository implements IAccountRepository {
     const account: Account = {
       firstName: data.firstName,
       lastName: data.lastName,
+      phone: data.phone,
+      country: data.country,
       kyc: {},
       email: {
         value: data.email

@@ -26,6 +26,7 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
       id: (from as any)._id,
       lastName: from.lastName,
       firstName: from.firstName,
+      country: from.country,
       email: {
         value: from.email.value,
         verified: from.email.verified

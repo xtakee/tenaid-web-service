@@ -9,7 +9,7 @@ import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
 import { isWithin24Hours } from 'src/core/helpers/date.helper';
-import { INVALID_ACCESS_TIME } from 'src/core/strings';
+import { DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
@@ -20,7 +20,12 @@ import { CommunityPathRequestDto } from './dto/request/community.path.request.dt
 import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
 import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper';
 import { CommunityPath } from './model/community.path';
-import { Types } from 'mongoose';
+import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
+import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
+import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
+import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
+import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
+import { PaginatedResult } from 'src/core/helpers/paginator';
 
 @Injectable()
 export class CommunityService {
@@ -32,7 +37,9 @@ export class CommunityService {
     private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
-    private readonly communityMapper: CommunityToDtoMapper
+    private readonly memberMapper: CommunityMemberResponseToDtoMapper,
+    private readonly communityMapper: CommunityToDtoMapper,
+    private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
 
   /**
@@ -129,7 +136,7 @@ export class CommunityService {
         throw new NotFoundException()
     } else throw new NotFoundException()
 
-    const host = await this.communityRepository.getHost(body.code, body.community)
+    const host = await this.communityRepository.getVisitorByCode(body.code, body.community)
     if (host) {
       if (host.community.account.toString() !== user) throw new ForbiddenException()
 
@@ -223,11 +230,53 @@ export class CommunityService {
    * @param path 
    * @returns 
    */
-  async getCommunityPath(path: string): Promise<CommunityPathResponseDto> {
-    const result = await this.communityRepository.getCommunityPath(path)
+  async getCommunityPath(path: string, community: string): Promise<CommunityPathResponseDto> {
+    const result = await this.communityRepository.getCommunityPath(path, community)
 
     if (path) return this.pathMapper.map(result)
 
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async requestJoin(user: string, data: CommunityJoinRequestDto): Promise<AccountCommunityResponseDto> {
+
+    const previousRequest = await this.communityRepository.getCommunityMemberRequest(user, data.community)
+    if (previousRequest) {
+      const error = previousRequest.status === ACCOUNT_STATUS.PENDING
+        ? DUPLICATE_COMMUNITY_JOIN_REQUEST
+        : DUPLICATE_COMMUNITY_MEMBER_REQUEST
+
+      throw new ForbiddenException(error)
+    }
+
+    const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
+    if (!pathData) throw new NotFoundException()
+
+    const mCounter = await this.counterRepository.getCounter(COUNTER_TYPE.MEMBER)
+    const request = await this.communityRepository.createCommunityMember(user, data.community, {
+      path: data.path,
+      point: data.point,
+      status: ACCOUNT_STATUS.PENDING,
+      code: this.codeGenerator.uniqueNumeric(mCounter, CODE_LEN_5).toString(),
+      description: data.description
+    })
+
+    const savedRequest = await this.communityRepository.getMemberRequest((request as any)._id)
+    if (savedRequest) return this.communityAccountMapper.map(savedRequest)
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async getCommunintyJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityJoinRequests(community, page, limit)
   }
 }

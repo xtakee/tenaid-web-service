@@ -4,7 +4,7 @@ import { CommunityPath } from "../model/community.path";
 import { CommunityPathResponseDto } from "../dto/response/community.path.response.dto";
 
 @Injectable()
-export class CommunityPathToDtoMapper implements Mapper<CommunityPath, CommunityPathResponseDto> {
+export class CommunityPathToDtoMapper implements Mapper<any, CommunityPathResponseDto> {
 
   map(from: CommunityPath): CommunityPathResponseDto {
     return {

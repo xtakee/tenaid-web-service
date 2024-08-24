@@ -2,10 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { Mapper } from "src/core/util/mapper";
 import { Member } from "src/feature/community/dto/response/community.invite.response.dto";
 import { AccountToDtoMapper } from "src/feature/account/mapper/account.to.dto.mapper";
+import { CommunityAccountToDtoMapper } from "./community.account.to.dto.mapper";
 
 @Injectable()
 export class CommunityMemberToDtoMapper implements Mapper<any, Member> {
-constructor(private readonly accountMapper: AccountToDtoMapper){}
+  constructor(private readonly accountMapper: CommunityAccountToDtoMapper) { }
 
   map(from: any): Member {
     return {

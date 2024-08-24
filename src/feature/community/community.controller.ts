@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { User } from 'src/core/decorators/current.user';
@@ -15,6 +15,10 @@ import { CommunityVisitorsDto } from 'src/feature/community/dto/response/communi
 import { isMongoId } from 'class-validator';
 import { CommunityPathRequestDto } from './dto/request/community.path.request.dto';
 import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
+import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
+import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
+import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
+import { PaginatedResult } from 'src/core/helpers/paginator';
 
 @Controller({
   version: '1',
@@ -163,7 +167,6 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/path')
-  @Auth()
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community paths/streets' })
   async getAllCommunityPath(@Param('community') community: string): Promise<CommunityPathResponseDto[]> {
@@ -175,12 +178,31 @@ export class CommunityController {
    * @param path 
    * @returns 
    */
-  @Get('path/:path')
-  @Auth()
+  @Get('path/:community/:path')
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community path/street' })
-  async getCommunityPath(@Param('path') path: string): Promise<CommunityPathResponseDto> {
-    return await this.communityService.getCommunityPath(path)
+  async getCommunityPath(@Param('path') path: string, @Param('community') community: string): Promise<CommunityPathResponseDto> {
+    return await this.communityService.getCommunityPath(path, community)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  @Post('join')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Request to Join a community' })
+  async requestJoin(@User() user: string, @Body() data: CommunityJoinRequestDto): Promise<AccountCommunityResponseDto> {
+    return await this.communityService.requestJoin(user, data)
+  }
+
+  @Get('/:community/request')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
+  @ApiOperation({ summary: 'Get all community join requests' })
+  async getCommunityJoinRequests(@Param('community') community: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
+    return await this.communityService.getCommunintyJoinRequests(community, page, limit)
   }
 
 }

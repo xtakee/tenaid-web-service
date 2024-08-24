@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsMongoId, IsNotEmpty } from "class-validator";
 
-export class CommunityMemberDto {
+export class CommunityMemberRequestDto {
 
   id?: string
   isAdmin?: boolean

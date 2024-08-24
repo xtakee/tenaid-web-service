@@ -1,22 +1,67 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Community } from "./model/community";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { CommunityPath } from "./model/community.path";
 import { CommunityDto } from "src/feature/community/dto/community.dto";
 import { CommunityMember } from "./model/community.member";
-import { CommunityMemberDto } from "src/feature/community/dto/community.member.dto";
+import { CommunityMemberRequestDto } from "src/feature/community/dto/request/community.member.request.dto";
 import { CommunityInvite } from "./model/community.invite";
 import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto";
 import { ACCOUNT_STATUS } from "../auth/auth.constants";
 import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto";
 import { CommunityInviteValidateDto } from "src/feature/community/dto/request/community.invite.validate.dto";
 import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto";
+import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
+
+const MEMBER_VISITOR_QUERY = {
+  path: 'member',
+  select: '_id account description path point code isAdmin',
+  strictPopulate: false,
+  populate: {
+    path: 'account',
+    select: '_id firstName lastName phone country photo email',
+    strictPopulate: false,
+  }
+}
+
+const MEMBER_COMMUNITIES_QUERY = [{
+  path: 'path',
+  select: '_id name description'
+},
+{
+  path: 'community',
+  select: '_id name description photo type image address'
+}]
+
+const COMMUNITY_VISITOR_QUERY = [
+  {
+    path: 'member',
+    select: '_id account description path point code isAdmin',
+    strictPopulate: false,
+    populate: {
+      path: 'account',
+      select: '_id firstName lastName phone country photo email',
+      strictPopulate: false,
+    }
+  }
+]
+
+const COMMUNITY_MEMBER_QUERY = [
+  {
+    path: 'account',
+    select: '_id firstName lastName email.value email.verified phone country photo'
+  }, {
+    path: 'path',
+    select: '_id name description'
+  }
+]
 
 @Injectable()
 export class CommunityRepository {
   constructor(
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
+    private readonly paginator: Paginator,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
     @InjectModel(CommunityPath.name) private readonly communityPathModel: Model<CommunityPath>
@@ -82,20 +127,19 @@ export class CommunityRepository {
    * @param community 
    * @param data 
    */
-  async createCommunityMember(user: string, id: string, data: CommunityMemberDto): Promise<void> {
-
+  async createCommunityMember(user: string, community: string, data: CommunityMemberRequestDto): Promise<CommunityMember> {
     const member: CommunityMember = {
-      community: new Types.ObjectId(id),
+      community: new Types.ObjectId(community),
       code: data.code,
       isAdmin: data.isAdmin,
       description: data.description,
-      path: data.path,
+      path: data.path ? new Types.ObjectId(data.path) : null,
       status: data.status,
       point: data.point,
       account: new Types.ObjectId(user)
     }
 
-    await this.communityMemberModel.create(member)
+    return this.communityMemberModel.create(member)
   }
 
   /**
@@ -129,10 +173,11 @@ export class CommunityRepository {
   /**
    * 
    * @param path 
+   * @param community 
    * @returns 
    */
-  async getCommunityPath(path: string): Promise<CommunityPath> {
-    return await this.communityPathModel.findById(path)
+  async getCommunityPath(path: string, community: string): Promise<CommunityPath> {
+    return await this.communityPathModel.findOne({ _id: new Types.ObjectId(path), community: new Types.ObjectId(community) })
   }
 
   /**
@@ -151,10 +196,7 @@ export class CommunityRepository {
       photo: data.photo
     }
 
-    const _invite = await this.communityInviteModel.create(invite)
-    if (_invite) return _invite
-
-    return null
+    return await this.communityInviteModel.create(invite)
   }
 
   /**
@@ -172,26 +214,41 @@ export class CommunityRepository {
   }
 
   /**
+ * 
+ * @param user 
+ * @param community 
+ * @returns 
+ */
+  async getCommunityMemberRequest(user: string, community: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(community),
+      $or: [{ status: ACCOUNT_STATUS.APPROVED }, { status: ACCOUNT_STATUS.PENDING }]
+    })
+  }
+
+  /**
+   * 
+   * @param member 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityMember(member: string, community: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      _id: new Types.ObjectId(member),
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
    * 
    * @param code 
    */
-  async getHost(code: string, community: string): Promise<any> {
+  async getVisitorByCode(code: string, community: string): Promise<any> {
     return await this.communityInviteModel.findOne(
       { community: new Types.ObjectId(community), code: code },
       '_id name code photo expected status checkIn checkOut member community account')
-      .populate([
-        {
-          path: 'member',
-          select: '_id account description path point code isAdmin',
-          strictPopulate: false,
-          populate: {
-            path: 'account',
-            select: '_id firstName lastName phone country photo email',
-            strictPopulate: false,
-          }
-        }
-      ]
-      ).exec()
+      .populate(COMMUNITY_VISITOR_QUERY).exec()
   }
 
   /**
@@ -239,19 +296,7 @@ export class CommunityRepository {
     return await this.communityInviteModel.find(
       { community: new Types.ObjectId(community) },
       '_id name code expected photo checkIn checkOut status member community account')
-      .populate([
-        {
-          path: 'member',
-          select: '_id account description path point code isAdmin',
-          strictPopulate: false,
-          populate: {
-            path: 'account',
-            select: '_id firstName lastName phone country photo email',
-            strictPopulate: false,
-          }
-        }
-      ]
-      ).exec()
+      .populate(COMMUNITY_VISITOR_QUERY).exec()
   }
 
   /**
@@ -264,19 +309,7 @@ export class CommunityRepository {
     return await this.communityInviteModel.find(
       { account: new Types.ObjectId(user), community: new Types.ObjectId(community) },
       '_id name code photo expected checkIn checkOut status member community account')
-      .populate([
-        {
-          path: 'member',
-          select: '_id account description path point code isAdmin',
-          strictPopulate: false,
-          populate: {
-            path: 'account',
-            select: '_id firstName lastName phone country photo email',
-            strictPopulate: false,
-          }
-        }
-      ]
-      ).exec()
+      .populate(MEMBER_VISITOR_QUERY).exec()
   }
 
   /**
@@ -288,18 +321,50 @@ export class CommunityRepository {
     return await this.communityInviteModel.findOne(
       { _id: new Types.ObjectId(invite) },
       '_id name code photo expected checkIn checkOut status member community account')
-      .populate([
-        {
-          path: 'member',
-          select: '_id account description path point code isAdmin',
-          strictPopulate: false,
-          populate: {
-            path: 'account',
-            select: '_id firstName lastName phone country photo email',
-            strictPopulate: false,
-          }
-        }
-      ]
-      ).exec()
+      .populate(MEMBER_VISITOR_QUERY).exec()
   }
+
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
+  async getAllAccountCommunities(user: string): Promise<any> {
+    return await this.communityMemberModel.find(
+      {
+        account: new Types.ObjectId(user),
+        status: ACCOUNT_STATUS.APPROVED
+      },
+      '_id code path isAdmin status community')
+      .populate(MEMBER_COMMUNITIES_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param member 
+   * @returns 
+   */
+  async getMemberRequest(member: string): Promise<any> {
+    return await this.communityMemberModel.findOne(
+      { _id: new Types.ObjectId(member) },
+      '_id code path isAdmin status community')
+      .populate(MEMBER_COMMUNITIES_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.paginator.paginate(this.communityMemberModel,
+      { community: new Types.ObjectId(community), $or: [{ status: ACCOUNT_STATUS.PENDING }, { status: ACCOUNT_STATUS.DENIED }] },
+      {
+        select: '_id community path code description point account status createdAt updatedAt',
+        limit: limit,
+        page: page,
+        populate: COMMUNITY_MEMBER_QUERY
+      })
+  }
+
 }

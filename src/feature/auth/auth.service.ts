@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountRepository } from '../account/account.respository';
 import { Account } from '../account/model/account.model';
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
@@ -102,7 +102,7 @@ export class AuthService {
       }
     }
 
-    throw new UnauthorizedException();
+    throw new BadRequestException();
   }
 
   /**
@@ -123,7 +123,7 @@ export class AuthService {
       }
     }
 
-    throw new UnauthorizedException();
+    throw new BadRequestException();
   }
 
   /**
@@ -153,7 +153,7 @@ export class AuthService {
   async sign(id: string): Promise<AccountAuthResponseDto> {
     const account: Account = await this.accountRepository.getOneById(id)
     if (account) return await this.getAuthorizationResponse(account)
-    throw new UnauthorizedException();
+    throw new BadRequestException();
   }
 
   /**
@@ -193,13 +193,13 @@ export class AuthService {
     const admin = await this.adminRepository.getOneById(id)
     if (admin) return await this.getAdminAuthorizationResponse(admin)
 
-    throw new UnauthorizedException()
+    throw new BadRequestException()
   }
 
   async signManagedAccount(user: string, id: string): Promise<AccountAuthResponseDto> {
     const permissions = await this.getManageAccountPermissions(id)
     if (permissions) {
-      if (permissions[0].account !== user) throw new UnauthorizedException()
+      if (permissions[0].account !== user) throw new BadRequestException()
 
       const account = await this.accountRepository.getOneById(permissions[0].account)
       const owner = await this.accountRepository.getOneById(permissions[0].owner)
@@ -222,7 +222,7 @@ export class AuthService {
         }
       }
 
-      throw new UnauthorizedException()
+      throw new BadRequestException()
     }
 
     throw new NotFoundException()

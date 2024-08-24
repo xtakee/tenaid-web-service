@@ -36,7 +36,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Get all registered tenants' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.TENANTS))
-  async getAllTenants(@Query('limit') limit?: number, @Query('page') page?: number): Promise<PaginatedResult<any>> {
+  async getAllTenants(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
     return await this.adminService.getAllRegisteredTenants(page, limit)
   }
 
@@ -44,7 +44,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Get all registered Agents' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.AGENTS))
-  async getAllAgents(@Query('limit') limit?: number, @Query('page') page?: number): Promise<PaginatedResult<any>> {
+  async getAllAgents(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
     return await this.adminService.getAllRegisteredAgents(page, limit)
   }
 
@@ -52,7 +52,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Get all registered Managers/Lanlords' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.MANAGERS))
-  async getAllManagers(@Query('limit') limit?: number, @Query('page') page?: number): Promise<PaginatedResult<any>> {
+  async getAllManagers(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
     return await this.adminService.getAllRegisteredManagers(page, limit)
   }
 
@@ -61,7 +61,7 @@ export class AdminController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.MANAGERS))
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.AGENTS))
-  async getAllAddOnRequests(@Query('limit') limit?: number, @Query('page') page?: number): Promise<PaginatedResult<any>> {
+  async getAllAddOnRequests(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
     return await this.adminService.getAllAddOnRequests(page, limit)
   }
 }

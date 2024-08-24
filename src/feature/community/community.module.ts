@@ -17,9 +17,12 @@ import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CacheService } from 'src/services/cache/cache.service';
 import { CommunityMemberToDtoMapper } from './mapper/community.member.to.dto.mapper';
-import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
 import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper';
+import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
+import { CommunityAccountToDtoMapper } from './mapper/community.account.to.dto.mapper';
+import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
+import { Paginator } from 'src/core/helpers/paginator';
 
 @Module({
   providers: [
@@ -29,11 +32,14 @@ import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper'
     CommunityToDtoMapper,
     CodeGenerator,
     AuthHelper,
+    Paginator,
     CommunityVisitorsToDtoMapper,
     InviteToDtoMapper,
     CommunityPathToDtoMapper,
     CacheService,
-    AccountToDtoMapper,
+    CommunityMemberResponseToDtoMapper,
+    AccountCommunityToDtoMapper,
+    CommunityAccountToDtoMapper,
     CommunityInviteToDtoMapper,
     CommunityMemberToDtoMapper,
     AddressToDtoMapper],

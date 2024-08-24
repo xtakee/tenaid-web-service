@@ -46,6 +46,9 @@ export class Account {
   @Prop()
   phone?: string;
 
+  @Prop()
+  country?: string
+
   @Prop({ type: Date })
   dob?: Date;
 
