@@ -23,8 +23,6 @@ import { CommunityPath } from './model/community.path';
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
-import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
-import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { PaginatedResult } from 'src/core/helpers/paginator';
 
 @Injectable()
@@ -37,7 +35,6 @@ export class CommunityService {
     private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
-    private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
