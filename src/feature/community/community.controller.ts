@@ -90,9 +90,10 @@ export class CommunityController {
    */
   @Post('/invite/validate')
   @ApiOperation({ summary: 'Validate Invite Code' })
-  @BasicAuth()
-  async validateInvite(@User() user: string, @Body() body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
-    return await this.communityService.validateInvite(user, body)
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  async validateInvite(@Body() body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
+    return await this.communityService.validateInvite(body)
   }
 
   /**

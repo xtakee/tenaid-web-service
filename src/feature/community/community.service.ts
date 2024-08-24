@@ -123,7 +123,7 @@ export class CommunityService {
    * @param community 
    * @param code 
    */
-  async validateInvite(user: string, body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
+  async validateInvite(body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
     const realCode = this.codeGenerator.fromBase32(body.code.substring(1, body.code.length)).toString()
 
     const memberCode = realCode.substring(0, 5)
@@ -138,8 +138,6 @@ export class CommunityService {
 
     const host = await this.communityRepository.getVisitorByCode(body.code, body.community)
     if (host) {
-      if (host.community.account.toString() !== user) throw new ForbiddenException()
-
       // checkin visitor
       this.communityRepository.checkIn(body)
       return this.hostMapper.map(host)
