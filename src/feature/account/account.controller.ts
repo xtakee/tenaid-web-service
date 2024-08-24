@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { AccountCreateDto } from "./dto/request/account.create.dto";
 import { AccountService } from "./account.service";
 import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto";
@@ -20,6 +20,7 @@ import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forg
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
 import { ChangePasswordDto } from "src/feature/account/dto/request/change.password.dto";
 import { AddressDto } from "src/feature/core/dto/address.dto";
+import { PaginatedResult } from "src/core/helpers/paginator";
 
 @Controller({
   version: '1',
@@ -215,5 +216,20 @@ export class AccountController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async changePassword(@RootUser() user: string, @Body() body: ChangePasswordDto): Promise<void> {
     return await this.accountService.changePassword(user, body.password)
+  }
+
+  /**
+ * 
+ * @param community 
+ * @param limit 
+ * @param page 
+ * @returns 
+ */
+  @Get('community/')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
+  @ApiOperation({ summary: 'Get all account communities' })
+  async getAccountCommunities(@User() user: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountCommunities(user, page, limit)
   }
 }

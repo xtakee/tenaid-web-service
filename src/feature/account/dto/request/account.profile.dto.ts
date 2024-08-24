@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsDateString, IsNotEmpty, IsUrl } from "class-validator"
-import { IsAgeInRange } from "src/core/validators/is.age.range"
+import { IsMinAge } from "src/core/validators/is.min.age"
 
 export class AccountProfileDto {
   @IsNotEmpty()
   @IsDateString()
   @ApiProperty()
-  @IsAgeInRange(18)
+  @IsMinAge(18)
   dob: string
 
   @ApiProperty()

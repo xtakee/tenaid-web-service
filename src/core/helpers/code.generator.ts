@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import * as crypto from 'crypto';
-import { totp } from 'otplib';
-import { CacheService } from 'src/services/cache/cache.service';
+import { BadRequestException, Injectable } from '@nestjs/common'
+import * as crypto from 'crypto'
+import { totp } from 'otplib'
+import * as dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
+import { CacheService } from 'src/services/cache/cache.service'
+import { INVALID_INVITE_VALIDITY } from '../strings'
 
+export const CODE_LEN_3 = 3
+export const CODE_LEN_4 = 4
 export const CODE_LEN_5 = 5
 export const CODE_LEN_8 = 8
 export const CODE_LEN_6 = 6
@@ -16,20 +21,36 @@ export enum TOTP_VALIDITY {
 }
 
 const ALPHA_NUMERIC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+
+// minutes mapping for 10, 20, 30, 40, 50 minutes inclusive
+const MINUTES_DUMP = '123456'.split('')
+// hours mapping for 1 - 24 hours inclusive
+const HOURS_DUMP = 'ABCDEFGHIJKLMNOPQRSTUVWX'.split('')
+
 const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const NUMERIC = '1234567890'
 
 const SUFFIX_STORE = ALPHA_NUMERIC.split('')
 
+interface Validity {
+  code: string
+  period: number
+}
+
+/**
+ * 
+ * @param str 
+ * @returns 
+ */
+export function isDigit(str: string): boolean {
+  return /^\d+$/.test(str);
+}
+
 @Injectable()
 export class CodeGenerator {
 
   constructor(private readonly cache: CacheService) {
-    totp.options = {
-      digits: CODE_LEN_6,            // 6-digit code
-      step: TOTP_VALIDITY._12HRS,             // 30-second time step, 43200 - 12hr, 86400 - 24hr
-      window: 0             // Accepts OTPs from current, previous, and next time step
-    }
+    dayjs.extend(dayjsPluginUTC)
   }
 
   /**
@@ -56,6 +77,52 @@ export class CodeGenerator {
     //   .update(counter.toString() + microseconds)
     //   .digest('hex')
     //   .substring(0, length); // Shorten to desired length
+  }
+
+  /**
+   * 
+   * @param minutes 
+   * @returns 
+   */
+  private validityCode(minutes: number): string {
+    if ((minutes / 60) < 1)
+      return MINUTES_DUMP[Math.floor(minutes / 10)]
+
+    return HOURS_DUMP[Math.floor(minutes / 60)]
+  }
+
+  /**
+   * 
+   * @param code 
+   * @returns 
+   */
+  private getValidityPeriod(code: string): number {
+    if (isDigit(code)) return parseInt(code) * 10 * 60
+    return (HOURS_DUMP.indexOf(code) + 1) * 60 * 60
+  }
+
+  /**
+   * 
+   * @param time 
+   * @returns 
+   */
+  private getValidity(time: string): Validity {
+
+    // get datetime in utc
+    const date = (dayjs(time) as any).utc()
+    if (!date.isValid()) throw new BadRequestException(INVALID_INVITE_VALIDITY)
+
+    // get datetime in utc
+    const now = (dayjs() as any).utc()
+    const minutes = date.diff(now, 'minute')
+
+    if (minutes < 0) throw new BadRequestException(INVALID_INVITE_VALIDITY)
+
+    const code = this.validityCode(minutes)
+    return {
+      code: code,
+      period: this.getValidityPeriod(code)
+    }
   }
 
   /**
@@ -105,7 +172,7 @@ export class CodeGenerator {
    * @returns 
    */
   fromBase32(code: string): number {
-    return Number.parseInt(code.replace('-', ''), 36)
+    return Number.parseInt(code.replaceAll('-', ''), 36)
   }
 
   /**
@@ -114,7 +181,7 @@ export class CodeGenerator {
    * @returns 
    */
   format(code: string): string {
-    return code.slice(0, 3) + '-' + code.slice(3)
+    return `${code.slice(0, 3)}-${code.slice(3, 5)}-${code.slice(5)}`
   }
 
   /**
@@ -123,21 +190,28 @@ export class CodeGenerator {
    * @param prefix 
    * @returns 
    */
-  async totp(secret: string, prefix: string = ''): Promise<string> {
+  async totp(secret: string, time: string, prefix: string = ''): Promise<string> {
 
     let suffixIndex = await this.cache.get(secret)
-    if (!suffixIndex) {
-      suffixIndex = 0
-    } else {
+    if (!suffixIndex) suffixIndex = 0
+    else {
       suffixIndex = parseInt(suffixIndex)
       if (suffixIndex > SUFFIX_STORE.length) suffixIndex = 0
       else suffixIndex += 1
     }
 
     await this.cache.set(secret, suffixIndex)
+    const validity = this.getValidity(time)
 
-    const code = prefix + totp.generate(SUFFIX_STORE[suffixIndex] + secret)
-    return SUFFIX_STORE[suffixIndex] + this.toBase32(parseInt(code), true)
+    totp.options = {
+      digits: CODE_LEN_3,            // 6-digit code
+      step: validity.period,             // 30-second time step, 43200 - 12hr, 86400 - 24hr
+      window: 0             // Accepts OTPs from current, previous, and next time step
+    }
+
+    const otp = prefix + totp.generate(SUFFIX_STORE[suffixIndex] + secret)
+    const code = validity.code + SUFFIX_STORE[suffixIndex] + this.toBase32(parseInt(otp))
+    return this.format(code)
   }
 
   /**
@@ -147,9 +221,16 @@ export class CodeGenerator {
  * @returns 
  */
   isValidTotp(secret: string, code: string): boolean {
-    const token = this.fromBase32(code.substring(1, code.length)).toString()
-    const suffix = code.substring(0, 1)
+    const token = this.fromBase32(code.substring(2, code.length)).toString()
+    const validity = code.substring(0, 1)
+    const suffix = code.substring(1, 2)
     const tToken = token.substring(5, token.length)
+
+    totp.options = {
+      digits: CODE_LEN_3,            // 6-digit code
+      step: this.getValidityPeriod(validity),
+      window: 0             // Accepts OTPs from current, previous, and next time step
+    }
 
     return totp.check(tToken, suffix + secret)
   }

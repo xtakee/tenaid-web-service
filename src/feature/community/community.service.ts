@@ -101,7 +101,7 @@ export class CommunityService {
 
     if (member) {
       const key = (member as any)._id.toString()
-      data.code = await this.codeGenerator.totp(key, member.code)
+      data.code = await this.codeGenerator.totp(key, data.expected, member.code)
 
       const invite = await this.communityRepository.inviteVisitor(user, key, data)
       if (invite) return this.inviteMapper.map(invite)
@@ -117,10 +117,9 @@ export class CommunityService {
    * @param code 
    */
   async validateInvite(body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
-    const realCode = this.codeGenerator.fromBase32(body.code.substring(1, body.code.length)).toString()
+    const realCode = this.codeGenerator.fromBase32(body.code.substring(2, body.code.length)).toString()
 
-    const memberCode = realCode.substring(0, 5)
-    const member = await this.communityRepository.getMemberByCode(memberCode, body.community)
+    const member = await this.communityRepository.getMemberByCode(realCode.substring(0, 5), body.community)
 
     if (member) {
       const secret = (member as any)._id

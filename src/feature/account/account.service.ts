@@ -18,6 +18,8 @@ import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forg
 import { AuthHelper } from "src/core/helpers/auth.helper";
 import { Types } from "mongoose";
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
+import { CommunityRepository } from "../community/community.repository";
+import { PaginatedResult } from "src/core/helpers/paginator";
 
 @Injectable()
 export class AccountService {
@@ -26,6 +28,7 @@ export class AccountService {
     private readonly accountRepository: AccountRepository,
     private readonly mapper: AccountToDtoMapper,
     private readonly authHelper: AuthHelper,
+    private readonly communityRepository: CommunityRepository,
     private readonly bankRepository: BankRepository,
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
@@ -300,4 +303,15 @@ export class AccountService {
 
     throw new UnauthorizedException()
   }
+
+    /**
+   * 
+   * @param user 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+    async getAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+      return await this.communityRepository.getAllAccountCommunities(user, page, limit)
+    }
 }

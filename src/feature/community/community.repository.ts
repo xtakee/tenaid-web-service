@@ -31,7 +31,7 @@ const MEMBER_COMMUNITIES_QUERY = [{
 },
 {
   path: 'community',
-  select: '_id name description photo type image address'
+  select: '_id name description photo type image address createdAt updatedAt'
 }]
 
 const COMMUNITY_VISITOR_QUERY = [
@@ -329,14 +329,19 @@ export class CommunityRepository {
    * @param user 
    * @returns 
    */
-  async getAllAccountCommunities(user: string): Promise<any> {
-    return await this.communityMemberModel.find(
+  async getAllAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+
+    return await this.paginator.paginate(this.communityMemberModel,
       {
         account: new Types.ObjectId(user),
         status: ACCOUNT_STATUS.APPROVED
       },
-      '_id code path isAdmin status community')
-      .populate(MEMBER_COMMUNITIES_QUERY).exec()
+      {
+        select: '_id code path isAdmin status community',
+        limit: limit,
+        page: page,
+        populate: MEMBER_COMMUNITIES_QUERY
+      })
   }
 
   /**

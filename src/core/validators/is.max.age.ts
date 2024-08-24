@@ -2,23 +2,23 @@ import { registerDecorator, ValidationOptions, ValidationArguments } from 'class
 import * as dayjs from 'dayjs';
 
 // Custom validator to check if age is within a specific range
-export function IsAgeInRange(minAge: number, maxAge: number, validationOptions?: ValidationOptions) {
+export function IsMaxAge(maxAge: number, validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isAgeInRange',
+      name: 'isMaxAge',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [minAge, maxAge],
+      constraints: [maxAge],
       validator: {
         validate(value: any, args: ValidationArguments) {
-          const [minAge, maxAge] = args.constraints;
+          const [maxAge] = args.constraints;
           const age = dayjs().diff(value, 'years');
-          return typeof value === 'string' && age >= minAge && age <= maxAge
+          return typeof value === 'string' && age <= maxAge
         },
         defaultMessage(args: ValidationArguments) {
           const [minAge] = args.constraints;
-          return `${args.property} must be between ${minAge} and ${maxAge} years`;
+          return `${args.property} must not be greater than ${maxAge} years`;
         },
       },
     });

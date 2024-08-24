@@ -17,7 +17,6 @@ import { CommunityPathRequestDto } from './dto/request/community.path.request.dt
 import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
-import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { PaginatedResult } from 'src/core/helpers/paginator';
 
 @Controller({

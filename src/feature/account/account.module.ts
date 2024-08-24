@@ -19,6 +19,11 @@ import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { Paginator } from 'src/core/helpers/paginator';
+import { CommunityRepository } from '../community/community.repository';
+import { Community, CommunitySchema } from '../community/model/community';
+import { CommunityInvite, CommunityInviteSchema } from '../community/model/community.invite';
+import { CommunityPath, CommunityPathSchema } from '../community/model/community.path';
+import { CommunityMember, CommunityMemberSchema } from '../community/model/community.member';
 
 @Global()
 @Module({
@@ -55,6 +60,10 @@ import { Paginator } from 'src/core/helpers/paginator';
   MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
   MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
   MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }]),
+  MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
+  MongooseModule.forFeature([{ name: Community.name, schema: CommunitySchema }]),
+  MongooseModule.forFeature([{ name: CommunityMember.name, schema: CommunityMemberSchema }]),
+  MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }]),
   MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }])
   ],
   providers: [
@@ -66,6 +75,7 @@ import { Paginator } from 'src/core/helpers/paginator';
     BankRepository,
     PoliciesGuard,
     CaslAbilityFactory,
+    CommunityRepository,
     CacheService,
     AdminRepository,
     AccountAdminToDtoMapper,
