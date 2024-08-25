@@ -9,6 +9,7 @@ export class InviteToDtoMapper implements Mapper<CommunityInvite, CommunityInvit
     return {
       id: (from as any)._id,
       name: from.name,
+      reason: from.reason,
       photo: from.photo,
       status: from.status,
       code: from.code,

@@ -24,4 +24,7 @@ export class CommunityInviteDto {
 
   @ApiProperty()
   photo?: string
+
+  @ApiProperty()
+  reason: string
 }

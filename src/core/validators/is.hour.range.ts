@@ -15,10 +15,8 @@ export function IsHourInRange(minHour: number, maxHour: number, validationOption
           const [minHour, maxHour] = args.constraints
 
           // Check if value is a valid date string
-          const date = dayjs(value);
-          if (!date.isValid()) {
-            return false;
-          }
+          const date = dayjs(value)
+          if (!date.isValid())return false
 
           const now = dayjs();
           const hoursDifference = date.diff(now, 'hour');
