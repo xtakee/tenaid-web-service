@@ -207,7 +207,7 @@ export class CommunityController {
     return await this.communityService.getCommunintyJoinRequests(community, page, limit)
   }
 
-  @Post('/community/request/status')
+  @Post('/request/status')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
   @ApiOperation({ summary: 'Approve/Decline community join request' })
