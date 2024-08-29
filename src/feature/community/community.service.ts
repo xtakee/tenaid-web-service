@@ -4,7 +4,6 @@ import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
 import { CounterRepository } from '../core/counter/counter.repository';
 import { COUNTER_TYPE } from '../core/counter/constants';
-import { CODE_LEN_5, CODE_LEN_8, CodeGenerator } from 'src/core/helpers/code.generator';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
@@ -24,6 +23,10 @@ import { AccountCommunityResponseDto } from './dto/response/account.community.re
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { MAX_MEMBER_CODE_LENGTH } from './community.constants';
+import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
+import { CodeGenerator } from 'src/core/helpers/code.generator';
+import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
+import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 
 @Injectable()
 export class CommunityService {
@@ -36,6 +39,7 @@ export class CommunityService {
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
+    private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
 
@@ -51,10 +55,8 @@ export class CommunityService {
 
     const community = await this.communityRepository.createCommunity(user, data)
     if (community) {
-      // add admin to community member as admin
-      const mCounter = await this.counterRepository.getCounter(COUNTER_TYPE.MEMBER)
       await this.communityRepository.createCommunityMember(user, (community as any)._id, {
-        code: mCounter.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0'),
+        code: '0000',
         isAdmin: true,
         description: community.address?.address,
         status: ACCOUNT_STATUS.APPROVED
@@ -247,12 +249,11 @@ export class CommunityService {
     const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
     if (!pathData) throw new NotFoundException(INVALID_COMMUNITY_PATH)
 
-    const mCounter = await this.counterRepository.getCounter(COUNTER_TYPE.MEMBER)
     const request = await this.communityRepository.createCommunityMember(user, data.community, {
       path: data.path,
       point: data.point,
       status: ACCOUNT_STATUS.PENDING,
-      code: mCounter.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0'),
+      code: '-1',
       description: data.description
     })
 
@@ -268,5 +269,29 @@ export class CommunityService {
    */
   async getCommunintyJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getCommunityJoinRequests(community, page, limit)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async setJoinRequestStatus(user: string, data: CommunityRequestStatusDto): Promise<CommunityMemberResponseDto> {
+    let request: any = null
+    if (data.status === ACCOUNT_STATUS.APPROVED) {
+      const code = await this.communityRepository.getNextMemberCode(data.community)
+      if (code) {
+        request = await this.communityRepository.
+          approveJoinRequest(data.request, data.community,
+            code.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0'))
+      }
+    } else {
+      request = await this.communityRepository.declineJoinRequest(data.request, data.community, data.comment)
+    }
+
+    if (request) return this.memberMapper.map(request)
+
+    throw new NotFoundException()
   }
 }

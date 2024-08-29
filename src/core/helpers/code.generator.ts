@@ -340,3 +340,6 @@ export class CodeGenerator {
       || this.validateDays(code.totp, code.validity, code.variable + secret)
   }
 }
+// 3906100014 == 4 - 5am
+// 6681300016 - 8 - 11
+// 5125100017 30 --- 31st

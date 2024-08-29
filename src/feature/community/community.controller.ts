@@ -18,6 +18,8 @@ import { CommunityPathResponseDto } from './dto/response/community.path.response
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { PaginatedResult } from 'src/core/helpers/paginator';
+import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
+import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 
 @Controller({
   version: '1',
@@ -203,6 +205,14 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community join requests' })
   async getCommunityJoinRequests(@Param('community') community: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
     return await this.communityService.getCommunintyJoinRequests(community, page, limit)
+  }
+
+  @Get('/:community/request/status')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @ApiOperation({ summary: 'Approve/Decline community join request' })
+  async setCommunityJoinRequestStatus(@User() user: string, @Body() body: CommunityRequestStatusDto): Promise<CommunityMemberResponseDto> {
+    return await this.communityService.setJoinRequestStatus(user, body)
   }
 
 }

@@ -22,6 +22,9 @@ export class CommunityMember {
   description?: string
 
   @Prop()
+  comment?: string
+
+  @Prop()
   point?: number
 
   @Prop()

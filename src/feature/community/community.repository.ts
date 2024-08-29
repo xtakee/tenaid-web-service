@@ -328,6 +328,21 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param id 
+   * @returns 
+   */
+  async getNextMemberCode(id: string): Promise<number> {
+    const community = await this.communityModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(id) },
+      { $inc: { members: 1 } },
+      { new: true, upsert: false },
+    ).exec()
+
+    return community.members
+  }
+
+  /**
+   * 
    * @param user 
    * @returns 
    */
@@ -372,6 +387,32 @@ export class CommunityRepository {
         page: page,
         populate: COMMUNITY_MEMBER_QUERY
       })
+  }
+
+  /**
+   * 
+   * @param member 
+   * @param community 
+   * @param code 
+   */
+  async approveJoinRequest(member: string, community: string, code: string): Promise<any> {
+    return await this.communityMemberModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(member), community: new Types.ObjectId(community) },
+      { status: ACCOUNT_STATUS.APPROVED, code: code, comment: ACCOUNT_STATUS.APPROVED },
+      { returnDocument: 'after' })
+      .populate(COMMUNITY_MEMBER_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param member 
+   * @param community 
+   */
+  async declineJoinRequest(member: string, community: string, comment: string): Promise<any> {
+    return await this.communityMemberModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(member), community: new Types.ObjectId(community) },
+      { status: ACCOUNT_STATUS.DENIED, comment: comment }, { returnDocument: 'after' })
+      .populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
 }
