@@ -13,7 +13,8 @@ export class CommunityInviteToDtoMapper implements Mapper<any, CommunityInviteRe
       host: this.memberMapper.map(from.member),
       visitor: from.name,
       access: from.code,
-      expected: from.expected,
+      start: from.start,
+      end: from.end,
       status: from.status
     }
   }

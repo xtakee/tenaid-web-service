@@ -26,6 +26,7 @@ export class CommunityInviteResponseDto {
   visitor?: string
   access?: string
   status?: string
-  expected?: string
+  start?: string
+  end?: string
   checkIn?: string
 }

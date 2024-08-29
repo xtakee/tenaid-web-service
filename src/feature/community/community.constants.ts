@@ -10,3 +10,5 @@ export enum INVITE_STATUS {
   REVOKED = 'revoked',
   EXPIRED = 'expired'
 }
+
+export const MAX_MEMBER_CODE_LENGTH = 4

@@ -4,14 +4,19 @@ import { IsHourInRange } from "src/core/validators/is.hour.range";
 
 export class CommunityInviteDto {
   code?: string
+  alt?: string
   status?: string
   id?: string
 
   @ApiProperty()
   @IsNotEmpty()
   @IsDateString()
-  @IsHourInRange(0, 24)
-  expected: string
+  start: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString()
+  end: string
 
   @ApiProperty()
   @IsNotEmpty()

@@ -3,15 +3,15 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+} from '@nestjs/common'
+import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
 
 export interface Response<T> {
   message?: string;
   timestamp: string,
   path: string,
-  data: T;
+  data: T
 }
 
 @Injectable()
@@ -28,6 +28,6 @@ export class TransformResponseInterceptor<T>
         timestamp: new Date().toISOString(),
         data: data || {},
       }))
-    );
+    )
   }
 }

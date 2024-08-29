@@ -6,9 +6,9 @@ import { Address } from "src/feature/core/model/address.model";
 
 export type CommunityDocument = HydratedDocument<Community>;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Community {
-  @Prop({type: Types.ObjectId, ref: Account.name})
+  @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
   @Prop()
@@ -20,13 +20,16 @@ export class Community {
   @Prop()
   code: string
 
-  @Prop({enum: COMMUNITY_TYPE})
+  @Prop({ default: 0 })
+  members?: number
+
+  @Prop({ enum: COMMUNITY_TYPE })
   type: string
 
   @Prop()
   image?: string
 
-  @Prop({type: Address})
+  @Prop({ type: Address })
   address: Address
 }
 

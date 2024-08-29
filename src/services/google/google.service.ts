@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import axios from "axios";
-import { JWT } from 'google-auth-library';
-import { GooglePlace } from "./model/google.place";
+import { Injectable } from "@nestjs/common"
+import { JWT } from 'google-auth-library'
+import { GooglePlace } from "./model/google.place"
+import { Network } from "../network";
 
 const {
   GOOGLE_PLACES_URL,
@@ -41,7 +41,7 @@ export class GoogleService {
    */
   async search(query: string): Promise<GooglePlace[]> {
     try {
-      const response = await axios.get(`${GOOGLE_PLACES_URL}place/textsearch/json?query=${query}&key=${GOOGLE_API_KEY}`)
+      const response = await Network.get(`${GOOGLE_PLACES_URL}place/textsearch/json?query=${query}&key=${GOOGLE_API_KEY}`)
       return response.data.status === 'OK' ? response.data.results : []
 
     } catch (error) {
@@ -60,7 +60,7 @@ export class GoogleService {
     if (!accessToken) return null;
 
     try {
-      const result = await axios.post(FCM_SERVER_URL, payload, {
+      const result = await Network.post(FCM_SERVER_URL, payload, {
         headers: {
           Accept: 'application/json, */*',
           'Content-type': 'application/json',

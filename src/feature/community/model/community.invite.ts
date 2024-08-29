@@ -28,7 +28,10 @@ export class CommunityInvite {
   code?: string
 
   @Prop()
-  expected?: string
+  start?: string
+
+  @Prop()
+  end?: string
 
   @Prop()
   checkIn?: string

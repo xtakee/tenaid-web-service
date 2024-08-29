@@ -193,7 +193,8 @@ export class CommunityRepository {
       reason: data.reason,
       name: data.name,
       code: data.code,
-      expected: data.expected,
+      start: data.start,
+      end: data.end,
       photo: data.photo
     }
 
@@ -248,7 +249,7 @@ export class CommunityRepository {
   async getVisitorByCode(code: string, community: string): Promise<any> {
     return await this.communityInviteModel.findOne(
       { community: new Types.ObjectId(community), code: code },
-      '_id name code photo expected status checkIn checkOut member community account')
+      '_id name code photo start end status checkIn checkOut member community account')
       .populate(COMMUNITY_VISITOR_QUERY).exec()
   }
 
@@ -296,7 +297,7 @@ export class CommunityRepository {
   async getCommunityVisitors(community: string): Promise<any> {
     return await this.communityInviteModel.find(
       { community: new Types.ObjectId(community) },
-      '_id name code expected photo checkIn checkOut reason status member community account')
+      '_id name code start end photo checkIn checkOut reason status member community account')
       .populate(COMMUNITY_VISITOR_QUERY).exec()
   }
 
@@ -309,7 +310,7 @@ export class CommunityRepository {
   async getCommunityMemberVisitors(user: string, community: string): Promise<any> {
     return await this.communityInviteModel.find(
       { account: new Types.ObjectId(user), community: new Types.ObjectId(community) },
-      '_id name code photo expected checkIn checkOut status reason member community account')
+      '_id name code photo start end checkIn checkOut status reason member community account')
       .populate(MEMBER_VISITOR_QUERY).exec()
   }
 
@@ -321,7 +322,7 @@ export class CommunityRepository {
   async getCommunityMemberVisitor(invite: string): Promise<any> {
     return await this.communityInviteModel.findOne(
       { _id: new Types.ObjectId(invite) },
-      '_id name code photo expected checkIn checkOut reason status member community account')
+      '_id name code photo start end checkIn checkOut reason status member community account')
       .populate(MEMBER_VISITOR_QUERY).exec()
   }
 

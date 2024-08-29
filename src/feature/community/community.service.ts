@@ -8,7 +8,7 @@ import { CODE_LEN_5, CODE_LEN_8, CodeGenerator } from 'src/core/helpers/code.gen
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME } from 'src/core/strings';
+import { DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
@@ -23,6 +23,7 @@ import { CommunityJoinRequestDto } from './dto/request/community.join.request.dt
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
 import { PaginatedResult } from 'src/core/helpers/paginator';
+import { MAX_MEMBER_CODE_LENGTH } from './community.constants';
 
 @Injectable()
 export class CommunityService {
@@ -46,14 +47,14 @@ export class CommunityService {
    */
   async createCommunity(user: string, data: CommunityDto): Promise<CommunityDto> {
     const counter = await this.counterRepository.getCounter(COUNTER_TYPE.COMMUNITY)
-    data.code = this.codeGenerator.uniqueAlphaNumeric(counter, CODE_LEN_8)
+    data.code = counter.toString()
 
     const community = await this.communityRepository.createCommunity(user, data)
     if (community) {
       // add admin to community member as admin
       const mCounter = await this.counterRepository.getCounter(COUNTER_TYPE.MEMBER)
       await this.communityRepository.createCommunityMember(user, (community as any)._id, {
-        code: this.codeGenerator.uniqueNumeric(mCounter, CODE_LEN_5).toString(),
+        code: mCounter.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0'),
         isAdmin: true,
         description: community.address?.address,
         status: ACCOUNT_STATUS.APPROVED
@@ -101,7 +102,7 @@ export class CommunityService {
 
     if (member) {
       const key = (member as any)._id.toString()
-      data.code = await this.codeGenerator.totp(key, data.expected, member.code)
+      data.code = await this.codeGenerator.totp(key, member.code, data.start, data.end)
 
       const invite = await this.communityRepository.inviteVisitor(user, key, data)
       if (invite) return this.inviteMapper.map(invite)
@@ -117,14 +118,13 @@ export class CommunityService {
    * @param code 
    */
   async validateInvite(body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
-    const realCode = this.codeGenerator.fromBase32(body.code.substring(2, body.code.length)).toString()
-
-    const member = await this.communityRepository.getMemberByCode(realCode.substring(0, 5), body.community)
+    const code = this.codeGenerator.decriptCode(body.code)
+    const member = await this.communityRepository.getMemberByCode(code.user, body.community)
 
     if (member) {
       const secret = (member as any)._id
 
-      if (!(this.codeGenerator.isValidTotp(secret.toString(), body.code)))
+      if (!(this.codeGenerator.isValidTotp(secret.toString(), code)))
         throw new NotFoundException()
     } else throw new NotFoundException()
 
@@ -245,14 +245,14 @@ export class CommunityService {
     }
 
     const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
-    if (!pathData) throw new NotFoundException()
+    if (!pathData) throw new NotFoundException(INVALID_COMMUNITY_PATH)
 
     const mCounter = await this.counterRepository.getCounter(COUNTER_TYPE.MEMBER)
     const request = await this.communityRepository.createCommunityMember(user, data.community, {
       path: data.path,
       point: data.point,
       status: ACCOUNT_STATUS.PENDING,
-      code: this.codeGenerator.uniqueNumeric(mCounter, CODE_LEN_5).toString(),
+      code: mCounter.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0'),
       description: data.description
     })
 
