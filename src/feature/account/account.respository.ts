@@ -234,7 +234,7 @@ export class AccountRepository implements IAccountRepository {
       country: data.country,
       kyc: {},
       email: {
-        value: data.email
+        value: data.email.toLowerCase()
       },
       password: data.password
     }

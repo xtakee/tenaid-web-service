@@ -259,15 +259,16 @@ export class CodeGenerator {
 
     // reset to end of day
     const endDate = utcEnd.hour(23).minute(0).second(0).millisecond(0)
+    const startDate = utcStart.hour(0).minute(0).second(0).millisecond(0)
     // get number of days valid
-    const days = endDate.diff(utcStart, 'day')
+    const days = endDate.diff(startDate, 'day')
 
     // check if hours is within range
     if (days > MAX_VALIDITY_DAYS) throw new BadRequestException(INVALID_INVITE_VALIDITY_PERIOD_DAY)
     // convert to seconds
     const steps = days * 24 * 60 * 60
 
-    const otp = this.generateTotp(variator + secret, steps, utcStart.valueOf())
+    const otp = this.generateTotp(variator + secret, steps, startDate.valueOf())
     return otp + days.toString() + user + variator
   }
 

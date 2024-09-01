@@ -92,7 +92,7 @@ export class AuthService {
    * @returns AccountAuthResponseDto
    */
   async login(username: string, password: string): Promise<AccountAuthResponseDto> {
-    const account: Account = await this.accountRepository.getOneByEmail(username)
+    const account: Account = await this.accountRepository.getOneByEmail(username.toLowerCase())
 
     if (account) {
       const isMatch = await this.authHelper.isMatch(password, account.password);
