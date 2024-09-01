@@ -13,6 +13,7 @@ import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/acco
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { CodeGenerator } from 'src/core/helpers/code.generator';
+import { INVALID_LOGIN_ERROR } from 'src/core/strings';
 
 @Injectable()
 export class AuthService {
@@ -102,7 +103,7 @@ export class AuthService {
       }
     }
 
-    throw new BadRequestException();
+    throw new BadRequestException(INVALID_LOGIN_ERROR);
   }
 
   /**
@@ -123,7 +124,7 @@ export class AuthService {
       }
     }
 
-    throw new BadRequestException();
+    throw new BadRequestException(INVALID_LOGIN_ERROR);
   }
 
   /**
