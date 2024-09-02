@@ -51,7 +51,7 @@ export class AccountService {
    * @returns AccountAuthResponseDto
    */
   async create(data: AccountCreateDto): Promise<AccountResponseDto> {
-    let account = await this.accountRepository.getOneByEmail(data.email)
+    let account = await this.accountRepository.getOneByEmail(data.email.trim().toLowerCase())
 
     if (!account) {
       account = await this.accountRepository.create(data)

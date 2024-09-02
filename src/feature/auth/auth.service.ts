@@ -93,7 +93,7 @@ export class AuthService {
    * @returns AccountAuthResponseDto
    */
   async login(username: string, password: string): Promise<AccountAuthResponseDto> {
-    const account: Account = await this.accountRepository.getOneByEmail(username.toLowerCase())
+    const account: Account = await this.accountRepository.getOneByEmail(username.trim().toLowerCase())
 
     if (account) {
       const isMatch = await this.authHelper.isMatch(password, account.password);
@@ -114,7 +114,7 @@ export class AuthService {
  */
   async loginAdmin(username: string, password: string): Promise<AccountAdminAuthResponseDto> {
 
-    const account: AccountAdmin = await this.adminRepository.getOneByEmail(username)
+    const account: AccountAdmin = await this.adminRepository.getOneByEmail(username.trim().toLowerCase())
 
     if (account) {
       const isMatch = await this.authHelper.isMatch(password, account.password);
