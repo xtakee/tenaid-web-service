@@ -22,7 +22,7 @@ import { CommunityJoinRequestDto } from './dto/request/community.join.request.dt
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
 import { PaginatedResult } from 'src/core/helpers/paginator';
-import { MAX_MEMBER_CODE_LENGTH } from './community.constants';
+import { MAX_COMMUNITY_CODE_LENGTH, MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
@@ -293,5 +293,15 @@ export class CommunityService {
     if (request) return this.memberMapper.map(request)
 
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param query 
+   * @param page 
+   * @param limit 
+   */
+  async searchCommunity(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.searchCommunity(query, page, limit);
   }
 }

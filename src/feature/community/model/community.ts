@@ -3,6 +3,7 @@ import { HydratedDocument, Types } from "mongoose";
 import { Account } from "src/feature/account/model/account.model";
 import { COMMUNITY_TYPE } from "../community.constants";
 import { Address } from "src/feature/core/model/address.model";
+import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
 
 export type CommunityDocument = HydratedDocument<Community>;
 
@@ -11,13 +12,13 @@ export class Community {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
-  @Prop()
+  @Prop({ index: true })
   name: string
 
   @Prop()
   description: string
 
-  @Prop()
+  @Prop({ unique: true, index: true })
   code: string
 
   @Prop({ default: 0 })
@@ -29,8 +30,14 @@ export class Community {
   @Prop()
   image?: string
 
+  @Prop({enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.PENDING})
+  status?: string
+
   @Prop({ type: Address })
   address: Address
 }
 
-export const CommunitySchema = SchemaFactory.createForClass(Community);
+const CommunitySchema = SchemaFactory.createForClass(Community);
+CommunitySchema.index({ name: 'text', code: 'text' })
+
+export { CommunitySchema }

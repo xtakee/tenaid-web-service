@@ -61,18 +61,6 @@ export class CommunityController {
 
   /**
    * 
-   * @param code 
-   * @returns 
-   */
-  @Get('/:code')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get a community by code' })
-  async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
-    return this.communityService.getCommunityByCode(code)
-  }
-
-  /**
-   * 
    * @param user 
    * @param body 
    */
@@ -215,4 +203,22 @@ export class CommunityController {
     return await this.communityService.setJoinRequestStatus(user, body)
   }
 
+  @Get('search')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Search a community' })
+  async searchCommunity(@User() user: string, @Query('query') query: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
+    return await this.communityService.searchCommunity(query, page, limit);
+  }
+
+  /**
+   * 
+   * @param code 
+   * @returns 
+   */
+  @Get('/:code')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community by code' })
+  async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
+    return this.communityService.getCommunityByCode(code)
+  }
 }

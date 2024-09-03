@@ -415,4 +415,20 @@ export class CommunityRepository {
       .populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
+  /**
+   * 
+   * @param query 
+   * @param page 
+   * @param limit 
+   */
+  async searchCommunity(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.paginator.paginate(this.communityModel,
+      { status: ACCOUNT_STATUS.APPROVED, $text: { $search: query } },
+      {
+        select: '_id name code description address members image type createdAt updatedAt',
+        limit: limit,
+        page: page
+      })
+  }
+
 }

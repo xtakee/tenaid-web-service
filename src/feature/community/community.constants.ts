@@ -12,3 +12,4 @@ export enum INVITE_STATUS {
 }
 
 export const MAX_MEMBER_CODE_LENGTH = 4
+export const MAX_COMMUNITY_CODE_LENGTH = 8
