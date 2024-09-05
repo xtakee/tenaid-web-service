@@ -13,6 +13,7 @@ import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/comm
 import { CommunityInviteValidateDto } from "src/feature/community/dto/request/community.invite.validate.dto";
 import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
+import { MemberAccount } from "./model/member.account";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -47,15 +48,10 @@ const COMMUNITY_VISITOR_QUERY = [
   }
 ]
 
-const COMMUNITY_MEMBER_QUERY = [
-  {
-    path: 'account',
-    select: '_id firstName lastName email.value email.verified phone country photo'
-  }, {
-    path: 'path',
-    select: '_id name description'
-  }
-]
+const COMMUNITY_MEMBER_QUERY = {
+  path: 'path',
+  select: '_id name description'
+}
 
 @Injectable()
 export class CommunityRepository {
@@ -79,7 +75,7 @@ export class CommunityRepository {
       description: data.description,
       code: data.code,
       type: data.type,
-      image: data.image,
+      images: data.images,
       address: data.address,
       account: new Types.ObjectId(user)
     }
@@ -101,7 +97,7 @@ export class CommunityRepository {
         name: data.name,
         description: data.description,
         type: data.type,
-        image: data.image,
+        images: data.images,
         address: data.address,
       }, { returnDocument: 'after' }).exec()
   }
@@ -127,7 +123,7 @@ export class CommunityRepository {
    * @param community 
    * @param data 
    */
-  async createCommunityMember(user: string, community: string, data: CommunityMemberRequestDto): Promise<CommunityMember> {
+  async createCommunityMember(user: string, memberInfo: MemberAccount, community: string, data: CommunityMemberRequestDto): Promise<CommunityMember> {
     const member: CommunityMember = {
       community: new Types.ObjectId(community),
       code: data.code,
@@ -136,6 +132,7 @@ export class CommunityRepository {
       path: data.path ? new Types.ObjectId(data.path) : null,
       status: data.status,
       point: data.point,
+      extra: memberInfo,
       account: new Types.ObjectId(user)
     }
 
@@ -382,7 +379,7 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityMemberModel,
       { community: new Types.ObjectId(community), $or: [{ status: ACCOUNT_STATUS.PENDING }, { status: ACCOUNT_STATUS.DENIED }] },
       {
-        select: '_id community path code description point account status createdAt updatedAt',
+        select: '_id community path code description point extra status createdAt updatedAt',
         limit: limit,
         page: page,
         populate: COMMUNITY_MEMBER_QUERY
@@ -421,9 +418,9 @@ export class CommunityRepository {
    * @param page 
    * @param limit 
    */
-  async searchCommunity(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+  async searchCommunity(user: string, query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.paginator.paginate(this.communityModel,
-      { status: ACCOUNT_STATUS.APPROVED, $text: { $search: query } },
+      { status: ACCOUNT_STATUS.APPROVED, account: new Types.ObjectId(user), $text: { $search: query } },
       {
         select: '_id name code description address members image type createdAt updatedAt',
         limit: limit,

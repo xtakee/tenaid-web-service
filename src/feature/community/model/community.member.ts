@@ -4,6 +4,7 @@ import { Account } from "src/feature/account/model/account.model";
 import { Community } from "./community";
 import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
 import { CommunityPath } from "./community.path";
+import { MemberAccount } from "./member.account";
 
 export type CommunityMemberDocument = HydratedDocument<CommunityMember>;
 
@@ -13,7 +14,7 @@ export class CommunityMember {
   community: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: Account.name })
-  account: Types.ObjectId
+  account?: Types.ObjectId
 
   @Prop({ ref: CommunityPath.name })
   path?: Types.ObjectId
@@ -23,6 +24,9 @@ export class CommunityMember {
 
   @Prop()
   comment?: string
+
+  @Prop({ type: MemberAccount })
+  extra: MemberAccount
 
   @Prop()
   point?: number

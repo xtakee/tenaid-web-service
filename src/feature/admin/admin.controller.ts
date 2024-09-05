@@ -8,6 +8,7 @@ import { MongoAbility } from '@casl/ability';
 import { ADMIN_SYSTEM_FEATURES, CLAIM } from '../auth/auth.constants';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
 import { PaginatedResult } from 'src/core/helpers/paginator';
+import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
 
 @Controller({
   version: '1',
@@ -36,24 +37,24 @@ export class AdminController {
   @ApiOperation({ summary: 'Get all registered tenants' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.TENANTS))
-  async getAllTenants(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.adminService.getAllRegisteredTenants(page, limit)
+  async getAllTenants(@Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.adminService.getAllRegisteredTenants(paginate.page, paginate.limit)
   }
 
   @Get('account/can-publish')
   @ApiOperation({ summary: 'Get all registered Agents' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.AGENTS))
-  async getAllAgents(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.adminService.getAllRegisteredAgents(page, limit)
+  async getAllAgents(@Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.adminService.getAllRegisteredAgents(paginate.page, paginate.limit)
   }
 
   @Get('account/can-own')
   @ApiOperation({ summary: 'Get all registered Managers/Lanlords' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.MANAGERS))
-  async getAllManagers(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.adminService.getAllRegisteredManagers(page, limit)
+  async getAllManagers(@Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.adminService.getAllRegisteredManagers(paginate.page, paginate.limit)
   }
 
   @Get('account/add-on-requests')
@@ -61,7 +62,7 @@ export class AdminController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.MANAGERS))
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, ADMIN_SYSTEM_FEATURES.AGENTS))
-  async getAllAddOnRequests(@Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.adminService.getAllAddOnRequests(page, limit)
+  async getAllAddOnRequests(@Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.adminService.getAllAddOnRequests(paginate.page, paginate.limit)
   }
 }

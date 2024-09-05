@@ -16,7 +16,7 @@ export class CommunityToDtoMapper implements Mapper<Community, CommunityDto> {
       address: this.addressMapper.map(from.address),
       code: from.code,
       type: from.type,
-      image: from.image
+      images: from.images
     }
   }
 }

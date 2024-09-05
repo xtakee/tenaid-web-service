@@ -27,12 +27,15 @@ import { CommunityRequestStatusDto } from './dto/request/community.request.statu
 import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
+import { AccountRepository } from '../account/account.respository';
+import { MemberAccount } from './model/member.account';
 
 @Injectable()
 export class CommunityService {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly counterRepository: CounterRepository,
+    private readonly accountRepository: AccountRepository,
     private readonly codeGenerator: CodeGenerator,
     private readonly inviteMapper: InviteToDtoMapper,
     private readonly pathMapper: CommunityPathToDtoMapper,
@@ -55,7 +58,11 @@ export class CommunityService {
 
     const community = await this.communityRepository.createCommunity(user, data)
     if (community) {
-      await this.communityRepository.createCommunityMember(user, (community as any)._id, {
+
+      const account = await this.getMemberAccountExtras(user)
+      if (!account) throw new ForbiddenException()
+
+      await this.communityRepository.createCommunityMember(user, account, (community as any)._id, {
         code: '0000',
         isAdmin: true,
         description: community.address?.address,
@@ -233,6 +240,25 @@ export class CommunityService {
   /**
    * 
    * @param user 
+   * @returns 
+   */
+  private async getMemberAccountExtras(user: string): Promise<MemberAccount> {
+    const account = await this.accountRepository.getOneById(user)
+    if (!account) throw new ForbiddenException()
+
+    return {
+      firstName: account.firstName,
+      lastName: account.lastName,
+      email: account.email,
+      phone: account.phone,
+      photo: account.photo,
+      country: account.country
+    }
+  }
+
+  /**
+   * 
+   * @param user 
    * @param data 
    */
   async requestJoin(user: string, data: CommunityJoinRequestDto): Promise<AccountCommunityResponseDto> {
@@ -249,7 +275,10 @@ export class CommunityService {
     const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
     if (!pathData) throw new NotFoundException(INVALID_COMMUNITY_PATH)
 
-    const request = await this.communityRepository.createCommunityMember(user, data.community, {
+    const account = await this.getMemberAccountExtras(user)
+    if (!account) throw new ForbiddenException()
+
+    const request = await this.communityRepository.createCommunityMember(user, account, data.community, {
       path: data.path,
       point: data.point,
       status: ACCOUNT_STATUS.PENDING,
@@ -301,7 +330,7 @@ export class CommunityService {
    * @param page 
    * @param limit 
    */
-  async searchCommunity(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.searchCommunity(query, page, limit);
+  async searchCommunity(user: string, query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.searchCommunity(user, query, page, limit);
   }
 }

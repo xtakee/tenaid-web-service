@@ -20,6 +20,7 @@ import { AccountCommunityResponseDto } from './dto/response/account.community.re
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
+import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
 
 @Controller({
   version: '1',
@@ -36,8 +37,7 @@ export class CommunityController {
    * @returns 
    */
   @Post('')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Create a community' })
   async createCommunity(@User() user: string, @Body() body: CommunityDto): Promise<CommunityDto> {
     return this.communityService.createCommunity(user, body)
@@ -191,8 +191,8 @@ export class CommunityController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
   @ApiOperation({ summary: 'Get all community join requests' })
-  async getCommunityJoinRequests(@Param('community') community: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.communityService.getCommunintyJoinRequests(community, page, limit)
+  async getCommunityJoinRequests(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getCommunintyJoinRequests(community, paginate.page, paginate.limit)
   }
 
   @Post('/request/status')
@@ -206,8 +206,8 @@ export class CommunityController {
   @Get('search')
   @BasicAuth()
   @ApiOperation({ summary: 'Search a community' })
-  async searchCommunity(@User() user: string, @Query('query') query: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.communityService.searchCommunity(query, page, limit);
+  async searchCommunity(@User() user: string, @Query('query') query: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
   }
 
   /**

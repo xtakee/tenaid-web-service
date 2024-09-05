@@ -24,7 +24,7 @@ export class CommunityDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsUrl()
-  image: string
+  images: string[]
 
   @ApiProperty()
   @IsNotEmpty()

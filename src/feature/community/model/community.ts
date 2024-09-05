@@ -28,7 +28,7 @@ export class Community {
   type: string
 
   @Prop()
-  image?: string
+  images?: string[]
 
   @Prop({enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.PENDING})
   status?: string

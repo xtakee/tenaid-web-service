@@ -21,6 +21,7 @@ import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.pa
 import { ChangePasswordDto } from "src/feature/account/dto/request/change.password.dto";
 import { AddressDto } from "src/feature/core/dto/address.dto";
 import { PaginatedResult } from "src/core/helpers/paginator";
+import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 
 @Controller({
   version: '1',
@@ -229,7 +230,7 @@ export class AccountController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
   @ApiOperation({ summary: 'Get all account communities' })
-  async getAccountCommunities(@User() user: string, @Query('limit') limit: number = 10, @Query('page') page: number = 1): Promise<PaginatedResult<any>> {
-    return await this.accountService.getAccountCommunities(user, page, limit)
+  async getAccountCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountCommunities(user, paginate.page, paginate.limit)
   }
 }
