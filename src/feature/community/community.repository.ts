@@ -422,7 +422,7 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityModel,
       { status: ACCOUNT_STATUS.APPROVED, account: { $ne: new Types.ObjectId(user) }, $text: { $search: query } },
       {
-        select: '_id name code description address members image type createdAt updatedAt',
+        select: '_id name code description address members images type createdAt updatedAt',
         limit: limit,
         page: page
       })
