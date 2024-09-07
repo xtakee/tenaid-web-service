@@ -29,7 +29,7 @@ export class CommunityMember {
   extra: MemberAccount
 
   @Prop()
-  point?: number
+  point?: string
 
   @Prop()
   code: string

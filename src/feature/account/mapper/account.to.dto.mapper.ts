@@ -1,6 +1,6 @@
 import { Mapper } from "src/core/util/mapper";
 import { Account } from "../model/account.model";
-import { AccountResponseDto, _KYC } from "src/feature/account/dto/response/account.response.dto";
+import { AccountResponseDto, DashboardFlagsDto, _KYC } from "src/feature/account/dto/response/account.response.dto";
 import { Injectable } from "@nestjs/common";
 import { ADD_ON } from "src/feature/auth/auth.constants";
 import { AddressToDtoMapper } from "src/feature/core/mapper/address.to.dto.mapper";
@@ -27,6 +27,12 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
       lastName: from.lastName,
       firstName: from.firstName,
       country: from.country,
+      flags: {
+        welcome: from.flags?.welcome ?? true,
+        joinCommunity: from.flags?.joinCommunity ?? true,
+        createCommunity: from.flags?.createCommunity ?? true,
+        quickActions: from.flags?.quickActions ?? false
+      },
       email: {
         value: from.email.value,
         verified: from.email.verified

@@ -11,7 +11,7 @@ import { AddOnRequestDto } from "src/feature/account/dto/request/add.on.request.
 import { RootUser, User } from "src/core/decorators/current.user";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
 import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
-import { Auth } from "../auth/guards/auth.decorator";
+import { Auth, BasicAuth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
 import { isMongoId } from "class-validator";
@@ -227,8 +227,7 @@ export class AccountController {
  * @returns 
  */
   @Get('community/')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all account communities' })
   async getAccountCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.accountService.getAccountCommunities(user, paginate.page, paginate.limit)

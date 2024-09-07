@@ -15,7 +15,7 @@ export class CommunityMemberRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  point?: number
+  point?: string
 
   @ApiProperty()
   @IsNotEmpty()

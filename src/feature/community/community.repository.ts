@@ -32,7 +32,7 @@ const MEMBER_COMMUNITIES_QUERY = [{
 },
 {
   path: 'community',
-  select: '_id name description photo type image address createdAt updatedAt'
+  select: '_id name description images type image address createdAt updatedAt'
 }]
 
 const COMMUNITY_VISITOR_QUERY = [
@@ -136,7 +136,7 @@ export class CommunityRepository {
       account: new Types.ObjectId(user)
     }
 
-    return this.communityMemberModel.create(member)
+    return await this.communityMemberModel.create(member).then(data => data.populate(MEMBER_COMMUNITIES_QUERY))
   }
 
   /**
@@ -348,10 +348,10 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityMemberModel,
       {
         account: new Types.ObjectId(user),
-        status: ACCOUNT_STATUS.APPROVED
+        status: { $ne: ACCOUNT_STATUS.DENIED }
       },
       {
-        select: '_id code path isAdmin status community',
+        select: '_id code path isAdmin point description status community',
         limit: limit,
         page: page,
         populate: MEMBER_COMMUNITIES_QUERY

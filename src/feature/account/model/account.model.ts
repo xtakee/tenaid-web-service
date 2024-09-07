@@ -28,6 +28,21 @@ export class KYC {
   bankingCompleted?: boolean
 }
 
+@Schema()
+export class DashboardFlags {
+  @Prop({ default: true })
+  welcome?: boolean
+
+  @Prop({ default: false })
+  quickActions?: boolean
+
+  @Prop({ default: true })
+  joinCommunity?: boolean
+
+  @Prop({ default: true })
+  createCommunity?: boolean
+}
+
 @Schema({ timestamps: true })
 export class Account {
 
@@ -48,6 +63,9 @@ export class Account {
 
   @Prop()
   country?: string
+
+  @Prop({type: DashboardFlags, default: new DashboardFlags()})
+  flags?: DashboardFlags
 
   @Prop({ type: Date })
   dob?: Date;

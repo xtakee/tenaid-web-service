@@ -187,6 +187,12 @@ export class CommunityController {
     return await this.communityService.requestJoin(user, data)
   }
 
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
   @Get('/:community/request')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
@@ -195,6 +201,12 @@ export class CommunityController {
     return await this.communityService.getCommunintyJoinRequests(community, paginate.page, paginate.limit)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param body 
+   * @returns 
+   */
   @Post('/request/status')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
@@ -203,6 +215,13 @@ export class CommunityController {
     return await this.communityService.setJoinRequestStatus(user, body)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param query 
+   * @param paginate 
+   * @returns 
+   */
   @Get('search')
   @BasicAuth()
   @ApiOperation({ summary: 'Search a community' })

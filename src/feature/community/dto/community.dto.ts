@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsNotEmpty, IsUrl } from "class-validator"
+import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsUrl } from "class-validator"
 import { AddressDto } from "src/feature/core/dto/address.dto"
 import { COMMUNITY_TYPE } from "src/feature/community/community.constants"
 
@@ -22,8 +22,9 @@ export class CommunityDto {
   type: string
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsUrl()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUrl({}, { each: true })
   images: string[]
 
   @ApiProperty()

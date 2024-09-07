@@ -9,6 +9,7 @@ export class AccountCommunityResponseDto {
   description?: string
   code: string
   status: string
+  isAdmin: boolean = false
   createdAt: string
   updatedAt: string
 }

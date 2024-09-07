@@ -10,6 +10,16 @@ export class _KYC {
   bankingCompleted?: boolean
 }
 
+export class DashboardFlagsDto {
+  welcome?: boolean
+
+  quickActions?: boolean
+
+  joinCommunity?: boolean
+
+  createCommunity?: boolean
+}
+
 export interface Role {
   id: string
   name: string
@@ -32,6 +42,7 @@ export class AccountResponseDto {
   country?: string
   photo: string
   dob?: string
+  flags: DashboardFlagsDto
   kycCompleted?: boolean
   primaryAccountType?: string
   accountTypes?: AccType[]

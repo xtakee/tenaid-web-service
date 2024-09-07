@@ -411,6 +411,36 @@ export class AccountRepository implements IAccountRepository {
   }
 
   /**
+   * 
+   * @param user 
+   */
+  async clearCreateFlag(user: string): Promise<void> {
+    this.accountModel.findByIdAndUpdate(user, {
+      'flags.createCommunity': false
+    }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  async clearWelcomeFlag(user: string): Promise<void> {
+    this.accountModel.findByIdAndUpdate(user, {
+      'flags.welcome': false
+    }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  async clearJoinFlag(user: string): Promise<void> {
+    this.accountModel.findByIdAndUpdate(user, {
+      'flags.joinCommunity': false
+    }).exec()
+  }
+
+  /**
  * 
  * @param user 
  * @param addOnType 

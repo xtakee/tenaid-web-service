@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
@@ -22,7 +22,7 @@ import { CommunityJoinRequestDto } from './dto/request/community.join.request.dt
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
 import { PaginatedResult } from 'src/core/helpers/paginator';
-import { MAX_COMMUNITY_CODE_LENGTH, MAX_MEMBER_CODE_LENGTH } from './community.constants';
+import { MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
@@ -59,15 +59,18 @@ export class CommunityService {
     const community = await this.communityRepository.createCommunity(user, data)
     if (community) {
 
-      const account = await this.getMemberAccountExtras(user)
-      if (!account) throw new ForbiddenException()
+      const { member, flags } = await this.getMemberAccountExtras(user)
 
-      await this.communityRepository.createCommunityMember(user, account, (community as any)._id, {
+      await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
         code: '0000',
         isAdmin: true,
         description: community.address?.address,
         status: ACCOUNT_STATUS.APPROVED
       })
+
+      if (flags?.createCommunity === true) {
+        await this.accountRepository.clearCreateFlag(user);
+      }
 
       return this.communityMapper.map(community)
     }
@@ -242,17 +245,20 @@ export class CommunityService {
    * @param user 
    * @returns 
    */
-  private async getMemberAccountExtras(user: string): Promise<MemberAccount> {
+  private async getMemberAccountExtras(user: string): Promise<any> {
     const account = await this.accountRepository.getOneById(user)
-    if (!account) throw new ForbiddenException()
+    if (!account) throw new UnauthorizedException()
 
     return {
-      firstName: account.firstName,
-      lastName: account.lastName,
-      email: account.email,
-      phone: account.phone,
-      photo: account.photo,
-      country: account.country
+      flags: account.flags,
+      member: {
+        firstName: account.firstName,
+        lastName: account.lastName,
+        email: account.email,
+        phone: account.phone,
+        photo: account.photo,
+        country: account.country
+      }
     }
   }
 
@@ -275,10 +281,9 @@ export class CommunityService {
     const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
     if (!pathData) throw new NotFoundException(INVALID_COMMUNITY_PATH)
 
-    const account = await this.getMemberAccountExtras(user)
-    if (!account) throw new ForbiddenException()
+    const { member, flags } = await this.getMemberAccountExtras(user)
 
-    const request = await this.communityRepository.createCommunityMember(user, account, data.community, {
+    const request = await this.communityRepository.createCommunityMember(user, member, data.community, {
       path: data.path,
       point: data.point,
       status: ACCOUNT_STATUS.PENDING,
@@ -286,8 +291,12 @@ export class CommunityService {
       description: data.description
     })
 
-    const savedRequest = await this.communityRepository.getMemberRequest((request as any)._id)
-    if (savedRequest) return this.communityAccountMapper.map(savedRequest)
+    if (request) {
+      if (flags?.joinCommunity === true) {
+        await this.accountRepository.clearJoinFlag(user);
+      }
+      return this.communityAccountMapper.map(request)
+    }
 
     throw new NotFoundException()
   }
