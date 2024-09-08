@@ -133,8 +133,17 @@ export class CommunityRepository {
       status: data.status,
       point: data.point,
       extra: memberInfo,
+      isPrimary: data.isPrimary,
       account: new Types.ObjectId(user)
     }
+
+    const count = await this.communityMemberModel.countDocuments({
+      account: new Types.ObjectId(user),
+      isPrimary: true,
+      status: ACCOUNT_STATUS.APPROVED
+    }).exec()
+
+    if (!count) member.isPrimary = true
 
     return await this.communityMemberModel.create(member).then(data => data.populate(MEMBER_COMMUNITIES_QUERY))
   }
@@ -351,7 +360,7 @@ export class CommunityRepository {
         status: { $ne: ACCOUNT_STATUS.DENIED }
       },
       {
-        select: '_id code path isAdmin point description status community',
+        select: '_id code path isAdmin isPrimary point description status community',
         limit: limit,
         page: page,
         populate: MEMBER_COMMUNITIES_QUERY

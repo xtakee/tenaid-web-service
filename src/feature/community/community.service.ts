@@ -287,6 +287,7 @@ export class CommunityService {
       path: data.path,
       point: data.point,
       status: ACCOUNT_STATUS.PENDING,
+      isPrimary: data.isPrimary,
       code: '-1',
       description: data.description
     })

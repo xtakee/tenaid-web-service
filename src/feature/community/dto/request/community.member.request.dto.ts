@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty } from "class-validator";
+import { IsBoolean, IsMongoId, IsNotEmpty } from "class-validator";
 
 export class CommunityMemberRequestDto {
 
@@ -16,6 +16,11 @@ export class CommunityMemberRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   point?: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsBoolean()
+  isPrimary?: boolean
 
   @ApiProperty()
   @IsNotEmpty()

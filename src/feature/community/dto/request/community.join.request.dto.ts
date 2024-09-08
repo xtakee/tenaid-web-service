@@ -1,11 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty, IsNumber } from "class-validator";
+import { IsBoolean, IsMongoId, IsNotEmpty, IsNumber } from "class-validator";
 
 export class CommunityJoinRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
   community: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsBoolean()
+  isPrimary?: boolean
 
   @ApiProperty()
   @IsNotEmpty()

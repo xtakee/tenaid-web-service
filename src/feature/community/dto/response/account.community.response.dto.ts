@@ -10,6 +10,7 @@ export class AccountCommunityResponseDto {
   code: string
   status: string
   isAdmin: boolean = false
+  isPrimary: boolean = false
   createdAt: string
   updatedAt: string
 }

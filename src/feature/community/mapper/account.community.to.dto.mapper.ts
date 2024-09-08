@@ -16,6 +16,7 @@ export class AccountCommunityToDtoMapper implements Mapper<any, AccountCommunity
     return {
       id: from._id,
       isAdmin: from.isAdmin,
+      isPrimary: from.isPrimary,
       community: this.communityMapper.map(from.community),
       path: this.pathMapper.map(from.path),
       point: from.point,
