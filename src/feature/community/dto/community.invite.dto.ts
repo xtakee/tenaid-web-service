@@ -3,7 +3,6 @@ import { IsDateString, IsMongoId, IsNotEmpty } from "class-validator";
 import { IsHourInRange } from "src/core/validators/is.hour.range";
 
 export class CommunityInviteDto {
-  code?: string
   alt?: string
   status?: string
   id?: string
@@ -20,7 +19,20 @@ export class CommunityInviteDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsDateString()
+  date: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   name: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  type: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  code: string
 
   @ApiProperty()
   @IsNotEmpty()
@@ -28,8 +40,18 @@ export class CommunityInviteDto {
   community: string
 
   @ApiProperty()
+  @IsNotEmpty()
+  @IsMongoId()
+  member: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsMongoId()
+  path: string
+
+  @ApiProperty()
   photo?: string
 
   @ApiProperty()
-  reason: string
+  reason?: string
 }

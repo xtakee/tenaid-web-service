@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ICacheService } from './icache.service';
 import Redis from 'ioredis';
 

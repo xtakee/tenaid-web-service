@@ -16,6 +16,8 @@ import { ManagedAccount } from "./model/managed.account";
 import { Permission } from "../auth/model/permission";
 import { CacheService } from "src/services/cache/cache.service";
 import { mergeArray } from "src/core/helpers/array.helper";
+import { DeviceToken } from "./model/device.token";
+import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -25,6 +27,7 @@ export class AccountRepository implements IAccountRepository {
     private readonly paginator: Paginator,
     private readonly cache: CacheService,
     @InjectModel(AddOnRequest.name) private readonly addOnRequestModel: Model<AddOnRequest>,
+    @InjectModel(DeviceToken.name) private readonly deviceTokenModel: Model<DeviceToken>,
     @InjectModel(ManagedAccount.name) private readonly managedAccountModel: Model<ManagedAccount>,
     @InjectModel(BankAccount.name) private readonly bankAccountModel: Model<BankAccount>) { }
 
@@ -499,6 +502,18 @@ export class AccountRepository implements IAccountRepository {
     }
 
     throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async setDevicePushToken(user: string, data: DeviceTokenRequestDto): Promise<void> {
+    await this.deviceTokenModel.findOneAndUpdate({ account: new Types.ObjectId(user) }, {
+      token: data.token,
+      device: data.device
+    }, { new: true, upsert: true, returnDocument: 'after' }).exec()
   }
 
 }

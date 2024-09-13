@@ -110,15 +110,9 @@ export class CommunityService {
    * @param data 
    */
   async invite(user: string, data: CommunityInviteDto): Promise<CommunityInviteDto> {
-    const member = await this.communityRepository.getApprovedCommunityMember(user, data.community)
+    const invite = await this.communityRepository.inviteVisitor(user, data)
 
-    if (member) {
-      const key = (member as any)._id.toString()
-      data.code = await this.codeGenerator.totp(key, member.code, data.start, data.end)
-
-      const invite = await this.communityRepository.inviteVisitor(user, key, data)
-      if (invite) return this.inviteMapper.map(invite)
-    }
+    if (invite) return this.inviteMapper.map(invite)
 
     throw new ForbiddenException()
   }
@@ -189,11 +183,57 @@ export class CommunityService {
    * 
    * @param user 
    * @param community 
+   * @param page 
+   * @param limit 
    * @returns 
    */
-  async getCommunityMemberVisitors(user: string, community: string): Promise<CommunityVisitorsDto[]> {
-    const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community)
-    if (visitors) return visitors.map((visitor: any) => this.visitorsMapper.map(visitor))
+  async getCommunityMemberVisitors(user: string, community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community, page, limit)
+    if (visitors) return visitors
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param start 
+   * @param end 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityMemberVisitorsByDate(
+    user: string,
+    community: string,
+    start: string,
+    end: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitorsByDate(user, community, start, end, page, limit);
+    if (visitors) return visitors;
+
+    throw new NotFoundException()
+  }
+
+/**
+ * 
+ * @param user 
+ * @param community 
+ * @param status 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getCommunityMemberVisitorsByStatus(
+    user: string,
+    community: string,
+    status: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitorsByStatus(user, community, status, page, limit);
+    if (visitors) return visitors;
 
     throw new NotFoundException()
   }

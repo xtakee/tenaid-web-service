@@ -20,6 +20,7 @@ import { Types } from "mongoose";
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
 import { CommunityRepository } from "../community/community.repository";
 import { PaginatedResult } from "src/core/helpers/paginator";
+import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 
 @Injectable()
 export class AccountService {
@@ -304,14 +305,23 @@ export class AccountService {
     throw new UnauthorizedException()
   }
 
-    /**
+  /**
+ * 
+ * @param user 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllAccountCommunities(user, page, limit)
+  }
+
+  /**
    * 
    * @param user 
-   * @param page 
-   * @param limit 
-   * @returns 
+   * @param body 
    */
-    async getAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-      return await this.communityRepository.getAllAccountCommunities(user, page, limit)
-    }
+  async setDevicePushToken(user: string, body: DeviceTokenRequestDto): Promise<void> {
+    await this.accountRepository.setDevicePushToken(user, body)
+  }
 }

@@ -198,19 +198,6 @@ export class CodeGenerator {
 
   /**
    * 
-   * @param seed 
-   * @returns 
-   */
-  private rng(seed: number): () => number {
-    let state = seed;
-    return () => {
-      state = (state * 9301 + 49297) % 233280;
-      return state / 233280;
-    };
-  }
-
-  /**
-   * 
    * @param secret 
    * @param steps 
    * @param epoch 

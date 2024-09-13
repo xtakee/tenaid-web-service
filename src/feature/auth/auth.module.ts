@@ -44,7 +44,7 @@ import { CodeGenerator } from 'src/core/helpers/code.generator';
     JwtModule.register({
       global: true,
       secret: JwtConstants.Jwt_Secret,
-      signOptions: { expiresIn: '24h' },
+      //signOptions: { expiresIn: '24h' }, // no expiry
     }),
     MongooseModule.forFeatureAsync([{
       name: Account.name,

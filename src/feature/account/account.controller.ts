@@ -22,6 +22,7 @@ import { ChangePasswordDto } from "src/feature/account/dto/request/change.passwo
 import { AddressDto } from "src/feature/core/dto/address.dto";
 import { PaginatedResult } from "src/core/helpers/paginator";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
+import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 
 @Controller({
   version: '1',
@@ -231,5 +232,12 @@ export class AccountController {
   @ApiOperation({ summary: 'Get all account communities' })
   async getAccountCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.accountService.getAccountCommunities(user, paginate.page, paginate.limit)
+  }
+
+  @Post('push-token')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Update account device push token' })
+  async setDevicePushToken(@User() user: string, @Body() body: DeviceTokenRequestDto): Promise<void> {
+    return await this.accountService.setDevicePushToken(user, body)
   }
 }

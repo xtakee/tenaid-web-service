@@ -47,8 +47,8 @@ export class Paginator {
       docs,
       totalItems,
       totalPages,
-      currentPage: page,
-      itemsPerPage: limit,
+      currentPage: page * 1,
+      itemsPerPage: limit * 1,
     };
   }
 }

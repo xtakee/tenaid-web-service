@@ -4,8 +4,13 @@ import { Community } from "./community";
 import { CommunityMember } from "./community.member";
 import { INVITE_STATUS } from "../community.constants";
 import { Account } from "src/feature/account/model/account.model";
+import { CommunityPath } from "./community.path";
 
 export type CommunityInviteDocument = HydratedDocument<CommunityInvite>;
+enum InviteType {
+  SINGLE = 'single',
+  EXTENDED = 'extended'
+}
 
 @Schema({ timestamps: true })
 export class CommunityInvite {
@@ -18,8 +23,17 @@ export class CommunityInvite {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: CommunityPath.name })
+  path: Types.ObjectId
+
   @Prop()
   name?: string
+
+  @Prop({ type: Date })
+  date: Date
+
+  @Prop({ enum: InviteType })
+  type?: string
 
   @Prop()
   photo?: string
@@ -27,17 +41,17 @@ export class CommunityInvite {
   @Prop()
   code?: string
 
-  @Prop()
-  start?: string
+  @Prop({ type: Date })
+  start: Date
 
-  @Prop()
-  end?: string
+  @Prop({ type: Date })
+  end: Date
 
   @Prop()
   checkIn?: string
 
   @Prop()
-  reason: string
+  reason?: string
 
   @Prop()
   checkOut?: string

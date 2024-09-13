@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Result } from 'src/core/util/result';
 import { LocationDto } from 'src/feature/core/dto/location.dto';
 import { GoogleService } from 'src/services/google/google.service';
 
@@ -7,10 +8,10 @@ export class LocationService {
   constructor(private readonly googlesService: GoogleService) { }
 
   async searchAddress(address: string): Promise<LocationDto[]> {
-    const response = await this.googlesService.search(address)
-    if (!response) throw new BadRequestException()
+    const result: Result = await this.googlesService.search(address)
+    if (result.error) throw new BadRequestException()
 
-    return response.map((place) => {
+    return result.data.map((place) => {
       return {
         name: place.name,
         address: place.formatted_address,

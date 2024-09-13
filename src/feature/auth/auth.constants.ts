@@ -11,6 +11,11 @@ export enum ACCOUNT_STATUS {
   REVOKED = 'revoked'
 }
 
+export enum DEVICE_TYPE {
+  ANDROID = 'android',
+  IOS = 'ios'
+}
+
 export const PASSWORD_MIN_LENGTH = 8
 
 export const MANAGER = 'can-own'

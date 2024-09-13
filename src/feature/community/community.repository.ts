@@ -26,6 +26,19 @@ const MEMBER_VISITOR_QUERY = {
   }
 }
 
+function getPaginatedMemberVisitorsQuery(page: number, limit: number) {
+  return {
+    select: '_id name code photo start end checkIn checkOut status reason path',
+    limit: limit,
+    page: page,
+    populate: {
+      path: 'path',
+      select: '_id name description',
+      strictPopulate: false,
+    }
+  }
+}
+
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'path',
   select: '_id name description'
@@ -191,16 +204,19 @@ export class CommunityRepository {
    * @param user 
    * @param data 
    */
-  async inviteVisitor(user: string, member: string, data: CommunityInviteDto): Promise<CommunityInvite> {
+  async inviteVisitor(user: string, data: CommunityInviteDto): Promise<CommunityInvite> {
     const invite: CommunityInvite = {
       community: new Types.ObjectId(data.community),
-      member: new Types.ObjectId(member),
+      member: new Types.ObjectId(data.member),
       account: new Types.ObjectId(user),
+      path: new Types.ObjectId(data.path),
       reason: data.reason,
       name: data.name,
+      type: data.type,
+      date: new Date(data.date),
       code: data.code,
-      start: data.start,
-      end: data.end,
+      start: new Date(data.start),
+      end: new Date(data.end),
       photo: data.photo
     }
 
@@ -313,11 +329,72 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getCommunityMemberVisitors(user: string, community: string): Promise<any> {
-    return await this.communityInviteModel.find(
-      { account: new Types.ObjectId(user), community: new Types.ObjectId(community) },
-      '_id name code photo start end checkIn checkOut status reason member community account')
-      .populate(MEMBER_VISITOR_QUERY).exec()
+  async getCommunityMemberVisitors(user: string, community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      {
+        account: new Types.ObjectId(user),
+        community: new Types.ObjectId(community),
+      },
+      getPaginatedMemberVisitorsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param start 
+   * @param end 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityMemberVisitorsByStatus(
+    user: string,
+    community: string,
+    status: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      {
+        account: new Types.ObjectId(user),
+        community: new Types.ObjectId(community),
+        status: status
+      },
+      getPaginatedMemberVisitorsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param start 
+   * @param end 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityMemberVisitorsByDate(
+    user: string,
+    community: string,
+    start: string,
+    end: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      {
+        account: new Types.ObjectId(user),
+        community: new Types.ObjectId(community),
+        $or: [
+          { start: { $gte: startDate, $lte: endDate } },
+          { end: { $gte: endDate } }
+        ],
+      },
+      getPaginatedMemberVisitorsQuery(page, limit))
   }
 
   /**

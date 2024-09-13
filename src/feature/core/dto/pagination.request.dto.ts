@@ -4,17 +4,16 @@ import { IsInt, IsNotEmpty, Max, Min } from "class-validator";
 
 export class PaginationRequestDto {
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ default: 1 })
   @IsInt()
   @Transform(({ value }) => parseInt(value, 10))
   @Min(1)
   page: number = 1
 
   @IsNotEmpty()
-  @ApiProperty()
-  @IsInt()
+  @ApiProperty({ default: 10 })
   @Transform(({ value }) => parseInt(value, 10))
-  @Min(10)
+  @Min(1)
   @Max(50)
   limit: number = 10
 }
