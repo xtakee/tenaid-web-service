@@ -389,10 +389,8 @@ export class CommunityRepository {
       {
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community),
-        $or: [
-          { start: { $gte: startDate, $lte: endDate } },
-          { end: { $gte: endDate } }
-        ],
+        start: { $lte: endDate },
+        end: { $gte: startDate }
       },
       getPaginatedMemberVisitorsQuery(page, limit))
   }

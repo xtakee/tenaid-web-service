@@ -41,7 +41,7 @@ export class AccountResponseDto {
   phone: string
   country?: string
   photo: string
-  dob?: string
+  dob?: Date
   flags: DashboardFlagsDto
   kycCompleted?: boolean
   primaryAccountType?: string

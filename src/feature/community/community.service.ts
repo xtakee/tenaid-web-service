@@ -69,7 +69,8 @@ export class CommunityService {
       })
 
       if (flags?.createCommunity === true) {
-        await this.accountRepository.clearCreateFlag(user);
+        //await this.accountRepository.clearCreateFlag(user);
+        await this.accountRepository.setQuickActionsFlag(user)
       }
 
       return this.communityMapper.map(community)

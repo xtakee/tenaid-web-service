@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Date, HydratedDocument, Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { Email } from "../../core/model/email.model";
 import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
@@ -64,7 +64,7 @@ export class Account {
   @Prop()
   country?: string
 
-  @Prop({type: DashboardFlags, default: new DashboardFlags()})
+  @Prop({ type: DashboardFlags, default: new DashboardFlags() })
   flags?: DashboardFlags
 
   @Prop({ type: Date })

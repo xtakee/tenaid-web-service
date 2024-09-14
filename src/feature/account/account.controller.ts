@@ -23,6 +23,7 @@ import { AddressDto } from "src/feature/core/dto/address.dto";
 import { PaginatedResult } from "src/core/helpers/paginator";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
+import { UpdateInfoDto } from "./dto/request/update.info.dto";
 
 @Controller({
   version: '1',
@@ -136,6 +137,19 @@ export class AccountController {
     return await this.accountService.updateProfile(id, body)
   }
 
+  @Patch('info')
+  @ApiOperation({ summary: 'Update dob, phone, photo, firstname and lastname' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  async updateProfileInfo(@Body() body: UpdateInfoDto, @User() id: string): Promise<AccountResponseDto> {
+    return await this.accountService.updateProfileInfo(id, body)
+  }
+
+  /**
+   * 
+   * @param id 
+   * @returns 
+   */
   @Get('managed')
   @ApiOperation({ summary: 'Get Managed Accounts' })
   @Auth()

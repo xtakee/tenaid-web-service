@@ -21,6 +21,7 @@ import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.pa
 import { CommunityRepository } from "../community/community.repository";
 import { PaginatedResult } from "src/core/helpers/paginator";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
+import { UpdateInfoDto } from "./dto/request/update.info.dto";
 
 @Injectable()
 export class AccountService {
@@ -249,6 +250,19 @@ export class AccountService {
    */
   async updateProfile(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateProfile(user, data)
+    if (account) return this.mapper.map(account)
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async updateProfileInfo(user: string, data: UpdateInfoDto): Promise<AccountResponseDto> {
+    let account = await this.accountRepository.updateProfileInfo(user, data)
     if (account) return this.mapper.map(account)
 
     throw new NotFoundException()

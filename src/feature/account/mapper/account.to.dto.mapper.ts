@@ -53,7 +53,7 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
       kycCompleted: isKycCompleted(from.primaryAccountType, from.kyc),
       phone: from.phone || null,
       photo: from.photo || null,
-      dob: from.dob?.toString() || null,
+      dob: from.dob,
       proofOfId: from.proofOfId || null
     }
   }

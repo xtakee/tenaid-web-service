@@ -18,6 +18,7 @@ import { CacheService } from "src/services/cache/cache.service";
 import { mergeArray } from "src/core/helpers/array.helper";
 import { DeviceToken } from "./model/device.token";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
+import { UpdateInfoDto } from "./dto/request/update.info.dto";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -116,6 +117,24 @@ export class AccountRepository implements IAccountRepository {
       phone: data.phone,
       photo: data.photo,
       proofOfId: data.proofOfId,
+      'kyc.profileCompleted': true
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param id 
+   * @param data 
+   * @returns 
+   */
+  async updateProfileInfo(id: string, data: UpdateInfoDto): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(id, {
+      dob: new Date(data.dob),
+      phone: data.phone,
+      photo: data.photo,
+      country: data.country,
+      firstName: data.firstName,
+      lastName: data.lastName,
       'kyc.profileCompleted': true
     }, { returnDocument: 'after' }).exec()
   }
@@ -420,6 +439,16 @@ export class AccountRepository implements IAccountRepository {
   async clearCreateFlag(user: string): Promise<void> {
     this.accountModel.findByIdAndUpdate(user, {
       'flags.createCommunity': false
+    }).exec()
+  }
+/**
+ * 
+ * @param user 
+ */
+  async setQuickActionsFlag(user: string): Promise<void> {
+    this.accountModel.findByIdAndUpdate(user, {
+      'flags.quickActions': true,
+      'flags.joinCommunity': false,
     }).exec()
   }
 
