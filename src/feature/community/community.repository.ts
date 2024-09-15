@@ -389,8 +389,34 @@ export class CommunityRepository {
       {
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community),
-        start: { $lte: endDate },
-        end: { $gte: startDate }
+        $or: [
+          { start: { $gte: startDate, $lte: endDate } },
+          { start: { $lt: startDate }, end: { $gte: endDate } }]
+      },
+      getPaginatedMemberVisitorsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityMemberUpcomingVisitors(
+    user: string,
+    community: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    const now = new Date()
+    const _date = new Date(now.setHours(0, 0, 0, 0));
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      {
+        account: new Types.ObjectId(user),
+        community: new Types.ObjectId(community),
+        start: { $gt: _date }
       },
       getPaginatedMemberVisitorsQuery(page, limit))
   }

@@ -218,15 +218,34 @@ export class CommunityService {
     throw new NotFoundException()
   }
 
-/**
- * 
- * @param user 
- * @param community 
- * @param status 
- * @param page 
- * @param limit 
- * @returns 
- */
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityMemberUpcomingVisitors(
+    user: string,
+    community: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberUpcomingVisitors(user, community, page, limit);
+    if (visitors) return visitors;
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param status 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
   async getCommunityMemberVisitorsByStatus(
     user: string,
     community: string,

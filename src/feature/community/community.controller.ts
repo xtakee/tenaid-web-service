@@ -83,13 +83,23 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberVisitorsByDate(user, community, start, end, paginate.page, paginate.limit);
   }
 
+  @Get(':community/member/invite-upcoming')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get Member upcoming invites' })
+  async getUpcomingInvites(@User() user: string,
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityMemberUpcomingVisitors(user, community, paginate.page, paginate.limit);
+  }
+
 
   @Get(':community/member/invite-status')
   @BasicAuth()
   @ApiOperation({ summary: 'Get Member invites by status' })
   async getInvitesByStatus(@User() user: string,
     @Param('community') community: string,
-    @Query('status') start: string,
+    @Query('status') status: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate.page, paginate.limit);
