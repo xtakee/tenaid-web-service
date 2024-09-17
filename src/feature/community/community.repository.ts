@@ -14,6 +14,9 @@ import { CommunityInviteValidateDto } from "src/feature/community/dto/request/co
 import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 import { MemberAccount } from "./model/member.account";
+import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto";
+import { CommunityAccessPoint } from "./model/community.access.point";
+import { Mode } from "fs";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -71,6 +74,7 @@ export class CommunityRepository {
   constructor(
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
+    @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
     @InjectModel(CommunityPath.name) private readonly communityPathModel: Model<CommunityPath>
@@ -94,6 +98,62 @@ export class CommunityRepository {
     }
 
     return await this.communityModel.create(community)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto): Promise<CommunityAccessPoint> {
+    console.log(community)
+    const accessPoint: CommunityAccessPoint = {
+      name: data.name,
+      description: data.description,
+      account: new Types.ObjectId(user),
+      password: data.password,
+      community: new Types.ObjectId(community)
+    }
+    console.log(accessPoint)
+    return await this.communityAccessPointModel.create(accessPoint);
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param access 
+   */
+  async getCommunityAccessPoint(community: string, access: string): Promise<any> {
+    return await this.communityAccessPointModel.findOne({
+      _id: new Types.ObjectId(access),
+      community: new Types.ObjectId(community),
+    }).populate({
+      path: 'community',
+      select: '_id name description code images types address'
+    }).exec();
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityAccessPoints(community: string): Promise<CommunityAccessPoint[]> {
+    return await this.communityAccessPointModel.find(
+      { community: new Types.ObjectId(community) });
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param access 
+   */
+  async getCommunityAccessPointByName(community: string, name: string): Promise<CommunityAccessPoint> {
+    return await this.communityAccessPointModel.findOne(
+      {
+        name: { $regex: name, $options: 'i' },
+        community: new Types.ObjectId(community)
+      });
   }
 
   /**
@@ -178,6 +238,15 @@ export class CommunityRepository {
    */
   async getCommunityByUser(user: string, community: string): Promise<Community> {
     return await this.communityModel.findOne({ account: new Types.ObjectId(user), _id: new Types.ObjectId(community) })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunity(community: string): Promise<Community> {
+    return await this.communityModel.findById(community)
   }
 
   /**
@@ -410,13 +479,13 @@ export class CommunityRepository {
     page: number,
     limit: number): Promise<PaginatedResult<any>> {
     const now = new Date()
-    const _date = new Date(now.setHours(0, 0, 0, 0));
+    const _date = new Date(now.setHours(23, 59, 59, 0));
 
     return await this.paginator.paginate(this.communityInviteModel,
       {
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community),
-        start: { $gt: _date }
+        start: { $gte: _date }
       },
       getPaginatedMemberVisitorsQuery(page, limit))
   }

@@ -23,6 +23,8 @@ import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.m
 import { CommunityAccountToDtoMapper } from './mapper/community.account.to.dto.mapper';
 import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 import { Paginator } from 'src/core/helpers/paginator';
+import { CommunityAccessPoint, CommunityAccessPointSchema } from './model/community.access.point';
+import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 
 @Module({
   providers: [
@@ -33,6 +35,7 @@ import { Paginator } from 'src/core/helpers/paginator';
     CodeGenerator,
     AuthHelper,
     Paginator,
+    CommunityAccessPointToDtoMapper,
     CommunityVisitorsToDtoMapper,
     InviteToDtoMapper,
     CommunityPathToDtoMapper,
@@ -45,6 +48,7 @@ import { Paginator } from 'src/core/helpers/paginator';
     AddressToDtoMapper],
   controllers: [CommunityController],
   imports: [
+    MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
     MongooseModule.forFeature([{ name: Community.name, schema: CommunitySchema }]),
     MongooseModule.forFeature([{ name: CommunityMember.name, schema: CommunityMemberSchema }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),

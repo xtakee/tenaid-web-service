@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query, UnauthorizedException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { User } from 'src/core/decorators/current.user';
@@ -21,6 +21,8 @@ import { PaginatedResult } from 'src/core/helpers/paginator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
+import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
+import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
 
 @Controller({
   version: '1',
@@ -71,6 +73,15 @@ export class CommunityController {
     return await this.communityService.invite(user, body)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param start 
+   * @param end 
+   * @param paginate 
+   * @returns 
+   */
   @Get(':community/member/invite-date')
   @BasicAuth()
   @ApiOperation({ summary: 'Get Member invites by date' })
@@ -83,6 +94,13 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberVisitorsByDate(user, community, start, end, paginate.page, paginate.limit);
   }
 
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
   @Get(':community/member/invite-upcoming')
   @BasicAuth()
   @ApiOperation({ summary: 'Get Member upcoming invites' })
@@ -93,7 +111,14 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberUpcomingVisitors(user, community, paginate.page, paginate.limit);
   }
 
-
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param status 
+   * @param paginate 
+   * @returns 
+   */
   @Get(':community/member/invite-status')
   @BasicAuth()
   @ApiOperation({ summary: 'Get Member invites by status' })
@@ -273,5 +298,33 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get a community by code' })
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
     return this.communityService.getCommunityByCode(code)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/:community/access-point')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Create a community access point' })
+  async createCommunityAccessPoint(@User() user: string, @Param('community') community: string, @Body() body: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
+    console.log(community)
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.createCommunityAccessPoint(user, community, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  @Get('/:community/access-point')
+  @ApiOperation({ summary: 'Get all community access points' })
+  async getCommunityAccessPoints(@Param('community') community: string): Promise<CommunityAccessPointResonseDto[]> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityAccessPoints(community)
   }
 }

@@ -48,13 +48,7 @@ export class CommunityInvite {
   end: Date
 
   @Prop()
-  checkIn?: string
-
-  @Prop()
   reason?: string
-
-  @Prop()
-  checkOut?: string
 
   @Prop({ enum: INVITE_STATUS, default: INVITE_STATUS.PENDING })
   status?: string

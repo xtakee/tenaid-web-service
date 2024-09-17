@@ -25,6 +25,7 @@ import { CommunityInvite, CommunityInviteSchema } from '../community/model/commu
 import { CommunityPath, CommunityPathSchema } from '../community/model/community.path';
 import { CommunityMember, CommunityMemberSchema } from '../community/model/community.member';
 import { DeviceToken, DeviceTokenSchema } from './model/device.token';
+import { CommunityAccessPoint, CommunityAccessPointSchema } from '../community/model/community.access.point';
 
 @Global()
 @Module({
@@ -54,6 +55,33 @@ import { DeviceToken, DeviceTokenSchema } from './model/device.token';
         if (this.isModified('password') || this.isNew) {
           this.password = await (new AuthHelper()).hash(this.password)
         }
+      });
+
+      schema.pre('findOneAndUpdate', async function (next) {
+        if ((this.getUpdate() as any).password) {
+          (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
+        }
+        next()
+      });
+      
+      return schema;
+    },
+  }]),
+  MongooseModule.forFeatureAsync([{
+    name: CommunityAccessPoint.name,
+    useFactory: async () => {
+      const schema = CommunityAccessPointSchema;
+      schema.pre('save', async function () {
+        if (this.isModified('password') || this.isNew) {
+          this.password = await (new AuthHelper()).hash(this.password)
+        }
+      });
+
+      schema.pre('findOneAndUpdate', async function (next) {
+        if ((this.getUpdate() as any).password) {
+          (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
+        }
+        next()
       });
       return schema;
     },

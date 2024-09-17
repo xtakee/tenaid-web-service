@@ -7,7 +7,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH } from 'src/core/strings';
+import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
@@ -29,6 +29,10 @@ import { CommunityMemberResponseDto } from './dto/response/community.member.resp
 import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 import { AccountRepository } from '../account/account.respository';
 import { MemberAccount } from './model/member.account';
+import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
+import { CommunityAccessPoint } from './model/community.access.point';
+import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
+import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 
 @Injectable()
 export class CommunityService {
@@ -38,6 +42,7 @@ export class CommunityService {
     private readonly accountRepository: AccountRepository,
     private readonly codeGenerator: CodeGenerator,
     private readonly inviteMapper: InviteToDtoMapper,
+    private readonly accessPointMapper: CommunityAccessPointToDtoMapper,
     private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
@@ -116,6 +121,29 @@ export class CommunityService {
     if (invite) return this.inviteMapper.map(invite)
 
     throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
+    const _community = await this.communityRepository.getCommunityAccessPointByName(community, data.name)
+    if (_community) throw new BadRequestException(DUPLICATE_ACCESS_POINT_ERROR)
+
+    const accessPoint = await this.communityRepository.createCommunityAccessPoint(user, community, data)
+    return this.accessPointMapper.map(accessPoint)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityAccessPoints(community: string): Promise<CommunityAccessPointResonseDto[]> {
+    const accessPoints = await this.communityRepository.getCommunityAccessPoints(community)
+    return accessPoints.map((point) => this.accessPointMapper.map(point))
   }
 
   /**

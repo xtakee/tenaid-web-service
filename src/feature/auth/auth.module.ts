@@ -18,9 +18,10 @@ import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { Paginator } from 'src/core/helpers/paginator';
 import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
-import { Counter, CounterSchema } from '../core/counter/model/counter.model';
-import { CounterRepository } from '../core/counter/counter.repository';
 import { CodeGenerator } from 'src/core/helpers/code.generator';
+import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
+import { CommunityRepository } from '../community/community.repository';
+import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper';
 
 @Global()
 @Module({
@@ -30,11 +31,14 @@ import { CodeGenerator } from 'src/core/helpers/code.generator';
     AccountRepository,
     AccountToDtoMapper,
     AuthHelper,
+    CommunityToDtoMapper,
     AuthRepository,
+    CommunityRepository,
     CaslAbilityFactory,
     PoliciesGuard,
     CacheService,
     AdminRepository,
+    AddressToDtoMapper,
     AccountAdminToDtoMapper,
     Paginator,
     CodeGenerator

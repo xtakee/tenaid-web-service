@@ -13,3 +13,4 @@ export const INVALID_INVITE_VALIDITY_PERIOD_HOUR: string = "You must enter a val
 export const INVALID_INVITE_VALIDITY_PERIOD_DAY: string = "You must enter a validity period not more than 7 days"
 export const INVALID_COMMUNITY_PATH: string = "You have entered an invalid community path"
 export const INVALID_DATE_FORMAT: string = "Invalid date format"
+export const DUPLICATE_ACCESS_POINT_ERROR: string = "An access point with this name exists. Provide a unique name"

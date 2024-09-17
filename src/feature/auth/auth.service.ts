@@ -12,8 +12,11 @@ import { PermissionDto } from 'src/feature/core/model/permission';
 import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response';
 import { AccountAdmin } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
-import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { INVALID_LOGIN_ERROR } from 'src/core/strings';
+import { CommunityRepository } from '../community/community.repository';
+import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
+import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
+import { Community } from '../community/model/community';
 
 @Injectable()
 export class AuthService {
@@ -25,8 +28,9 @@ export class AuthService {
     private readonly adminRepository: AdminRepository,
     private readonly adminAccountMapper: AccountAdminToDtoMapper,
     private readonly jwtService: JwtService,
+    private readonly communityMapper: CommunityToDtoMapper,
     private readonly authHelper: AuthHelper,
-    private readonly codeGenerator: CodeGenerator
+    private readonly communityRepository: CommunityRepository
   ) { }
 
   /**
@@ -197,6 +201,46 @@ export class AuthService {
     throw new BadRequestException()
   }
 
+  /**
+   * 
+   * @param community 
+   * @param access 
+   * @param password 
+   * @returns 
+   */
+  async signInCommunityAccessPoint(community: string, access: string, password: string): Promise<AccessPointAuthResponseDto> {
+    const accessPoint = await this.communityRepository.getCommunityAccessPoint(community, access)
+    if (accessPoint) {
+      const isMatch = await this.authHelper.isMatch(password, accessPoint.password)
+      if (isMatch) {
+        const payload = { sub: (accessPoint as any).community._id.toString(), sub_0: (accessPoint as any).account };
+        const token = this.jwtService.sign(payload)
+
+        const key = (accessPoint as any)._id.toString()
+        const authorization = this.authHelper.encrypt(key)
+        this.authRepository.saveAuthToken(key, token)
+
+        return {
+          account: {
+            id: (accessPoint as any)._id,
+            name: accessPoint.name,
+            description: accessPoint.description,
+            community: this.communityMapper.map(accessPoint.community as Community)
+          },
+          authorization
+        }
+      }
+    }
+
+    throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param id 
+   * @returns 
+   */
   async signManagedAccount(user: string, id: string): Promise<AccountAuthResponseDto> {
     const permissions = await this.getManageAccountPermissions(id)
     if (permissions) {
