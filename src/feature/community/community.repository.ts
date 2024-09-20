@@ -17,6 +17,7 @@ import { MemberAccount } from "./model/member.account";
 import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto";
 import { CommunityAccessPoint } from "./model/community.access.point";
 import { Mode } from "fs";
+import { populate } from "dotenv";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -410,6 +411,27 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param status 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getAllCommunities(page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
+    const query = !status ? {} : { status }
+
+    return await this.paginator.paginate(this.communityModel, query,
+      {
+        populate: {
+          path: 'account',
+          select: '_id firstName lastName email.value email.verified photo phone address'
+        },
+        page: page,
+        limit: limit
+      })
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @param start 
@@ -507,14 +529,14 @@ export class CommunityRepository {
    * @param id 
    * @returns 
    */
-  async getNextMemberCode(id: string): Promise<number> {
+  async getNextMemberCode(id: string, user: string): Promise<Community> {
     const community = await this.communityModel.findOneAndUpdate(
-      { _id: new Types.ObjectId(id) },
+      { _id: new Types.ObjectId(id), account: new Types.ObjectId(user) },
       { $inc: { members: 1 } },
       { new: true, upsert: false },
     ).exec()
 
-    return community.members
+    return community
   }
 
   /**
@@ -577,6 +599,35 @@ export class CommunityRepository {
       { status: ACCOUNT_STATUS.APPROVED, code: code, comment: ACCOUNT_STATUS.APPROVED },
       { returnDocument: 'after' })
       .populate(COMMUNITY_MEMBER_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param member 
+   * @param status 
+   * @param community 
+   * @param code 
+   * @returns 
+   */
+  async setJoinRequestStatus(member: string, status: string, community: string, code: string): Promise<any> {
+    return await this.communityMemberModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(member), community: new Types.ObjectId(community) },
+      { status: status, code: code, comment: status },
+      { returnDocument: 'after' })
+      .populate(COMMUNITY_MEMBER_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param status 
+   * @param comment 
+   */
+  async setCommunityRequestStatus(community: string, status: string, comment: string): Promise<void> {
+    await this.communityModel.findByIdAndUpdate(community, {
+      status: status,
+      comment: comment
+    }, { returnDocument: 'after' }).exec()
   }
 
   /**

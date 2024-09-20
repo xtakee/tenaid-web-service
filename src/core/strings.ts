@@ -14,3 +14,10 @@ export const INVALID_INVITE_VALIDITY_PERIOD_DAY: string = "You must enter a vali
 export const INVALID_COMMUNITY_PATH: string = "You have entered an invalid community path"
 export const INVALID_DATE_FORMAT: string = "Invalid date format"
 export const DUPLICATE_ACCESS_POINT_ERROR: string = "An access point with this name exists. Provide a unique name"
+
+// Push notification strings
+export const REQUEST_APPROVED: string = "Request Approved!"
+export const REQUEST_DENIED: string = "Request Denied!"
+
+export const REQUEST_DENIED_BODY: string = "Whoops! You are now a member of "
+export const REQUEST_APPROVED_BODY: string = "Congratulations! You are now a member of "

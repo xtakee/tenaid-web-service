@@ -6,11 +6,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AdminRepository } from './admin.repository';
 import { AccountAdminToDtoMapper } from './mapper/account.admin.to.dto.mapper';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
+import { CommunityRepository } from '../community/community.repository';
+import { Paginator } from 'src/core/helpers/paginator';
+import { NotificationService } from '../notification/notification.service';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  providers: [AdminService, AdminRepository, AccountAdminToDtoMapper, AuthHelper],
+  providers: [AdminService, AdminRepository, AccountAdminToDtoMapper, AuthHelper, NotificationService, CommunityRepository, Paginator],
   controllers: [AdminController],
-  imports: [MongooseModule.forFeature([{ name: AccountAdmin.name, schema: AccountAdminSchema }])],
+  imports: [MongooseModule.forFeature([{ name: AccountAdmin.name, schema: AccountAdminSchema }]),
+  BullModule.registerQueue({
+    name: 'notification',
+  })],
   exports: [MongooseModule.forFeature([{ name: AccountAdmin.name, schema: AccountAdminSchema }]),]
 })
 

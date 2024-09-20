@@ -1,17 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsMongoId, IsNotEmpty } from "class-validator";
+import { STATUS_TYPE } from "src/feature/community/dto/request/community.request.status.dto";
 
-export enum STATUS_TYPE {
-  APPROVED = 'approved',
-  DENIED = 'denied'
-}
-
-export class CommunityRequestStatusDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsMongoId()
-  request: string
-
+export class ReviewCommunityRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()

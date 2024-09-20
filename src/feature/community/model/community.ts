@@ -33,6 +33,9 @@ export class Community {
   @Prop({enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.PENDING})
   status?: string
 
+  @Prop()
+  comment?: string
+
   @Prop({ type: Address })
   address: Address
 }

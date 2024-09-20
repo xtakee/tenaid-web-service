@@ -43,6 +43,15 @@ export class DashboardFlags {
   createCommunity?: boolean
 }
 
+@Schema()
+export class PermissionFlags {
+  @Prop({ default: true })
+  canCreateCommunity?: boolean
+
+  @Prop({ default: true })
+  canJoinCommunity?: boolean
+}
+
 @Schema({ timestamps: true })
 export class Account {
 
@@ -66,6 +75,9 @@ export class Account {
 
   @Prop({ type: DashboardFlags, default: new DashboardFlags() })
   flags?: DashboardFlags
+
+  @Prop({ type: PermissionFlags, default: new PermissionFlags() })
+  permissions?: PermissionFlags
 
   @Prop({ type: Date })
   dob?: Date;

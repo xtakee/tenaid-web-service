@@ -436,15 +436,6 @@ export class AccountRepository implements IAccountRepository {
    * 
    * @param user 
    */
-  async clearCreateFlag(user: string): Promise<void> {
-    this.accountModel.findByIdAndUpdate(user, {
-      'flags.createCommunity': false
-    }).exec()
-  }
-/**
- * 
- * @param user 
- */
   async setQuickActionsFlag(user: string): Promise<void> {
     this.accountModel.findByIdAndUpdate(user, {
       'flags.quickActions': true,
@@ -463,12 +454,43 @@ export class AccountRepository implements IAccountRepository {
   }
 
   /**
+ * 
+ * @param user 
+ */
+  async setJoinFlagStatus(user: string, status: boolean): Promise<void> {
+    await this.accountModel.findOneAndUpdate({
+      _id: new Types.ObjectId(user),
+      'flags.quickActions': false
+    }, {
+      'flags.joinCommunity': status,
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
    * 
    * @param user 
+   * @param status 
    */
-  async clearJoinFlag(user: string): Promise<void> {
+  async setCreateFlagStatus(user: string, status: boolean): Promise<void> {
+    await this.accountModel.findOneAndUpdate({
+      _id: new Types.ObjectId(user),
+      'flags.quickActions': false
+    }, {
+      'flags.createCommunity': status,
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param status 
+   */
+  async setAllDashboardFlagStatus(user: string): Promise<void> {
     this.accountModel.findByIdAndUpdate(user, {
-      'flags.joinCommunity': false
+      'flags.joinCommunity': false,
+      'flags.createCommunity': false,
+      'flags.welcome': false,
+      'flags.quickActions': true
     }).exec()
   }
 
@@ -543,6 +565,14 @@ export class AccountRepository implements IAccountRepository {
       token: data.token,
       device: data.device
     }, { new: true, upsert: true, returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  async getDevicePushToken(user: string): Promise<DeviceToken> {
+    return await this.deviceTokenModel.findOne({ account: new Types.ObjectId(user) })
   }
 
 }

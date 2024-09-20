@@ -7,7 +7,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH } from 'src/core/strings';
+import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED } from 'src/core/strings';
 import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
 import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
@@ -33,6 +33,8 @@ import { CommunityAccessPointRequestDto } from './dto/request/community.access.p
 import { CommunityAccessPoint } from './model/community.access.point';
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
+import { MessageType, NotificationService } from '../notification/notification.service';
+import { title } from 'process';
 
 @Injectable()
 export class CommunityService {
@@ -41,6 +43,7 @@ export class CommunityService {
     private readonly counterRepository: CounterRepository,
     private readonly accountRepository: AccountRepository,
     private readonly codeGenerator: CodeGenerator,
+    private readonly notificationService: NotificationService,
     private readonly inviteMapper: InviteToDtoMapper,
     private readonly accessPointMapper: CommunityAccessPointToDtoMapper,
     private readonly pathMapper: CommunityPathToDtoMapper,
@@ -64,20 +67,16 @@ export class CommunityService {
     const community = await this.communityRepository.createCommunity(user, data)
     if (community) {
 
-      const { member, flags } = await this.getMemberAccountExtras(user)
+      const { member, _ } = await this.getMemberAccountExtras(user)
 
       await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
         code: '0000',
         isAdmin: true,
         description: community.address?.address,
-        status: ACCOUNT_STATUS.APPROVED
+        status: ACCOUNT_STATUS.PENDING
       })
 
-      if (flags?.createCommunity === true) {
-        //await this.accountRepository.clearCreateFlag(user);
-        await this.accountRepository.setQuickActionsFlag(user)
-      }
-
+      await this.accountRepository.setCreateFlagStatus(user, false)
       return this.communityMapper.map(community)
     }
 
@@ -369,7 +368,7 @@ export class CommunityService {
     const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
     if (!pathData) throw new NotFoundException(INVALID_COMMUNITY_PATH)
 
-    const { member, flags } = await this.getMemberAccountExtras(user)
+    const { member, _ } = await this.getMemberAccountExtras(user)
 
     const request = await this.communityRepository.createCommunityMember(user, member, data.community, {
       path: data.path,
@@ -381,9 +380,7 @@ export class CommunityService {
     })
 
     if (request) {
-      if (flags?.joinCommunity === true) {
-        await this.accountRepository.clearJoinFlag(user);
-      }
+      await this.accountRepository.setJoinFlagStatus(user, false);
       return this.communityAccountMapper.map(request)
     }
 
@@ -406,15 +403,37 @@ export class CommunityService {
    */
   async setJoinRequestStatus(user: string, data: CommunityRequestStatusDto): Promise<CommunityMemberResponseDto> {
     let request: any = null
+    let pushTitle = data.status === ACCOUNT_STATUS.APPROVED ? REQUEST_APPROVED : REQUEST_DENIED
+    let pushBody = ''
+    let code = '-1'
+
+    const community = await this.communityRepository.getNextMemberCode(data.community, user)
+    if (!community) throw new NotFoundException()
+
     if (data.status === ACCOUNT_STATUS.APPROVED) {
-      const code = await this.communityRepository.getNextMemberCode(data.community)
-      if (code) {
-        request = await this.communityRepository.
-          approveJoinRequest(data.request, data.community,
-            code.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0'))
-      }
+      code = community.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')
+      pushBody = `${REQUEST_APPROVED_BODY} ${community.name}`
     } else {
-      request = await this.communityRepository.declineJoinRequest(data.request, data.community, data.comment)
+      pushBody = `Whoops! ${community.name} has denied your join request. Kindly ensure your details are correct`
+    }
+
+    request = await this.communityRepository.
+      setJoinRequestStatus(data.request, data.status, data.community, code)
+
+    if (request) {
+      const deviceToken = await this.accountRepository.getDevicePushToken(request.account)
+      if (deviceToken)
+        this.notificationService.pushToDevice({
+          device: deviceToken.token, title: pushTitle, body: {
+            type: MessageType.REQUEST_JOIN_COMMUNITY, description: pushBody, link: '/home', extra: {
+              community: data.community
+            }
+          }
+        })
+
+      if (data.status === ACCOUNT_STATUS.APPROVED)
+        await this.accountRepository.setAllDashboardFlagStatus(request.account)
+      else await this.accountRepository.setJoinFlagStatus(request.account, true)
     }
 
     if (request) return this.memberMapper.map(request)

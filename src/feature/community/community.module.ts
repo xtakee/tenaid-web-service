@@ -25,6 +25,8 @@ import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.re
 import { Paginator } from 'src/core/helpers/paginator';
 import { CommunityAccessPoint, CommunityAccessPointSchema } from './model/community.access.point';
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
+import { NotificationService } from '../notification/notification.service';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   providers: [
@@ -35,6 +37,7 @@ import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point
     CodeGenerator,
     AuthHelper,
     Paginator,
+    NotificationService,
     CommunityAccessPointToDtoMapper,
     CommunityVisitorsToDtoMapper,
     InviteToDtoMapper,
@@ -47,13 +50,17 @@ import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point
     CommunityMemberToDtoMapper,
     AddressToDtoMapper],
   controllers: [CommunityController],
+  exports: [CommunityRepository, CommunityService],
   imports: [
     MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
     MongooseModule.forFeature([{ name: Community.name, schema: CommunitySchema }]),
     MongooseModule.forFeature([{ name: CommunityMember.name, schema: CommunityMemberSchema }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
     MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
-    MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }])
+    MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }]),
+    BullModule.registerQueue({
+      name: 'notification',
+    })
   ]
 })
 
