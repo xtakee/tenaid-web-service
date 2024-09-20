@@ -311,9 +311,17 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Create a community access point' })
   async createCommunityAccessPoint(@User() user: string, @Param('community') community: string, @Body() body: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
-    console.log(community)
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.createCommunityAccessPoint(user, community, body)
+  }
+
+
+  @Get('/:community/join-request-count')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community join request count' })
+  async getCommunityJoinRequestsCount(@User() user: string, @Param('community') community: string): Promise<{}> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityJoinRequestsCount(user, community)
   }
 
   /**
@@ -322,6 +330,7 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/access-point')
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all community access points' })
   async getCommunityAccessPoints(@Param('community') community: string): Promise<CommunityAccessPointResonseDto[]> {
     if (!isMongoId(community)) throw new BadRequestException()

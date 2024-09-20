@@ -304,7 +304,7 @@ export class AccountRepository implements IAccountRepository {
    */
   async getAllRegisteredTenants(page?: number, limit?: number): Promise<PaginatedResult<Account>> {
     return await this.paginator.paginate(this.accountModel,
-      { accountTypes: 'can-lease' },
+      { 'accountTypes.type': 'can-lease' },
       {
         select: '_id firstName lastName email.value email.verified photo phone createdAt',
         limit: limit,
@@ -320,7 +320,7 @@ export class AccountRepository implements IAccountRepository {
  */
   async getAllRegisteredAgents(page?: number, limit?: number): Promise<PaginatedResult<Account>> {
     return await this.paginator.paginate(this.accountModel,
-      { accountTypes: 'can-publish' },
+      { 'accountTypes.type': 'can-publish' },
       {
         select: '_id firstName lastName email.value email.verified photo phone createdAt',
         limit: limit,
@@ -336,7 +336,7 @@ export class AccountRepository implements IAccountRepository {
 */
   async getAllRegisteredManagers(page?: number, limit?: number): Promise<PaginatedResult<Account>> {
     return await this.paginator.paginate(this.accountModel,
-      { accountTypes: 'can-own' },
+      { 'accountTypes.type': 'can-own' },
       {
         select: '_id firstName lastName email.value email.verified photo phone createdAt',
         limit: limit,

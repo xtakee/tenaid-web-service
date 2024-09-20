@@ -211,6 +211,21 @@ export class CommunityService {
    * 
    * @param user 
    * @param community 
+   * @returns 
+   */
+  async getCommunityJoinRequestsCount(user: string, community: string): Promise<{}> {
+    const communityData = await this.communityRepository.getCommunity(community);
+    
+    if (communityData && communityData.account.toString() === user)
+      return { count: await this.communityRepository.getCommunityJoinRequestsCount(community) }
+
+    throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
    * @param page 
    * @param limit 
    * @returns 

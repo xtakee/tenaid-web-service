@@ -224,6 +224,18 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   */
+  async getCommunityJoinRequestsCount(community: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING
+    }).exec()
+  }
+
+  /**
+   * 
    * @param code 
    * @returns 
    */

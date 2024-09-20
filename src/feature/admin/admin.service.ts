@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, NotImplementedException } from '@nestjs/
 import { AdminRepository } from './admin.repository';
 import { CreateAdminDto } from 'src/feature/admin/dto/request/create.admin.dto';
 import { Permission } from '../auth/model/permission';
-import { ACCOUNT_STATUS, ADMIN_SYSTEM_FEATURES, CLAIM } from '../auth/auth.constants';
+import { ACCOUNT_STATUS, ADMIN_SYSTEM_FEATURES, CLAIM, SYSTEM_FEATURES } from '../auth/auth.constants';
 import { ReviewAddOnRequestDto } from 'src/feature/admin/dto/request/review.add.on.request.dto';
 import { AccountRepository } from '../account/account.respository';
 import { PaginatedResult } from 'src/core/helpers/paginator';
@@ -133,8 +133,15 @@ export class AdminService {
       await this.communityRepository.setJoinRequestStatus((member as any)._id, status, community, member.code)
       await this.communityRepository.setCommunityRequestStatus(community, status, comment)
 
-      if (status === ACCOUNT_STATUS.APPROVED)
+      if (status === ACCOUNT_STATUS.APPROVED) {
+        //enable all permissions
+        this.accountRepository.addPermission(communityData.account.toString(), {
+          authorization: SYSTEM_FEATURES.COMMUNITIES,
+          claim: [CLAIM.DELETE, CLAIM.READ, CLAIM.WRITE]
+        })
+
         await this.accountRepository.setAllDashboardFlagStatus(communityData.account.toString())
+      }
       else await this.accountRepository.setCreateFlagStatus(communityData.account.toString(), true)
 
       const deviceToken = await this.accountRepository.getDevicePushToken(communityData.account.toString())
