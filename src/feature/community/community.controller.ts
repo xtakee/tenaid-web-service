@@ -248,6 +248,23 @@ export class CommunityController {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @param request 
+   * @returns 
+   */
+  @Get(':community/request/:request')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @ApiOperation({ summary: 'Get a community join request' })
+  async getCommunityJoinRequest(@Param('community') community: string, @Param('request') request: string): Promise<any> {
+    if (!isMongoId(request)) throw new BadRequestException()
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunintyJoinRequest(community, request)
+  }
+
+  /**
+   * 
    * @param community 
    * @param paginate 
    * @returns 
@@ -257,6 +274,7 @@ export class CommunityController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
   @ApiOperation({ summary: 'Get all community join requests' })
   async getCommunityJoinRequests(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunintyJoinRequests(community, paginate.page, paginate.limit)
   }
 
@@ -336,4 +354,18 @@ export class CommunityController {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunityAccessPoints(community)
   }
+
+  /**
+ * 
+ * @param community 
+ * @returns 
+ */
+  @Post('/:community/primary')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Set a primary account community' })
+  async setPrimaryAccountCommunity(@User() user: string, @Param('community') community: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.setPrimaryAccountCommunity(user, community)
+  }
+
 }

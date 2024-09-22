@@ -215,7 +215,7 @@ export class CommunityService {
    */
   async getCommunityJoinRequestsCount(user: string, community: string): Promise<{}> {
     const communityData = await this.communityRepository.getCommunity(community);
-    
+
     if (communityData && communityData.account.toString() === user)
       return { count: await this.communityRepository.getCommunityJoinRequestsCount(community) }
 
@@ -380,8 +380,8 @@ export class CommunityService {
       throw new ForbiddenException(error)
     }
 
-    const pathData = await this.communityRepository.getCommunityPath(data.path, data.community)
-    if (!pathData) throw new NotFoundException(INVALID_COMMUNITY_PATH)
+    const community = await this.communityRepository.getCommunity(data.community)
+    if (!community) throw new NotFoundException();
 
     const { member, _ } = await this.getMemberAccountExtras(user)
 
@@ -396,6 +396,20 @@ export class CommunityService {
 
     if (request) {
       await this.accountRepository.setJoinFlagStatus(user, false);
+
+      // send email and notification here
+      const deviceToken = await this.accountRepository.getDevicePushToken(community.account.toString())
+      if (deviceToken) {
+        const memberName = `${request.extra.firstName} ${request.extra.lastName}`
+        this.notificationService.pushToDevice({
+          device: deviceToken.token, title: 'Join Requested', body: {
+            type: MessageType.REQUEST_JOIN_COMMUNITY, description: `Hello! ${memberName} has requested to be a member of ${community.name}`, link: 'community/join-request', extra: {
+              community: data.community,
+              request: (request as any)._id
+            }
+          }
+        })
+      }
       return this.communityAccountMapper.map(request)
     }
 
@@ -405,9 +419,36 @@ export class CommunityService {
   /**
    * 
    * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
    */
   async getCommunintyJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getCommunityJoinRequests(community, page, limit)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   */
+  async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
+    const response = await this.communityRepository.setPrimaryAccountCommunity(user, community)
+    if (response) return response
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param request 
+   * @returns 
+   */
+  async getCommunintyJoinRequest(community: string, request: string): Promise<any> {
+    const data = await this.communityRepository.getCommunityJoinRequest(community, request)
+    if (data) return data
+    throw new NotFoundException()
   }
 
   /**

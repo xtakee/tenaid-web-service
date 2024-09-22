@@ -49,7 +49,7 @@ const MEMBER_COMMUNITIES_QUERY = [{
 },
 {
   path: 'community',
-  select: '_id name description images type image address createdAt updatedAt'
+  select: '_id name code members description images type image address createdAt updatedAt'
 }]
 
 const COMMUNITY_VISITOR_QUERY = [
@@ -65,10 +65,16 @@ const COMMUNITY_VISITOR_QUERY = [
   }
 ]
 
-const COMMUNITY_MEMBER_QUERY = {
-  path: 'path',
-  select: '_id name description'
-}
+const COMMUNITY_MEMBER_QUERY = [
+  {
+    path: 'path',
+    select: '_id name description'
+  },
+  {
+    path: 'community',
+    select: '_id name description'
+  }
+]
 
 @Injectable()
 export class CommunityRepository {
@@ -213,8 +219,7 @@ export class CommunityRepository {
 
     const count = await this.communityMemberModel.countDocuments({
       account: new Types.ObjectId(user),
-      isPrimary: true,
-      status: ACCOUNT_STATUS.APPROVED
+      isPrimary: true
     }).exec()
 
     if (!count) member.isPrimary = true
@@ -331,6 +336,21 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       $or: [{ status: ACCOUNT_STATUS.APPROVED }, { status: ACCOUNT_STATUS.PENDING }]
     })
+  }
+
+  /**
+   * 
+   * @param request 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityJoinRequest(community: string, request: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      _id: new Types.ObjectId(request),
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING
+    }, '_id community path code description point extra status createdAt updatedAt')
+      .populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
   /**
@@ -573,6 +593,27 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
+    const prev = await this.communityMemberModel.findOneAndUpdate({ account: new Types.ObjectId(user), status: ACCOUNT_STATUS.APPROVED },
+      { isPrimary: false },
+      { returnDocument: 'after' }
+    ).find
+
+    if (prev) {
+      return await this.communityMemberModel.findOneAndUpdate(
+        { account: new Types.ObjectId(user), community: new Types.ObjectId(community) }
+      ).populate(MEMBER_COMMUNITIES_QUERY).exec()
+    }
+
+    return null
+  }
+
+  /**
+   * 
    * @param member 
    * @returns 
    */
@@ -590,7 +631,7 @@ export class CommunityRepository {
    */
   async getCommunityJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.paginator.paginate(this.communityMemberModel,
-      { community: new Types.ObjectId(community), $or: [{ status: ACCOUNT_STATUS.PENDING }, { status: ACCOUNT_STATUS.DENIED }] },
+      { community: new Types.ObjectId(community), status: ACCOUNT_STATUS.PENDING },
       {
         select: '_id community path code description point extra status createdAt updatedAt',
         limit: limit,
