@@ -23,9 +23,6 @@ export class CommunityInvite {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
-  @Prop({ type: Types.ObjectId, ref: CommunityPath.name })
-  path: Types.ObjectId
-
   @Prop()
   name?: string
 

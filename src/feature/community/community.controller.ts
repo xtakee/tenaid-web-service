@@ -53,8 +53,7 @@ export class CommunityController {
    * @returns 
    */
   @Patch('/:community')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Update a community' })
   async updateCommunity(@User() user: string, @Param('community') id: string, @Body() body: CommunityDto): Promise<CommunityDto> {
     if (!isMongoId(id)) throw new BadRequestException()
@@ -163,8 +162,7 @@ export class CommunityController {
    * @returns 
    */
   @Get(':community/invite')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all community invites/visitors' })
   async getCommunityVisitors(@Param('community') community: string): Promise<CommunityVisitorsDto[]> {
     if (!isMongoId(community)) throw new BadRequestException()
@@ -203,8 +201,7 @@ export class CommunityController {
    * @param body 
    */
   @Post('path')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Create community path/street' })
   async createCommunityPath(@User() user: string, @Body() body: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
     return await this.communityService.createCommunityPath(user, body)
@@ -254,8 +251,7 @@ export class CommunityController {
    * @returns 
    */
   @Get(':community/request/:request')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Get a community join request' })
   async getCommunityJoinRequest(@Param('community') community: string, @Param('request') request: string): Promise<any> {
     if (!isMongoId(request)) throw new BadRequestException()
@@ -270,8 +266,7 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/request')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all community join requests' })
   async getCommunityJoinRequests(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
@@ -285,8 +280,7 @@ export class CommunityController {
    * @returns 
    */
   @Post('/request/status')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
+  @BasicAuth()
   @ApiOperation({ summary: 'Approve/Decline community join request' })
   async setCommunityJoinRequestStatus(@User() user: string, @Body() body: CommunityRequestStatusDto): Promise<CommunityMemberResponseDto> {
     return await this.communityService.setJoinRequestStatus(user, body)

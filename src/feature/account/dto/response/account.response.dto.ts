@@ -3,21 +3,21 @@ import { Email } from "src/feature/core/model/email"
 
 
 export class _KYC {
-  profileCompleted?: boolean
+  profileCompleted?: Boolean
 
-  addressCompleted?: boolean
+  addressCompleted?: Boolean
 
-  bankingCompleted?: boolean
+  bankingCompleted?: Boolean
 }
 
 export class DashboardFlagsDto {
-  welcome?: boolean
+  welcome?: Boolean
 
-  quickActions?: boolean
+  quickActions?: Boolean
 
-  joinCommunity?: boolean
+  joinCommunity?: Boolean
 
-  createCommunity?: boolean
+  createCommunity?: Boolean
 }
 
 export interface Role {
@@ -25,12 +25,12 @@ export interface Role {
   name: string
   photo: string
   email: string
-  isOwner: boolean
+  isOwner: Boolean
 }
 
 interface AccType {
   type: string,
-  approved: boolean
+  approved: Boolean
 }
 
 export class AccountResponseDto {
@@ -43,7 +43,7 @@ export class AccountResponseDto {
   photo: string
   dob?: Date
   flags: DashboardFlagsDto
-  kycCompleted?: boolean
+  kycCompleted?: Boolean
   primaryAccountType?: string
   accountTypes?: AccType[]
   proofOfId?: string

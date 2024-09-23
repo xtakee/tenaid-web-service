@@ -11,13 +11,12 @@ export class InviteToDtoMapper implements Mapper<CommunityInvite, CommunityInvit
   map(from: CommunityInvite): CommunityInviteDto {
     return {
       id: (from as any)._id,
-      path: (from as any).path,
       name: from.name,
       date: from.date.toISOString(),
       type: from.type,
       member: (from as any).member,
       reason: from.reason,
-      alt: this.codeGen.toBase32(BigInt(from.code), true),
+      alt: from.code,
       photo: from.photo,
       status: from.status,
       code: from.code,

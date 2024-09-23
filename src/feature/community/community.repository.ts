@@ -222,7 +222,7 @@ export class CommunityRepository {
       isPrimary: true
     }).exec()
 
-    if (!count) member.isPrimary = true
+    if (!count || count === 0) member.isPrimary = true
 
     return await this.communityMemberModel.create(member).then(data => data.populate(MEMBER_COMMUNITIES_QUERY))
   }
@@ -296,7 +296,6 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community),
       member: new Types.ObjectId(data.member),
       account: new Types.ObjectId(user),
-      path: new Types.ObjectId(data.path),
       reason: data.reason,
       name: data.name,
       type: data.type,
@@ -663,9 +662,22 @@ export class CommunityRepository {
    * @returns 
    */
   async setJoinRequestStatus(member: string, status: string, community: string, code: string): Promise<any> {
+    let primary = false
+
+    if (status === ACCOUNT_STATUS.APPROVED) {
+      const memberData = await this.communityMemberModel.findById(member)
+      const count = await this.communityMemberModel.countDocuments({
+        account: memberData.account,
+        status: ACCOUNT_STATUS.APPROVED,
+        isPrimary: true
+      }).exec()
+
+      if (!count || count === 0) primary = true
+    }
+
     return await this.communityMemberModel.findOneAndUpdate(
       { _id: new Types.ObjectId(member), community: new Types.ObjectId(community) },
-      { status: status, code: code, comment: status },
+      { status: status, code: code, comment: status, isPrimary: primary },
       { returnDocument: 'after' })
       .populate(COMMUNITY_MEMBER_QUERY).exec()
   }

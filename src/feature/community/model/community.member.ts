@@ -35,10 +35,10 @@ export class CommunityMember {
   code: string
 
   @Prop({ default: false })
-  isAdmin?: boolean
+  isAdmin?: Boolean
 
   @Prop({ default: false })
-  isPrimary?: boolean
+  isPrimary?: Boolean
 
   @Prop({ enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.PENDING })
   status?: string

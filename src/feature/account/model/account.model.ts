@@ -10,7 +10,7 @@ export type AccountDocument = HydratedDocument<Account>;
 @Schema()
 export class AccountType {
   @Prop({ default: false })
-  approved?: boolean
+  approved?: Boolean
 
   @Prop({ enum: ADD_ON })
   type?: string
@@ -31,25 +31,25 @@ export class KYC {
 @Schema()
 export class DashboardFlags {
   @Prop({ default: true })
-  welcome?: boolean
+  welcome?: Boolean
 
   @Prop({ default: false })
-  quickActions?: boolean
+  quickActions?: Boolean
 
   @Prop({ default: true })
-  joinCommunity?: boolean
+  joinCommunity?: Boolean
 
   @Prop({ default: true })
-  createCommunity?: boolean
+  createCommunity?: Boolean
 }
 
 @Schema()
 export class PermissionFlags {
   @Prop({ default: true })
-  canCreateCommunity?: boolean
+  canCreateCommunity?: Boolean
 
   @Prop({ default: true })
-  canJoinCommunity?: boolean
+  canJoinCommunity?: Boolean
 }
 
 @Schema({ timestamps: true })

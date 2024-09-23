@@ -70,7 +70,7 @@ export class CommunityService {
       const { member, _ } = await this.getMemberAccountExtras(user)
 
       await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
-        code: '0000',
+        code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
         isAdmin: true,
         description: community.address?.address,
         status: ACCOUNT_STATUS.PENDING

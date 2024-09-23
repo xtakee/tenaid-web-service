@@ -134,12 +134,6 @@ export class AdminService {
       await this.communityRepository.setCommunityRequestStatus(community, status, comment)
 
       if (status === ACCOUNT_STATUS.APPROVED) {
-        //enable all permissions
-        this.accountRepository.addPermission(communityData.account.toString(), {
-          authorization: SYSTEM_FEATURES.COMMUNITIES,
-          claim: [CLAIM.DELETE, CLAIM.READ, CLAIM.WRITE]
-        })
-
         await this.accountRepository.setAllDashboardFlagStatus(communityData.account.toString())
       }
       else await this.accountRepository.setCreateFlagStatus(communityData.account.toString(), true)

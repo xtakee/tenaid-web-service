@@ -45,11 +45,6 @@ export class CommunityInviteDto {
   member: string
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsMongoId()
-  path: string
-
-  @ApiProperty()
   photo?: string
 
   @ApiProperty()
