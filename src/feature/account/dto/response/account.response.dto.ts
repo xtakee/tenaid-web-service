@@ -39,6 +39,7 @@ export class AccountResponseDto {
   lastName: string
   email: Email
   phone: string
+  gender?: string
   country?: string
   photo: string
   dob?: Date

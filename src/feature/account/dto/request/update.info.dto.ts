@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsDateString, IsUrl, IsOptional } from "class-validator"
+import { IsNotEmpty, IsDateString, IsUrl, IsOptional, IsEnum } from "class-validator"
 import { IsMinAge } from "src/core/validators/is.min.age"
+import { GENDER } from "src/feature/auth/auth.constants"
 
 export class UpdateInfoDto {
   @IsNotEmpty()
@@ -12,6 +13,12 @@ export class UpdateInfoDto {
   @ApiProperty()
   @IsNotEmpty()
   phone: string
+
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsEnum(GENDER)
+  gender: string
 
   @ApiProperty()
   @IsNotEmpty()

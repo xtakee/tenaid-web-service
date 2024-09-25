@@ -121,7 +121,7 @@ export class CommunityRepository {
       password: data.password,
       community: new Types.ObjectId(community)
     }
-    console.log(accessPoint)
+
     return await this.communityAccessPointModel.create(accessPoint);
   }
 
@@ -266,14 +266,18 @@ export class CommunityRepository {
   async getCommunity(community: string): Promise<Community> {
     return await this.communityModel.findById(community)
   }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getAllCommunityPaths(community: string): Promise<CommunityPath[]> {
-    return await this.communityPathModel.find({ community: new Types.ObjectId(community) })
+/**
+ * 
+ * @param community 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getAllCommunityPaths(community: string, page: number, limit: number): Promise<PaginatedResult<CommunityPath>> {
+    return await this.paginator.paginate(this.communityPathModel,
+      { community: new Types.ObjectId(community) },
+      { page: page, limit: limit }
+    )
   }
 
   /**
@@ -597,14 +601,15 @@ export class CommunityRepository {
    * @returns 
    */
   async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
-    const prev = await this.communityMemberModel.findOneAndUpdate({ account: new Types.ObjectId(user), status: ACCOUNT_STATUS.APPROVED },
-      { isPrimary: false },
-      { returnDocument: 'after' }
-    ).find
+    const prev = await this.communityMemberModel.updateMany({ account: new Types.ObjectId(user), status: ACCOUNT_STATUS.APPROVED },
+      { $set: { isPrimary: false } }
+    ).exec()
 
     if (prev) {
       return await this.communityMemberModel.findOneAndUpdate(
-        { account: new Types.ObjectId(user), community: new Types.ObjectId(community) }
+        { account: new Types.ObjectId(user), community: new Types.ObjectId(community) },
+        { isPrimary: true },
+        { returnDocument: 'after' }
       ).populate(MEMBER_COMMUNITIES_QUERY).exec()
     }
 

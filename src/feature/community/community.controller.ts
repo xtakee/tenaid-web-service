@@ -215,8 +215,10 @@ export class CommunityController {
   @Get('/:community/path')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community paths/streets' })
-  async getAllCommunityPath(@Param('community') community: string): Promise<CommunityPathResponseDto[]> {
-    return await this.communityService.getAllCommunityPaths(community)
+  async getAllCommunityPath(@Param('community') community: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
+      if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityPaths(community, paginate.page, paginate.limit)
   }
 
   /**
@@ -354,7 +356,7 @@ export class CommunityController {
  * @param community 
  * @returns 
  */
-  @Post('/:community/primary')
+  @Post('/:community/primary-access-point')
   @BasicAuth()
   @ApiOperation({ summary: 'Set a primary account community' })
   async setPrimaryAccountCommunity(@User() user: string, @Param('community') community: string): Promise<any> {

@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from "mongoose";
 import { Email } from "../../core/model/email.model";
 import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
-import { ACCOUNT_STATUS, ADD_ON } from "src/feature/auth/auth.constants";
+import { ACCOUNT_STATUS, ADD_ON, GENDER } from "src/feature/auth/auth.constants";
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -84,6 +84,9 @@ export class Account {
 
   @Prop()
   photo?: string
+
+  @Prop({enum: GENDER})
+  gender?: string
 
   @Prop()
   @Type(() => KYC)

@@ -132,6 +132,7 @@ export class AccountRepository implements IAccountRepository {
       dob: new Date(data.dob),
       phone: data.phone,
       photo: data.photo,
+      gender: data.gender,
       country: data.country,
       firstName: data.firstName,
       lastName: data.lastName,

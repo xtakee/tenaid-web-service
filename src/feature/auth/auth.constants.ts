@@ -27,6 +27,12 @@ export enum ADD_ON {
   TENANT = 'can-lease'
 }
 
+
+export enum GENDER {
+  MALE = 'Male',
+  FEMALE = 'Female'
+}
+
 export enum CLAIM {
   WRITE = 'write',
   READ = 'read',

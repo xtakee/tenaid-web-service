@@ -28,9 +28,7 @@ import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 import { AccountRepository } from '../account/account.respository';
-import { MemberAccount } from './model/member.account';
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
-import { CommunityAccessPoint } from './model/community.access.point';
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { MessageType, NotificationService } from '../notification/notification.service';
@@ -316,17 +314,15 @@ export class CommunityService {
     throw new NotFoundException()
   }
 
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getAllCommunityPaths(community: string): Promise<CommunityPathResponseDto[]> {
-    const paths = await this.communityRepository.getAllCommunityPaths(community)
-
-    if (paths) return paths.map((path) => this.pathMapper.map(path))
-
-    throw new NotFoundException()
+/**
+ * 
+ * @param community 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getAllCommunityPaths(community: string, page: number, limit: number): Promise<PaginatedResult<CommunityPathResponseDto>> {
+    return await this.communityRepository.getAllCommunityPaths(community, page, limit)
   }
 
   /**
@@ -356,6 +352,7 @@ export class CommunityService {
       member: {
         firstName: account.firstName,
         lastName: account.lastName,
+        gender: account.gender,
         email: account.email,
         phone: account.phone,
         photo: account.photo,
