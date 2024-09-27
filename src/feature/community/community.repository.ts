@@ -16,7 +16,6 @@ import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 import { MemberAccount } from "./model/member.account";
 import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto";
 import { CommunityAccessPoint } from "./model/community.access.point";
-import { Mode } from "fs";
 import { populate } from "dotenv";
 
 const MEMBER_VISITOR_QUERY = {
@@ -32,13 +31,30 @@ const MEMBER_VISITOR_QUERY = {
 
 function getPaginatedMemberVisitorsQuery(page: number, limit: number) {
   return {
-    select: '_id name code photo start end checkIn checkOut status reason path',
+    select: '_id name code photo start end status reason path',
     limit: limit,
     page: page,
     populate: {
       path: 'path',
       select: '_id name description',
       strictPopulate: false,
+    }
+  }
+}
+
+function getPaginatedCommunityVisitorsQuery(page: number, limit: number) {
+  return {
+    select: '_id name date code member photo start end status reason path',
+    limit: limit,
+    page: page,
+    populate: {
+      path: 'member',
+      select: '_id extra description',
+      strictPopulate: false,
+      populate: {
+        path: 'path',
+        select: '_id name description'
+      }
     }
   }
 }
@@ -266,13 +282,13 @@ export class CommunityRepository {
   async getCommunity(community: string): Promise<Community> {
     return await this.communityModel.findById(community)
   }
-/**
- * 
- * @param community 
- * @param page 
- * @param limit 
- * @returns 
- */
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
   async getAllCommunityPaths(community: string, page: number, limit: number): Promise<PaginatedResult<CommunityPath>> {
     return await this.paginator.paginate(this.communityPathModel,
       { community: new Types.ObjectId(community) },
@@ -418,15 +434,93 @@ export class CommunityRepository {
 
   /**
    * 
-   * @param user 
    * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
    */
-  async getCommunityVisitors(community: string): Promise<any> {
-    return await this.communityInviteModel.find(
-      { community: new Types.ObjectId(community) },
-      '_id name code start end photo checkIn checkOut reason status member community account')
-      .populate(COMMUNITY_VISITOR_QUERY).exec()
+  async getCommunityVisitors(community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
+    const query = {
+      community: new Types.ObjectId(community),
+    }
+    if (status) (query as any).status = status
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      query,
+      getPaginatedCommunityVisitorsQuery(page, limit))
   }
+
+  /**
+   * 
+   * @param community 
+   * @param code 
+   * @returns 
+   */
+  async getCommunityInviteByCode(community: string, code: string): Promise<CommunityInvite> {
+    return await this.communityInviteModel.findOne({ code: code, community: new Types.ObjectId(community) })
+  }
+
+  /**
+ * 
+ * @param community 
+ * @param page 
+ * @param limit 
+ */
+  async getAllCommunityMembers(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.paginator.paginate(this.communityMemberModel, { community: new Types.ObjectId(community) }, {
+      select: '_id path description point code extra',
+      page: page,
+      limit: limit,
+      populate: {
+        path: 'path',
+        select: '_id name description',
+        strictPopulate: false,
+      }
+    })
+  }
+
+  /**
+ * 
+ * @param community 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getCommunityVisitorsByDate(
+    community: string,
+    start: string,
+    end: string,
+    page: number,
+    limit: number,
+    status?: string): Promise<PaginatedResult<any>> {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+
+    const query = {
+      community: new Types.ObjectId(community),
+      $or: [
+        { start: { $gte: startDate, $lte: endDate } },
+        { start: { $lt: startDate }, end: { $gte: endDate } }]
+    }
+
+    if (status) (query as any).status = status
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      {
+        community: new Types.ObjectId(community),
+        query,
+        $or: [
+          { start: { $gte: startDate, $lte: endDate } },
+          { start: { $lt: startDate }, end: { $gte: endDate } }]
+      },
+      getPaginatedCommunityVisitorsQuery(page, limit))
+  }
+
+  /*
+  $or: [
+          { start: { $gte: startDate, $lte: endDate } },
+          { start: { $lt: startDate }, end: { $gte: endDate } }]
+  */
 
   /**
    * 
@@ -721,6 +815,23 @@ export class CommunityRepository {
   async searchCommunity(user: string, query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.paginator.paginate(this.communityModel,
       { status: ACCOUNT_STATUS.APPROVED, account: { $ne: new Types.ObjectId(user) }, $text: { $search: query } },
+      {
+        select: '_id name code description address members images type createdAt updatedAt',
+        limit: limit,
+        page: page
+      })
+  }
+
+  /**
+   * 
+   * @param query 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async searchCommunityNoAuth(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.paginator.paginate(this.communityModel,
+      { status: ACCOUNT_STATUS.APPROVED, $text: { $search: query } },
       {
         select: '_id name code description address members images type createdAt updatedAt',
         limit: limit,

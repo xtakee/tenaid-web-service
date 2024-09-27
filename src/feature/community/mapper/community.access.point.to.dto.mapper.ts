@@ -9,8 +9,7 @@ export class CommunityAccessPointToDtoMapper implements Mapper<CommunityAccessPo
     return {
       id: (from as any)._id,
       name: from.name,
-      description: from.description,
-      community: from.community.toString()
+      description: from.description
     }
   }
 

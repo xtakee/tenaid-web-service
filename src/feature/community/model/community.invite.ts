@@ -24,19 +24,19 @@ export class CommunityInvite {
   account: Types.ObjectId
 
   @Prop()
-  name?: string
+  name: string
 
   @Prop({ type: Date })
   date: Date
 
   @Prop({ enum: InviteType })
-  type?: string
+  type: string
 
   @Prop()
   photo?: string
 
   @Prop()
-  code?: string
+  code: string
 
   @Prop({ type: Date })
   start: Date

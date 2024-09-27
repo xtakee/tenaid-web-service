@@ -33,6 +33,7 @@ import { CommunityAccessPointResonseDto } from './dto/response/community.access.
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { MessageType, NotificationService } from '../notification/notification.service';
 import { title } from 'process';
+import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
 
 @Injectable()
 export class CommunityService {
@@ -184,14 +185,29 @@ export class CommunityService {
   /**
    * 
    * @param community 
+   * @param page 
+   * @param limit 
+   * @param status 
    * @returns 
    */
-  async getCommunityVisitors(community: string): Promise<CommunityVisitorsDto[]> {
-    const visitors = await this.communityRepository.getCommunityVisitors(community)
-    if (visitors) return visitors.map((visitor: any) => this.visitorsMapper.map(visitor))
-
-    throw new NotFoundException()
+  async getCommunityVisitors(community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
+    return await this.communityRepository.getCommunityVisitors(community, page, limit, status)
   }
+
+  /**
+   * 
+   * @param community 
+   * @param start 
+   * @param end 
+   * @param page 
+   * @param limit 
+   * @param status 
+   * @returns 
+   */
+  async getCommunityVisitorsByDate(community: string, start: string, end: string, page: number, limit: number, status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
+    return await this.communityRepository.getCommunityVisitorsByDate(community, start, end, page, limit, status)
+  }
+
 
   /**
    * 
@@ -314,13 +330,13 @@ export class CommunityService {
     throw new NotFoundException()
   }
 
-/**
- * 
- * @param community 
- * @param page 
- * @param limit 
- * @returns 
- */
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
   async getAllCommunityPaths(community: string, page: number, limit: number): Promise<PaginatedResult<CommunityPathResponseDto>> {
     return await this.communityRepository.getAllCommunityPaths(community, page, limit)
   }
@@ -358,6 +374,37 @@ export class CommunityService {
         photo: account.photo,
         country: account.country
       }
+    }
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   */
+  async getAllCommunityMembers(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityMembers(community, page, limit)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param code 
+   * @returns 
+   */
+  async getCommunityInviteByCode(community: string, code: string): Promise<CommunityInviteCodeResponseDto> {
+    const invite = await this.communityRepository.getCommunityInviteByCode(community, code)
+    if (!invite) throw new NotFoundException()
+    return {
+      name: invite.name,
+      date: invite.date,
+      type: invite.type,
+      photo: invite.photo,
+      start: invite.start,
+      end: invite.end,
+      reason: invite.reason,
+      status: invite.status
     }
   }
 
@@ -401,9 +448,9 @@ export class CommunityService {
         this.notificationService.pushToDevice({
           device: deviceToken.token, title: 'Join Requested', body: {
             type: MessageType.REQUEST_JOIN_COMMUNITY, description: `Hello! ${memberName} has requested to be a member of ${community.name}`, link: 'community/join-request', extra: {
-              community: data.community,
               request: (request as any)._id
-            }
+            },
+            community: data.community
           }
         })
       }
@@ -478,9 +525,8 @@ export class CommunityService {
       if (deviceToken)
         this.notificationService.pushToDevice({
           device: deviceToken.token, title: pushTitle, body: {
-            type: MessageType.REQUEST_JOIN_COMMUNITY, description: pushBody, link: '/home', extra: {
-              community: data.community
-            }
+            type: MessageType.REQUEST_JOIN_COMMUNITY, description: pushBody, link: '/home',
+            community: data.community
           }
         })
 
@@ -502,5 +548,9 @@ export class CommunityService {
    */
   async searchCommunity(user: string, query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.communityRepository.searchCommunity(user, query, page, limit);
+  }
+
+  async searchCommunityNoAuth(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.searchCommunityNoAuth(query, page, limit);
   }
 }

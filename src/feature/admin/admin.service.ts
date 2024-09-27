@@ -142,9 +142,8 @@ export class AdminService {
       if (deviceToken) {
         this.notificationService.pushToDevice({
           device: deviceToken.token, title: pushTitle, body: {
-            type: MessageType.REQUEST_CREATE_COMMUNITY, description: pushBody, link: '/home', extra: {
-              community: community
-            }
+            type: MessageType.REQUEST_CREATE_COMMUNITY, description: pushBody, link: '/home',
+            community: community
           }
         })
       }

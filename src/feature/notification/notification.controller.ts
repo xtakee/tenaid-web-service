@@ -6,6 +6,7 @@ import { NotificationService } from './notification.service';
 export class PushBody {
   type: string
   description: string
+  community: string
   link: string
   extra?: {}
 }

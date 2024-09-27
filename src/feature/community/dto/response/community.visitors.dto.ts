@@ -4,10 +4,9 @@ export class CommunityVisitorsDto {
   id?: string
   photo?: string
   name?: string
-  access?: string
-  checkIn?: string
-  checkOut?: string
-  createdAt?: string
-  expected?: string
-  host?: Member
+  code?: string
+  date?: string
+  start?: string
+  end?: string
+  member?: Member
 }

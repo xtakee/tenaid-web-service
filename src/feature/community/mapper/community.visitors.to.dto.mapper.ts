@@ -13,11 +13,10 @@ export class CommunityVisitorsToDtoMapper implements Mapper<any, CommunityVisito
       id: from._id,
       photo: from.photo,
       name: from.name,
-      access: from.code,
-      checkIn: from.checkIn,
-      checkOut: from.checkOut,
-      expected: from.expected,
-      host: this.memberMapper.map(from.member)
+      code: from.code,
+      start: from.start,
+      end: from.end,
+      member: this.memberMapper.map(from.member)
     }
   }
 }

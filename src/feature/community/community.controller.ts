@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query, UnauthorizedException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { User } from 'src/core/decorators/current.user';
 import { CommunityService } from './community.service';
@@ -20,9 +20,10 @@ import { AccountCommunityResponseDto } from './dto/response/account.community.re
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
-import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
+import { DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.request.dto';
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
+import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
 
 @Controller({
   version: '1',
@@ -86,11 +87,10 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get Member invites by date' })
   async getInvitesByDate(@User() user: string,
     @Param('community') community: string,
-    @Query('start') start: string,
-    @Query('end') end: string,
+    @Query() date: DateRangeDto,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberVisitorsByDate(user, community, start, end, paginate.page, paginate.limit);
+    return await this.communityService.getCommunityMemberVisitorsByDate(user, community, date.start, date.end, paginate.page, paginate.limit);
   }
 
   /**
@@ -164,9 +164,23 @@ export class CommunityController {
   @Get(':community/invite')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community invites/visitors' })
-  async getCommunityVisitors(@Param('community') community: string): Promise<CommunityVisitorsDto[]> {
+  @ApiQuery({ name: 'status', required: false, type: String })
+  async getCommunityVisitors(@Param('community') community: string, @Query() paginate: PaginationRequestDto, @Query('status') status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return this.communityService.getCommunityVisitors(community)
+    return await this.communityService.getCommunityVisitors(community, paginate.page, paginate.limit, status)
+  }
+
+  @Get(':community/invite-date')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community invites/visitors by date' })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  async getCommunityVisitorsByDate(
+    @Param('community') community: string,
+    @Query() date: DateRangeDto,
+    @Query() paginate: PaginationRequestDto,
+    @Query('status') status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityVisitorsByDate(community, date.start, date.end, paginate.page, paginate.limit, status)
   }
 
   /**
@@ -217,7 +231,7 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community paths/streets' })
   async getAllCommunityPath(@Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
-      if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityPaths(community, paginate.page, paginate.limit)
   }
 
@@ -302,6 +316,25 @@ export class CommunityController {
     return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
   }
 
+  @Get(':community/member')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community members' })
+  async getAllCommunityMembers(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getAllCommunityMembers(community, paginate.page, paginate.limit)
+  }
+
+  /**
+   * 
+   * @param query 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('no-auth/search')
+  @ApiOperation({ summary: 'Search a community - No Auth' })
+  async searchCommunityNoAuth(@Query('query') query: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.searchCommunityNoAuth(query, paginate.page, paginate.limit);
+  }
+
   /**
    * 
    * @param code 
@@ -311,7 +344,21 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community by code' })
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
-    return this.communityService.getCommunityByCode(code)
+    return await this.communityService.getCommunityByCode(code)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param code 
+   * @returns 
+   */
+  @Get(':community/invite-code')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community invite by code' })
+  async getCommunityInviteByCode(@Param('community') community: string, @Query('code') code: string): Promise<CommunityInviteCodeResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityInviteByCode(community, code)
   }
 
   /**
@@ -344,7 +391,6 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/access-point')
-  @BasicAuth()
   @ApiOperation({ summary: 'Get all community access points' })
   async getCommunityAccessPoints(@Param('community') community: string): Promise<CommunityAccessPointResonseDto[]> {
     if (!isMongoId(community)) throw new BadRequestException()
