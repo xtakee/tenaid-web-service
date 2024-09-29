@@ -576,4 +576,12 @@ export class AccountRepository implements IAccountRepository {
     return await this.deviceTokenModel.findOne({ account: new Types.ObjectId(user) })
   }
 
+  /**
+   * 
+   * @param user 
+   */
+  async deleteDeviceToken(user: string): Promise<void> {
+    await this.deviceTokenModel.deleteOne({ account: new Types.ObjectId(user) })
+  }
+
 }

@@ -32,8 +32,9 @@ import { CommunityAccessPointRequestDto } from './dto/request/community.access.p
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { MessageType, NotificationService } from '../notification/notification.service';
-import { title } from 'process';
 import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
+import { EventGateway, EventType } from '../event/event.gateway';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class CommunityService {
@@ -49,6 +50,7 @@ export class CommunityService {
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly hostMapper: CommunityInviteToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
+    private readonly eventGateway: EventGateway,
     private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
@@ -116,7 +118,17 @@ export class CommunityService {
   async invite(user: string, data: CommunityInviteDto): Promise<CommunityInviteDto> {
     const invite = await this.communityRepository.inviteVisitor(user, data)
 
-    if (invite) return this.inviteMapper.map(invite)
+    if (invite) {
+      const response = this.inviteMapper.map(invite);
+
+      // data sync event to client
+      this.eventGateway.sendEvent(data.community, {
+        id: new Types.ObjectId().toString(),
+        type: EventType.VISITOR,
+        body: response
+      })
+      return response
+    }
 
     throw new ForbiddenException()
   }
@@ -206,6 +218,18 @@ export class CommunityService {
    */
   async getCommunityVisitorsByDate(community: string, start: string, end: string, page: number, limit: number, status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
     return await this.communityRepository.getCommunityVisitorsByDate(community, start, end, page, limit, status)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param status 
+   * @returns 
+   */
+  async getUpcomingCommunityVisitors(community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
+    return await this.communityRepository.getUpcomingCommunityVisitors(community, page, limit)
   }
 
 

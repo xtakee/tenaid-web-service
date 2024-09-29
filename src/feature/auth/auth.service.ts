@@ -137,7 +137,8 @@ export class AuthService {
    * @returns void
    */
   async logout(user: string): Promise<void> {
-    return await this.authRepository.invalidateAuthToken(user)
+    await this.authRepository.invalidateAuthToken(user)
+    await this.accountRepository.deleteDeviceToken(user)
   }
 
   /**

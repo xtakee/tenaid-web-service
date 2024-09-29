@@ -49,11 +49,12 @@ function getPaginatedCommunityVisitorsQuery(page: number, limit: number) {
     page: page,
     populate: {
       path: 'member',
-      select: '_id extra description',
+      select: '_id extra description isAdmin',
       strictPopulate: false,
       populate: {
         path: 'path',
-        select: '_id name description'
+        select: '_id name description',
+        strictPopulate: false,
       }
     }
   }
@@ -129,7 +130,6 @@ export class CommunityRepository {
    * @param data 
    */
   async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto): Promise<CommunityAccessPoint> {
-    console.log(community)
     const accessPoint: CommunityAccessPoint = {
       name: data.name,
       description: data.description,
@@ -468,7 +468,7 @@ export class CommunityRepository {
  */
   async getAllCommunityMembers(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.paginator.paginate(this.communityMemberModel, { community: new Types.ObjectId(community) }, {
-      select: '_id path description point code extra',
+      select: '_id path description point code extra isAdmin',
       page: page,
       limit: limit,
       populate: {
@@ -506,21 +506,31 @@ export class CommunityRepository {
     if (status) (query as any).status = status
 
     return await this.paginator.paginate(this.communityInviteModel,
-      {
-        community: new Types.ObjectId(community),
-        query,
-        $or: [
-          { start: { $gte: startDate, $lte: endDate } },
-          { start: { $lt: startDate }, end: { $gte: endDate } }]
-      },
+      query,
       getPaginatedCommunityVisitorsQuery(page, limit))
   }
 
-  /*
-  $or: [
-          { start: { $gte: startDate, $lte: endDate } },
-          { start: { $lt: startDate }, end: { $gte: endDate } }]
-  */
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getUpcomingCommunityVisitors(
+    community: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    const now = new Date()
+
+    return await this.paginator.paginate(this.communityInviteModel,
+      {
+        community: new Types.ObjectId(community),
+        status: 'pending',
+        end: { $gt: now }
+      },
+      getPaginatedCommunityVisitorsQuery(page, limit))
+  }
 
   /**
    * 

@@ -170,6 +170,15 @@ export class CommunityController {
     return await this.communityService.getCommunityVisitors(community, paginate.page, paginate.limit, status)
   }
 
+  @Get(':community/invite-upcoming')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community upcoming invites/visitors' })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  async getCommunityUpcomingVisitors(@Param('community') community: string, @Query() paginate: PaginationRequestDto, @Query('status') status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getUpcomingCommunityVisitors(community, paginate.page, paginate.limit, status)
+  }
+
   @Get(':community/invite-date')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community invites/visitors by date' })
@@ -316,10 +325,11 @@ export class CommunityController {
     return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
   }
 
-  @Get(':community/member')
+  @Get(':community/members')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community members' })
   async getAllCommunityMembers(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityMembers(community, paginate.page, paginate.limit)
   }
 

@@ -27,6 +27,8 @@ import { CommunityAccessPoint, CommunityAccessPointSchema } from './model/commun
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { NotificationService } from '../notification/notification.service';
 import { BullModule } from '@nestjs/bullmq';
+import { EventGateway } from '../event/event.gateway';
+import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard';
 
 @Module({
   providers: [
@@ -37,6 +39,8 @@ import { BullModule } from '@nestjs/bullmq';
     CodeGenerator,
     AuthHelper,
     Paginator,
+    EventGateway,
+    WsJwtAuthGuard,
     NotificationService,
     CommunityAccessPointToDtoMapper,
     CommunityVisitorsToDtoMapper,
