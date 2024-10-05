@@ -141,7 +141,7 @@ export class AdminService {
       const deviceToken = await this.accountRepository.getDevicePushToken(communityData.account.toString())
       if (deviceToken) {
         this.notificationService.pushToDevice({
-          device: deviceToken.token, title: pushTitle, body: {
+          device: deviceToken.token, title: pushTitle, body: pushBody, data: {
             type: MessageType.REQUEST_CREATE_COMMUNITY, description: pushBody, link: '/home',
             community: community
           }

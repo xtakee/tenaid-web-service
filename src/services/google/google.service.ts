@@ -109,11 +109,12 @@ export class GoogleService {
    * @param deviceToken 
    * @returns 
    */
-  async pushOne(title: string, body: {}, device: string): Promise<Result> {
+  async pushOne(title: string, body: string, device: string, data: {}): Promise<Result> {
     const payload = {
       'message': {
         'token': device,
-        'notification': { 'title': title, 'body': JSON.stringify(body) }
+        'notification': { 'title': title, 'body': body },
+        'data': data
       }
     }
 
@@ -128,14 +129,16 @@ export class GoogleService {
    * @param topic 
    * @returns 
    */
-  async pushTopic(title: string, data: {}, body: {}, topic: string): Promise<Result> {
+  async pushTopic(title: string, data: {}, body: string, topic: string): Promise<Result> {
     const payload = {
       'message': {
         'topic': topic,
-        'notification': { 'title': title, 'body': JSON.stringify(body) },
-        'data': JSON.stringify(data)
+        'notification': { 'title': title, 'body': body },
+        'data': data
       }
     }
+
+    console.log(payload)
     return await this.push(payload)
   }
 

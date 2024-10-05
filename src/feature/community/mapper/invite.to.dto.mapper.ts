@@ -19,6 +19,7 @@ export class InviteToDtoMapper implements Mapper<CommunityInvite, CommunityInvit
       alt: from.code,
       photo: from.photo,
       status: from.status,
+      exitOnly: from.exitOnly,
       code: from.code,
       community: from.community?.toString(),
       start: from.start.toISOString(),

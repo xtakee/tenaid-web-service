@@ -3,13 +3,8 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { User } from 'src/core/decorators/current.user';
 import { CommunityService } from './community.service';
-import { MongoAbility } from '@casl/ability';
-import { CLAIM, SYSTEM_FEATURES } from '../auth/auth.constants';
-import { Auth, BasicAuth } from '../auth/guards/auth.decorator';
-import { CheckPolicies } from '../auth/guards/casl/policies.guard';
+import { BasicAuth } from '../auth/guards/auth.decorator';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
-import { CommunityInviteValidateDto } from 'src/feature/community/dto/request/community.invite.validate.dto';
-import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { isMongoId } from 'class-validator';
@@ -24,6 +19,8 @@ import { DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.reque
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
 import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
+import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
+import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 
 @Controller({
   version: '1',
@@ -135,20 +132,6 @@ export class CommunityController {
    * @param body 
    * @returns 
    */
-  @Post('/invite/validate')
-  @ApiOperation({ summary: 'Validate Invite Code' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.COMMUNITIES))
-  async validateInvite(@Body() body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
-    return await this.communityService.validateInvite(body)
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param body 
-   * @returns 
-   */
   @Post(':community/invite/revoke')
   @BasicAuth()
   @ApiOperation({ summary: 'Revoke Invite Code' })
@@ -210,12 +193,13 @@ export class CommunityController {
    * @param invite 
    * @returns 
    */
-  @Get('invite/:invite')
+  @Get(':community/invite/:invite')
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community invite/visitor' })
-  async getCommunityVisitor(@Param('invite') invite: string): Promise<CommunityVisitorsDto> {
+  async getCommunityVisitor(@Param('community') community: string, @Param('invite') invite: string): Promise<CommunityVisitorsDto> {
     if (!isMongoId(invite)) throw new BadRequestException()
-    return this.communityService.getCommunityVisitor(invite)
+    if (!isMongoId(community)) throw new BadRequestException()
+    return this.communityService.getCommunityVisitor(community, invite)
   }
 
   /**
@@ -325,6 +309,27 @@ export class CommunityController {
     return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
   }
 
+  /**
+  * 
+  * @param community 
+  * @param code 
+  * @returns 
+  */
+  @Get(':community/invite-code')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community invite by code' })
+  async getCommunityInviteByCode(@Param('community') community: string, @Query('code') code: string, @Query('member') member: string): Promise<CommunityInviteCodeResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(member)) throw new BadRequestException()
+    return await this.communityService.getCommunityInviteByCode(community, member, code)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
   @Get(':community/members')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community members' })
@@ -357,19 +362,6 @@ export class CommunityController {
     return await this.communityService.getCommunityByCode(code)
   }
 
-  /**
-   * 
-   * @param community 
-   * @param code 
-   * @returns 
-   */
-  @Get(':community/invite-code')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get a community invite by code' })
-  async getCommunityInviteByCode(@Param('community') community: string, @Query('code') code: string): Promise<CommunityInviteCodeResponseDto> {
-    if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityInviteByCode(community, code)
-  }
 
   /**
    * 
@@ -408,6 +400,40 @@ export class CommunityController {
   }
 
   /**
+   * 
+   * @param community 
+   * @param invite 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/:community/:invite/activities')
+  @ApiOperation({ summary: 'Get all invite activities' })
+  async getCheckinsActivity(
+    @Param('community') community: string,
+    @Param('invite') invite: string,
+    @Query() paginate: PaginationRequestDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(invite)) throw new BadRequestException()
+    return await this.communityService.getInviteActivities(community, invite, paginate.page, paginate.limit)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/:community/visitor/check-in-out')
+  @ApiOperation({ summary: 'Get all community visitors check in and out' })
+  async getCommunityCheckinActivity(
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto
+  ): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityCheckinActivity(community, paginate.page, paginate.limit)
+  }
+
+  /**
  * 
  * @param community 
  * @returns 
@@ -418,6 +444,33 @@ export class CommunityController {
   async setPrimaryAccountCommunity(@User() user: string, @Param('community') community: string): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.setPrimaryAccountCommunity(user, community)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param body 
+   */
+  @Post('/:community/visitor/check-in-out')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Check in-out visitor from a community' })
+  async checkInOutVisitor(@Param('community') community: string, @Body() body: CheckInOutVisitorRequestDto): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.checkInOutVisitor(community, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/:community/visitor/exit-code')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Update a visitor exit code' })
+  async updateTerminalCode(@Param('community') community: string, @User() user: string, @Body() body: CommunityExitCodeDto): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.updateVisitorTerminalCode(user, community, body)
   }
 
 }

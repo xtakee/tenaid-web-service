@@ -5,6 +5,8 @@ import { Queue } from 'bullmq';
 
 export enum MessageType {
   REQUEST_JOIN_COMMUNITY = 'request-join-community',
+  VISITOR_CHECK_IN = 'visitor_check_in',
+  VISITOR_CHECK_OUT = 'visitor_check_out',
   REQUEST_CREATE_COMMUNITY = 'request-create-community',
   MESSAGE_CHAT = 'message-chat',
   MESSAGE_PAYMENT = 'message-payment'

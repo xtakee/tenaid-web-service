@@ -8,10 +8,7 @@ import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
 import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED } from 'src/core/strings';
-import { CommunityInviteToDtoMapper } from './mapper/community.invite.to.dto.mapper';
-import { CommunityInviteResponseDto } from 'src/feature/community/dto/response/community.invite.response.dto';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
-import { CommunityInviteValidateDto } from 'src/feature/community/dto/request/community.invite.validate.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
 import { CommunityPathRequestDto } from './dto/request/community.path.request.dto';
@@ -22,9 +19,8 @@ import { CommunityJoinRequestDto } from './dto/request/community.join.request.dt
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
 import { PaginatedResult } from 'src/core/helpers/paginator';
-import { MAX_MEMBER_CODE_LENGTH } from './community.constants';
+import { INVITE_STATUS, MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
-import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 import { AccountRepository } from '../account/account.respository';
@@ -35,6 +31,9 @@ import { MessageType, NotificationService } from '../notification/notification.s
 import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
 import { EventGateway, EventType } from '../event/event.gateway';
 import { Types } from 'mongoose';
+import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
+import { CheckType } from '../core/dto/check.type';
+import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 
 @Injectable()
 export class CommunityService {
@@ -42,13 +41,11 @@ export class CommunityService {
     private readonly communityRepository: CommunityRepository,
     private readonly counterRepository: CounterRepository,
     private readonly accountRepository: AccountRepository,
-    private readonly codeGenerator: CodeGenerator,
     private readonly notificationService: NotificationService,
     private readonly inviteMapper: InviteToDtoMapper,
     private readonly accessPointMapper: CommunityAccessPointToDtoMapper,
     private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
-    private readonly hostMapper: CommunityInviteToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
     private readonly memberMapper: CommunityMemberResponseToDtoMapper,
@@ -118,7 +115,27 @@ export class CommunityService {
   async invite(user: string, data: CommunityInviteDto): Promise<CommunityInviteDto> {
     const invite = await this.communityRepository.inviteVisitor(user, data)
 
+    const checkType = data.exitOnly === true
+      ? CheckType.CHECK_OUT
+      : CheckType.CHECK_IN
+
     if (invite) {
+      // we want to update check in-out activity
+      const checkedInOut = await this.communityRepository.getCheckInVisitor(
+        data.community,
+        data.member,
+        (invite as any)._id,
+        data.code,
+        checkType)
+
+      if (checkedInOut) {
+        await this.communityRepository.checkInVisitor(
+          data.community,
+          data.member,
+          data.code,
+          checkType)
+      }
+
       const response = this.inviteMapper.map(invite);
 
       // data sync event to client
@@ -154,33 +171,6 @@ export class CommunityService {
   async getCommunityAccessPoints(community: string): Promise<CommunityAccessPointResonseDto[]> {
     const accessPoints = await this.communityRepository.getCommunityAccessPoints(community)
     return accessPoints.map((point) => this.accessPointMapper.map(point))
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @param code 
-   */
-  async validateInvite(body: CommunityInviteValidateDto): Promise<CommunityInviteResponseDto> {
-    const code = this.codeGenerator.decriptCode(body.code)
-    const member = await this.communityRepository.getMemberByCode(code.user, body.community)
-
-    if (member) {
-      const secret = (member as any)._id
-
-      if (!(this.codeGenerator.isValidTotp(secret.toString(), code)))
-        throw new NotFoundException()
-    } else throw new NotFoundException()
-
-    const host = await this.communityRepository.getVisitorByCode(body.code, body.community)
-    if (host) {
-      // checkin visitor
-      this.communityRepository.checkIn(body)
-      return this.hostMapper.map(host)
-    }
-
-    throw new NotFoundException()
   }
 
   /**
@@ -238,8 +228,8 @@ export class CommunityService {
    * @param invite 
    * @returns 
    */
-  async getCommunityVisitor(invite: string): Promise<CommunityVisitorsDto> {
-    const visitor = await this.communityRepository.getCommunityMemberVisitor(invite)
+  async getCommunityVisitor(community: string, invite: string): Promise<CommunityVisitorsDto> {
+    const visitor = await this.communityRepository.getCommunityMemberVisitor(community, invite)
     if (visitor) return this.visitorsMapper.map(visitor)
 
     throw new NotFoundException()
@@ -298,6 +288,12 @@ export class CommunityService {
     throw new NotFoundException()
   }
 
+  async getCommunityCheckinActivity(
+    community: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityCheckinActivity(community, page, limit)
+  }
   /**
    * 
    * @param user 
@@ -417,8 +413,8 @@ export class CommunityService {
    * @param code 
    * @returns 
    */
-  async getCommunityInviteByCode(community: string, code: string): Promise<CommunityInviteCodeResponseDto> {
-    const invite = await this.communityRepository.getCommunityInviteByCode(community, code)
+  async getCommunityInviteByCode(community: string, member: string, code: string): Promise<CommunityInviteCodeResponseDto> {
+    const invite = await this.communityRepository.getCommunityInviteByCode(community, member, code)
     if (!invite) throw new NotFoundException()
     return {
       name: invite.name,
@@ -469,11 +465,12 @@ export class CommunityService {
       const deviceToken = await this.accountRepository.getDevicePushToken(community.account.toString())
       if (deviceToken) {
         const memberName = `${request.extra.firstName} ${request.extra.lastName}`
+        const body = `Hello! ${memberName} has requested to be a member of ${community.name}`
         this.notificationService.pushToDevice({
-          device: deviceToken.token, title: 'Join Requested', body: {
-            type: MessageType.REQUEST_JOIN_COMMUNITY, description: `Hello! ${memberName} has requested to be a member of ${community.name}`, link: 'community/join-request', extra: {
-              request: (request as any)._id
-            },
+          device: deviceToken.token, title: 'Join Requested', body, data: {
+            type: MessageType.REQUEST_JOIN_COMMUNITY, description: body,
+            contentId: (request as any)._id,
+            link: 'community/join-request',
             community: data.community
           }
         })
@@ -548,7 +545,7 @@ export class CommunityService {
       const deviceToken = await this.accountRepository.getDevicePushToken(request.account)
       if (deviceToken)
         this.notificationService.pushToDevice({
-          device: deviceToken.token, title: pushTitle, body: {
+          device: deviceToken.token, title: pushTitle, body: pushBody, data: {
             type: MessageType.REQUEST_JOIN_COMMUNITY, description: pushBody, link: '/home',
             community: data.community
           }
@@ -574,7 +571,85 @@ export class CommunityService {
     return await this.communityRepository.searchCommunity(user, query, page, limit);
   }
 
+  /**
+   * 
+   * @param query 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
   async searchCommunityNoAuth(query: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.communityRepository.searchCommunityNoAuth(query, page, limit);
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   */
+  async checkInOutVisitor(community: string, data: CheckInOutVisitorRequestDto): Promise<void> {
+    const request = await this.communityRepository.getCommunityInviteByCode(community, data.member, data.code)
+
+    if (request) {
+      if (request.status === INVITE_STATUS.PENDING) {
+        await this.communityRepository.checkInVisitor(community,
+          request.member.toString(),
+          data.code)
+      }
+
+      // send push notification to member
+      const account = request.account.toString()
+      const deviceToken = await this.accountRepository.getDevicePushToken(account)
+      const title: string = data.type === CheckType.CHECK_IN ? 'Checkin successful' : 'Checkout successful'
+      const body = data.type === CheckType.CHECK_IN
+        ? `Your guest ${request.name.trim()}, has checked in successfully`
+        : `Your guest ${request.name.trim()}, has checked out successfully`
+
+      if (deviceToken)
+        this.notificationService.pushToDevice({
+          device: deviceToken.token, title: title, body: body, data: {
+            type: data.type === CheckType.CHECK_IN
+              ? MessageType.VISITOR_CHECK_IN
+              : MessageType.VISITOR_CHECK_OUT, description: body,
+            link: 'visitor/check-inout',
+            community: community,
+            contentId: (request as any)._id
+          }
+        })
+
+    }
+    await this.communityRepository.createCheckInOutActivity(community, data, request)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param invite 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getInviteActivities(community: string, invite: string, page: number, limit: number): Promise<any> {
+    return await this.communityRepository.getInviteActivities(community, invite, page, limit)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   */
+  async updateVisitorTerminalCode(user: string, community: string, data: CommunityExitCodeDto): Promise<void> {
+    const invite = await this.communityRepository.updateVisitorTerminalInvite(community, data)
+
+    if (invite) {
+      // we want to update check in-out activity
+      await this.communityRepository.getCheckInVisitor(
+        community,
+        data.member,
+        (invite as any)._id,
+        data.code, CheckType.CHECK_OUT)
+    }
+
+    else throw new ForbiddenException()
   }
 }

@@ -4,8 +4,9 @@ import { Community } from "./community";
 import { CommunityInvite } from "./community.invite";
 import { CommunityMember } from "./community.member";
 import { CheckType } from "src/feature/core/dto/check.type";
+import { CommunityAccessPoint } from "./community.access.point";
 
-export type CommunityCheckinsDocument = HydratedDocument<CommunityInvite>;
+export type CommunityCheckinsDocument = HydratedDocument<CommunityCheckins>;
 
 @Schema({ timestamps: true })
 export class CommunityCheckins {
@@ -14,6 +15,9 @@ export class CommunityCheckins {
 
   @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
   member: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: CommunityAccessPoint.name })
+  accessPoint: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityInvite.name })
   invite?: Types.ObjectId

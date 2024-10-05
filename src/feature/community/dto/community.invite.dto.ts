@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsMongoId, IsNotEmpty } from "class-validator";
-import { IsHourInRange } from "src/core/validators/is.hour.range";
+import { IsBoolean, IsDateString, IsMongoId, IsNotEmpty } from "class-validator";
 
 export class CommunityInviteDto {
   alt?: string
@@ -29,6 +28,11 @@ export class CommunityInviteDto {
   @ApiProperty()
   @IsNotEmpty()
   type: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsBoolean()
+  exitOnly: Boolean
 
   @ApiProperty()
   @IsNotEmpty()

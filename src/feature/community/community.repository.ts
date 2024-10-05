@@ -10,13 +10,15 @@ import { CommunityInvite } from "./model/community.invite";
 import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto";
 import { ACCOUNT_STATUS } from "../auth/auth.constants";
 import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto";
-import { CommunityInviteValidateDto } from "src/feature/community/dto/request/community.invite.validate.dto";
 import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 import { MemberAccount } from "./model/member.account";
 import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto";
 import { CommunityAccessPoint } from "./model/community.access.point";
-import { populate } from "dotenv";
+import { CheckInOutVisitorRequestDto } from "./dto/request/check.in.out.visitor.request.dto";
+import { CheckType } from "../core/dto/check.type";
+import { CommunityCheckins } from "./model/community.checkins";
+import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -31,7 +33,7 @@ const MEMBER_VISITOR_QUERY = {
 
 function getPaginatedMemberVisitorsQuery(page: number, limit: number) {
   return {
-    select: '_id name code photo start end status reason path',
+    select: '_id name code exitOnly photo start end status reason path',
     limit: limit,
     page: page,
     populate: {
@@ -44,7 +46,7 @@ function getPaginatedMemberVisitorsQuery(page: number, limit: number) {
 
 function getPaginatedCommunityVisitorsQuery(page: number, limit: number) {
   return {
-    select: '_id name date code member photo start end status reason path',
+    select: '_id name date code member exitOnly photo start end status reason path',
     limit: limit,
     page: page,
     populate: {
@@ -57,6 +59,24 @@ function getPaginatedCommunityVisitorsQuery(page: number, limit: number) {
         strictPopulate: false,
       }
     }
+  }
+}
+
+function getVisitorsCheckinsQuery(page: number, limit: number) {
+  return {
+    select: '_id code date type accessPoint',
+    limit: limit,
+    page: page,
+    populate: [
+      {
+        path: 'accessPoint',
+        select: '_id name description'
+      },
+      {
+        path: 'invite',
+        select: '_id name type date start end reason status photo'
+      }
+    ]
   }
 }
 
@@ -100,6 +120,7 @@ export class CommunityRepository {
     private readonly paginator: Paginator,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
+    @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
     @InjectModel(CommunityPath.name) private readonly communityPathModel: Model<CommunityPath>
   ) { }
@@ -316,6 +337,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community),
       member: new Types.ObjectId(data.member),
       account: new Types.ObjectId(user),
+      exitOnly: data.exitOnly,
       reason: data.reason,
       name: data.name,
       type: data.type,
@@ -401,10 +423,14 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async checkIn(data: CommunityInviteValidateDto): Promise<void> {
+  async checkInVisitor(community: string, member: string, code: string, type: string = CheckType.CHECK_IN): Promise<void> {
     return await this.communityInviteModel.findOneAndUpdate(
-      { community: new Types.ObjectId(data.community), code: data.code },
-      { checkIn: data.checkIn }, { returnDocument: 'after' }
+      {
+        community: new Types.ObjectId(community),
+        code: code,
+        member: new Types.ObjectId(member)
+      },
+      { status: type }, { returnDocument: 'after' }
     )
   }
 
@@ -456,8 +482,12 @@ export class CommunityRepository {
    * @param code 
    * @returns 
    */
-  async getCommunityInviteByCode(community: string, code: string): Promise<CommunityInvite> {
-    return await this.communityInviteModel.findOne({ code: code, community: new Types.ObjectId(community) })
+  async getCommunityInviteByCode(community: string, member: string, code: string): Promise<CommunityInvite> {
+    return await this.communityInviteModel.findOne({
+      $or: [{ code: code, }, { terminalCode: code, }],
+      member: new Types.ObjectId(member),
+      community: new Types.ObjectId(community)
+    })
   }
 
   /**
@@ -646,6 +676,7 @@ export class CommunityRepository {
       {
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community),
+        exitOnly: false,
         start: { $gte: _date }
       },
       getPaginatedMemberVisitorsQuery(page, limit))
@@ -653,14 +684,73 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
    * @param invite 
    * @returns 
    */
-  async getCommunityMemberVisitor(invite: string): Promise<any> {
+  async getCommunityMemberVisitor(community: string, invite: string): Promise<any> {
     return await this.communityInviteModel.findOne(
-      { _id: new Types.ObjectId(invite) },
-      '_id name code photo start end checkIn checkOut reason status member community account')
+      { _id: new Types.ObjectId(invite), community: new Types.ObjectId(community) },
+      '_id name code photo start end reason status member community account')
       .populate(MEMBER_VISITOR_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityCheckinActivity(
+    community: string,
+    page: number,
+    limit: number): Promise<PaginatedResult<any>> {
+
+    return await this.paginator.paginate(this.communityCheckInsModel,
+      { community: new Types.ObjectId(community), invite: { $ne: null } },
+      {
+        select: '_id code date type accessPoint invite',
+        limit: limit,
+        page: page,
+        sort: { createdAt: 1 },
+        populate: [
+          {
+            path: 'accessPoint',
+            select: '_id name description'
+          },
+          {
+            path: 'invite',
+            select: '_id name start end type code exitOnly reason'
+          }
+        ]
+      })
+
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param invite 
+   * @returns 
+   */
+  async getCommunityVisitorInvite(community: string, invite: string): Promise<CommunityInvite> {
+    return await this.communityInviteModel.findOne(
+      { _id: new Types.ObjectId(invite), community: new Types.ObjectId(community) })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   * @returns 
+   */
+  async updateVisitorTerminalInvite(community: string, data: CommunityExitCodeDto): Promise<CommunityInvite> {
+    return await this.communityInviteModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(data.invite), community: new Types.ObjectId(community) }, {
+      terminalCode: data.code,
+      terminalDate: new Date(data.date)
+    }, { returnDocument: 'after' }).exec()
   }
 
   /**
@@ -847,6 +937,107 @@ export class CommunityRepository {
         limit: limit,
         page: page
       })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   * @param request 
+   */
+  async createCheckInOutActivity(community: string, data: CheckInOutVisitorRequestDto, request?: CommunityInvite): Promise<void> {
+    const check: CommunityCheckins = {
+      community: new Types.ObjectId(community),
+      accessPoint: new Types.ObjectId(data.accessPoint),
+      member: new Types.ObjectId(data.member),
+      invite: request ? (request as any)._id : null,
+      code: data.code,
+      date: new Date(data.date),
+      type: data.type
+    }
+
+    await this.communityCheckInsModel.create(check)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param code 
+   * @returns 
+   */
+  async getCheckInVisitor(community: string, member: string, request: string, code: string, type: string = CheckType.CHECK_IN): Promise<CommunityCheckins> {
+    return await this.communityCheckInsModel.findOneAndUpdate({
+      code: code,
+      community: new Types.ObjectId(community),
+      member: new Types.ObjectId(member),
+      type: type
+    }, { invite: new Types.ObjectId(request) }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param invite 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getInviteActivities(community: string, invite: string, page: number, limit: number): Promise<any> {
+    const request = await this.getCommunityVisitorInvite(community, invite)
+    const activities = await this.paginator.paginate(this.communityCheckInsModel,
+      { invite: new Types.ObjectId(invite), community: new Types.ObjectId(community) },
+      {
+        select: '_id code date type accessPoint',
+        limit: limit,
+        page: page,
+        sort: { createdAt: 1 },
+        populate: {
+          path: 'accessPoint',
+          select: '_id name description'
+        }
+      })
+
+    return {
+      invite: {
+        _id: (request as any)._id,
+        name: request.name,
+        type: request.type,
+        code: request.code,
+        date: request.date,
+        reason: request.reason,
+        start: request.start,
+        end: request.end,
+        photo: request.photo
+      },
+      activities
+    }
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getMemberVisitorsCheckins(community: string, member: string, page: number, limit: number): Promise<any> {
+    return await this.paginator.paginate(this.communityCheckInsModel,
+      { member: new Types.ObjectId(member), community: new Types.ObjectId(community) },
+      getVisitorsCheckinsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityVisitorsCheckins(community: string, page: number, limit: number): Promise<any> {
+    return await this.paginator.paginate(this.communityCheckInsModel,
+      { community: new Types.ObjectId(community) },
+      getVisitorsCheckinsQuery(page, limit))
   }
 
 }

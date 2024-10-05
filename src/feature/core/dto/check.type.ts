@@ -1,4 +1,4 @@
 export enum CheckType {
-  CHECK_OUT = 'check-out',
-  CHECK_IN = 'check-in'
+  CHECK_OUT = 'checkOut',
+  CHECK_IN = 'checkIn'
 }

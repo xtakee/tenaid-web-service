@@ -8,7 +8,7 @@ export class PushBody {
   description: string
   community: string
   link: string
-  extra?: {}
+  contentId?: string
 }
 
 export class PushDto {
@@ -22,7 +22,11 @@ export class PushDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  body: PushBody
+  body: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  data?: PushBody
 }
 
 export class PushTopicDto {
