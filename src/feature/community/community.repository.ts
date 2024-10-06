@@ -19,6 +19,7 @@ import { CheckInOutVisitorRequestDto } from "./dto/request/check.in.out.visitor.
 import { CheckType } from "../core/dto/check.type";
 import { CommunityCheckins } from "./model/community.checkins";
 import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto";
+import { CommunityEventNode } from "./model/community.event.node";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -122,6 +123,7 @@ export class CommunityRepository {
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
+    @InjectModel(CommunityEventNode.name) private readonly communityEventNodeModel: Model<CommunityEventNode>,
     @InjectModel(CommunityPath.name) private readonly communityPathModel: Model<CommunityPath>
   ) { }
 
@@ -1038,6 +1040,61 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityCheckInsModel,
       { community: new Types.ObjectId(community) },
       getVisitorsCheckinsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param status 
+   * @returns 
+   */
+  async getCommunityEventNodes(community: string, status: string): Promise<CommunityEventNode[]> {
+    return await this.communityEventNodeModel.find({
+      community: new Types.ObjectId(community),
+      status: status
+    });
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param account 
+   * @param member 
+   * @returns 
+   */
+  async updateCommunityEventNodeConnection(community: string, account: string, member: string, token: string, device: string): Promise<CommunityEventNode> {
+    return await this.communityEventNodeModel.findOneAndUpdate({
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(account),
+      member: new Types.ObjectId(member),
+      device: device
+    }, {
+      status: 'online',
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(account),
+      member: new Types.ObjectId(member),
+      token: token,
+      device: device
+    }, { new: true, upsert: true }).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param account 
+   * @param member 
+   * @param device 
+   * @returns 
+   */
+  async updateCommunityEventNodeDisConnection(community: string, account: string, member: string, device: string): Promise<CommunityEventNode> {
+    return await this.communityEventNodeModel.findOneAndUpdate({
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(account),
+      member: new Types.ObjectId(member),
+      device: device
+    }, {
+      status: 'offline'
+    }, { returnDocument: 'after' }).exec()
   }
 
 }

@@ -16,6 +16,7 @@ import { CommunityModule } from './feature/community/community.module';
 import { NotificationModule } from './feature/notification/notification.module';
 import { BullModule } from '@nestjs/bullmq';
 import { EventModule } from './feature/event/event.module';
+import { HealthModule } from './feature/health/health.module';
 
 @Module({
   imports: [
@@ -43,7 +44,9 @@ import { EventModule } from './feature/event/event.module';
     LocationModule,
     CommunityModule,
     NotificationModule,
-    EventModule
-  ]
+    EventModule,
+    HealthModule
+  ],
+  providers: []
 })
 export class AppModule { }

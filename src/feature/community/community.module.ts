@@ -30,6 +30,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { EventGateway } from '../event/event.gateway';
 import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard';
 import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.checkins';
+import { CommunityEventNode, CommunityEventNodeSchema } from './model/community.event.node';
 
 @Module({
   providers: [
@@ -59,6 +60,7 @@ import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.ch
   imports: [
     MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
     MongooseModule.forFeature([{ name: Community.name, schema: CommunitySchema }]),
+    MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
     MongooseModule.forFeature([{ name: CommunityMember.name, schema: CommunityMemberSchema }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
