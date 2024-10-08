@@ -6,6 +6,7 @@ import Axios from 'axios'
 import * as dayjs from 'dayjs'
 import { CacheService } from "../cache/cache.service";
 import { Failure, Result, Success } from "src/core/util/result";
+import { PushBody } from "src/feature/notification/notification.controller";
 
 const {
   GOOGLE_PLACES_URL,
@@ -109,10 +110,14 @@ export class GoogleService {
    * @param deviceToken 
    * @returns 
    */
-  async pushOne(device: string, data: {}): Promise<Result> {
+  async pushOne(device: string, data: PushBody): Promise<Result> {
     const payload = {
       'message': {
         'token': device,
+        'notification': {
+          'body': data.description,
+          'title': data.title
+        },
         'data': data
       }
     }
@@ -126,7 +131,7 @@ export class GoogleService {
    * @param data 
    * @returns 
    */
-  async pushMultipleDevice(devices: string[], data: {}): Promise<Result[]> {
+  async pushMultipleDevice(devices: string[], data: PushBody): Promise<Result[]> {
     if (devices.length < 1) return
     const responses: Result[] = []
     for (const token of devices) {
@@ -145,15 +150,18 @@ export class GoogleService {
    * @param topic 
    * @returns 
    */
-  async pushTopic(topic: string, data: {}): Promise<Result> {
+  async pushTopic(topic: string, data: PushBody): Promise<Result> {
     const payload = {
       'message': {
         'topic': topic,
+        'notification': {
+          'body': data.description,
+          'title': data.title
+        },
         'data': data
       }
     }
 
-    console.log(payload)
     return await this.push(payload)
   }
 
