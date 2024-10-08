@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsDateString, IsInt, IsNotEmpty, Max, Min } from "class-validator";
+import { IsDateString, IsInt, IsNotEmpty, IsOptional, Max, Min } from "class-validator";
 
 export class PaginationRequestDto {
   @IsNotEmpty()
@@ -28,4 +28,10 @@ export class DateRangeDto {
   @ApiProperty()
   @IsDateString()
   end: string
+}
+
+export class DateDto {
+  @IsOptional()
+  @IsDateString()
+  date: string
 }

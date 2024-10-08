@@ -9,6 +9,7 @@ export class LocationService {
 
   async searchAddress(address: string): Promise<LocationDto[]> {
     const result: Result = await this.googlesService.search(address)
+    console.log(result)
     if (result.error) throw new BadRequestException()
 
     return result.data.map((place) => {

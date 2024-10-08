@@ -15,7 +15,7 @@ import { AccountCommunityResponseDto } from './dto/response/account.community.re
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
-import { DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.request.dto';
+import { DateDto, DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.request.dto';
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
 import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
@@ -162,6 +162,14 @@ export class CommunityController {
     return await this.communityService.getUpcomingCommunityVisitors(community, paginate.page, paginate.limit, status)
   }
 
+  /**
+   * 
+   * @param community 
+   * @param date 
+   * @param paginate 
+   * @param status 
+   * @returns 
+   */
   @Get(':community/invite-date')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community invites/visitors by date' })
@@ -471,6 +479,20 @@ export class CommunityController {
   async updateTerminalCode(@Param('community') community: string, @User() user: string, @Body() body: CommunityExitCodeDto): Promise<void> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.updateVisitorTerminalCode(user, community, body)
+  }
+
+
+  @Get(':community/messages')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community messages' })
+  @ApiQuery({ name: 'date', required: false, type: String })
+  async getCommunityMessages(
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Query() date?: DateDto,
+  ): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityMessages(community, paginate.page, paginate.limit, date.date)
   }
 
 }

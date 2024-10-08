@@ -4,6 +4,7 @@ import { IsNotEmpty } from 'class-validator';
 import { NotificationService } from './notification.service';
 
 export class PushBody {
+  title: string
   type: string
   description: string
   community: string
@@ -11,18 +12,20 @@ export class PushBody {
   contentId?: string
 }
 
+export class PushMultipleDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  devices: string[]
+
+  @ApiProperty()
+  @IsNotEmpty()
+  data?: PushBody
+}
+
 export class PushDto {
   @ApiProperty()
   @IsNotEmpty()
   device: string
-
-  @ApiProperty()
-  @IsNotEmpty()
-  title: string
-
-  @ApiProperty()
-  @IsNotEmpty()
-  body: string
 
   @ApiProperty()
   @IsNotEmpty()
@@ -36,14 +39,7 @@ export class PushTopicDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  title: string
-
-  @ApiProperty()
-  data?: {}
-
-  @ApiProperty()
-  @IsNotEmpty()
-  body: string
+  data: PushDto
 }
 
 @Controller({

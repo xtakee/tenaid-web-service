@@ -28,6 +28,7 @@ import { DeviceToken, DeviceTokenSchema } from './model/device.token';
 import { CommunityAccessPoint, CommunityAccessPointSchema } from '../community/model/community.access.point';
 import { CommunityCheckins, CommunityCheckinsSchema } from '../community/model/community.checkins';
 import { CommunityEventNode, CommunityEventNodeSchema } from '../community/model/community.event.node';
+import { CommunityMessage, CommunityMessageSchema } from '../community/model/community.message';
 
 @Global()
 @Module({
@@ -88,6 +89,7 @@ import { CommunityEventNode, CommunityEventNodeSchema } from '../community/model
       return schema;
     },
   }]),
+  MongooseModule.forFeature([{ name: CommunityMessage.name, schema: CommunityMessageSchema }]),
   MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),
   MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
   MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),

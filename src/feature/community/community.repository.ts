@@ -20,6 +20,10 @@ import { CheckType } from "../core/dto/check.type";
 import { CommunityCheckins } from "./model/community.checkins";
 import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto";
 import { CommunityEventNode } from "./model/community.event.node";
+import { MessageDto } from "./dto/request/message.dto";
+import { CommunityMessage } from "./model/community.message";
+import { populate } from "dotenv";
+import { MessageResonseDto } from "./dto/response/message.response.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -114,6 +118,31 @@ const COMMUNITY_MEMBER_QUERY = [
   }
 ]
 
+function getCommunityMessagesQuery(page: number, limit: number) {
+  return {
+    select: '_id author messageId repliedTo body type description date community',
+    page: page,
+    limit: limit,
+    sort: { date: 1 },
+    populate: [
+      {
+        path: 'author',
+        select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+      },
+      { path: 'community', select: '_id name' },
+      {
+        path: 'repliedTo',
+        select: '_id author messageId body type description date community',
+        strictPopulate: false,
+        populate: {
+          path: 'author',
+          select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+        }
+      }
+    ]
+  }
+}
+
 @Injectable()
 export class CommunityRepository {
   constructor(
@@ -123,6 +152,7 @@ export class CommunityRepository {
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
+    @InjectModel(CommunityMessage.name) private readonly communityMessageModel: Model<CommunityMessage>,
     @InjectModel(CommunityEventNode.name) private readonly communityEventNodeModel: Model<CommunityEventNode>,
     @InjectModel(CommunityPath.name) private readonly communityPathModel: Model<CommunityPath>
   ) { }
@@ -1095,6 +1125,71 @@ export class CommunityRepository {
     }, {
       status: 'offline'
     }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param account 
+   */
+  async getOfflineCommunityEventNodesTokens(account: string): Promise<string[]> {
+    return await this.communityEventNodeModel.find({ account: { $ne: new Types.ObjectId(account) }, status: 'offline' }, 'token');
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param message 
+   */
+  async createMessage(user: string, message: MessageDto): Promise<MessageResonseDto> {
+    let communityMessage: CommunityMessage = {
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(message.community),
+      author: new Types.ObjectId(message.author),
+      type: message.type,
+      body: message.body,
+      repliedTo: message.repliedTo ? new Types.ObjectId(message.repliedTo) : null,
+      messageId: message.messageId,
+      date: new Date(message.date)
+    }
+
+    communityMessage = await this.communityMessageModel.create(communityMessage)
+
+    return (await this.communityMessageModel.findById((communityMessage as any)._id,
+      '_id author messageId repliedTo body type description date community')
+      .populate([
+        {
+          path: 'author',
+          select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+        },
+        { path: 'community', select: '_id name' },
+        {
+          path: 'repliedTo',
+          select: '_id author messageId body type description date community',
+          strictPopulate: false,
+          populate: {
+            path: 'author',
+            select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+          }
+        }
+      ]
+      ).exec() as any)
+
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityMessages(community: string, page: number, limit: number, date?: string): Promise<PaginatedResult<any>> {
+    const query: any = { community: new Types.ObjectId(community) }
+    if (date) query.date = { $gt: new Date(date) }
+
+    return await this.paginator.paginate(this.communityMessageModel,
+      query, getCommunityMessagesQuery(page, limit))
   }
 
 }

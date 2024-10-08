@@ -109,16 +109,32 @@ export class GoogleService {
    * @param deviceToken 
    * @returns 
    */
-  async pushOne(title: string, body: string, device: string, data: {}): Promise<Result> {
+  async pushOne(device: string, data: {}): Promise<Result> {
     const payload = {
       'message': {
         'token': device,
-        'notification': { 'title': title, 'body': body },
         'data': data
       }
     }
 
     return await this.push(payload)
+  }
+
+  /**
+   * 
+   * @param devices 
+   * @param data 
+   * @returns 
+   */
+  async pushMultipleDevice(devices: string[], data: {}): Promise<Result[]> {
+    if (devices.length < 1) return
+    const responses: Result[] = []
+    for (const token of devices) {
+      const response = await this.pushOne(token, data)
+      responses.push(response)
+    }
+
+    return responses
   }
 
   /**
@@ -129,11 +145,10 @@ export class GoogleService {
    * @param topic 
    * @returns 
    */
-  async pushTopic(title: string, data: {}, body: string, topic: string): Promise<Result> {
+  async pushTopic(topic: string, data: {}): Promise<Result> {
     const payload = {
       'message': {
         'topic': topic,
-        'notification': { 'title': title, 'body': body },
         'data': data
       }
     }

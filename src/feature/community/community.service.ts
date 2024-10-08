@@ -467,7 +467,8 @@ export class CommunityService {
         const memberName = `${request.extra.firstName} ${request.extra.lastName}`
         const body = `Hello! ${memberName} has requested to be a member of ${community.name}`
         this.notificationService.pushToDevice({
-          device: deviceToken.token, title: 'Join Requested', body, data: {
+          device: deviceToken.token, data: {
+            title: 'Join Requested',
             type: MessageType.REQUEST_JOIN_COMMUNITY, description: body,
             contentId: (request as any)._id,
             link: 'community/join-request',
@@ -545,7 +546,8 @@ export class CommunityService {
       const deviceToken = await this.accountRepository.getDevicePushToken(request.account)
       if (deviceToken)
         this.notificationService.pushToDevice({
-          device: deviceToken.token, title: pushTitle, body: pushBody, data: {
+          device: deviceToken.token, data: {
+            title: pushTitle,
             type: MessageType.REQUEST_JOIN_COMMUNITY, description: pushBody, link: '/home',
             community: data.community
           }
@@ -607,7 +609,8 @@ export class CommunityService {
 
       if (deviceToken)
         this.notificationService.pushToDevice({
-          device: deviceToken.token, title: title, body: body, data: {
+          device: deviceToken.token, data: {
+            title: title,
             type: data.type === CheckType.CHECK_IN
               ? MessageType.VISITOR_CHECK_IN
               : MessageType.VISITOR_CHECK_OUT, description: body,
@@ -651,5 +654,17 @@ export class CommunityService {
     }
 
     else throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityMessages(community: string, page: number, limit: number, date?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityMessages(community, page, limit, date)
   }
 }
