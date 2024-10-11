@@ -134,10 +134,13 @@ function getCommunityMessagesQuery(page: number, limit: number) {
         path: 'repliedTo',
         select: '_id author messageId body type description date community',
         strictPopulate: false,
-        populate: {
-          path: 'author',
-          select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-        }
+        populate: [
+          {
+            path: 'author',
+            select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+          },
+          { path: 'community', select: '_id name' },
+        ]
       }
     ]
   }
@@ -1166,10 +1169,13 @@ export class CommunityRepository {
           path: 'repliedTo',
           select: '_id author messageId body type description date community',
           strictPopulate: false,
-          populate: {
-            path: 'author',
-            select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-          }
+          populate: [
+            {
+              path: 'author',
+              select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+            },
+            { path: 'community', select: '_id name' },
+          ]
         }
       ]
       ).exec() as any)
@@ -1191,5 +1197,7 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityMessageModel,
       query, getCommunityMessagesQuery(page, limit))
   }
+
+  //async getCommunityMessageUsers(community: string)
 
 }

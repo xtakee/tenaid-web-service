@@ -8,6 +8,13 @@ import { Account } from "src/feature/account/model/account.model";
 export type CommunityMessageDocument = HydratedDocument<CommunityMessage>;
 
 @Schema({ timestamps: true })
+export class MessageReaction {
+  reaction: string
+  @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
+  author: Types.ObjectId
+}
+
+@Schema({ timestamps: true })
 export class CommunityMessage {
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
@@ -18,8 +25,11 @@ export class CommunityMessage {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
-  @Prop({unique: true, index: true})
+  @Prop({ unique: true, index: true })
   messageId: string
+
+  @Prop({ type: [MessageReaction], default: [] })
+  reactions?: MessageReaction[]
 
   @Prop({ type: Types.ObjectId, ref: CommunityMessage.name })
   repliedTo?: Types.ObjectId
@@ -27,7 +37,7 @@ export class CommunityMessage {
   @Prop()
   body: string
 
-  @Prop({enum: MessageType})
+  @Prop({ enum: MessageType })
   type: string
 
   @Prop()

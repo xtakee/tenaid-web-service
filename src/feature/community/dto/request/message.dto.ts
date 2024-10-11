@@ -35,5 +35,6 @@ export class MessageDto {
   type: string
 
   @IsOptional()
+  @IsMongoId()
   repliedTo?: string
 }
