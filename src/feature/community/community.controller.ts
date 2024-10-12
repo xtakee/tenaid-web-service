@@ -492,7 +492,26 @@ export class CommunityController {
     @Query() date?: DateDto,
   ): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMessages(community, paginate.page, paginate.limit, date.date)
+    return await this.communityService.getCommunityMessages(community, paginate.page, paginate.limit, paginate.sort, date.date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @param date 
+   * @returns 
+   */
+  @Get(':community/messages-backup')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community previous messages' })
+  async getCommunityPreviousMessages(
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Query() date: DateDto,
+  ): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunityPreviousMessages(community, paginate.page, paginate.limit, date.date, paginate.sort)
   }
 
 }

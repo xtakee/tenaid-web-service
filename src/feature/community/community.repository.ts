@@ -22,8 +22,8 @@ import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto";
 import { CommunityEventNode } from "./model/community.event.node";
 import { MessageDto } from "./dto/request/message.dto";
 import { CommunityMessage } from "./model/community.message";
-import { populate } from "dotenv";
 import { MessageResonseDto } from "./dto/response/message.response.dto";
+import { SortDirection } from "../core/dto/pagination.request.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -118,12 +118,12 @@ const COMMUNITY_MEMBER_QUERY = [
   }
 ]
 
-function getCommunityMessagesQuery(page: number, limit: number) {
+function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
     select: '_id author messageId repliedTo body type description date community',
     page: page,
     limit: limit,
-    sort: { date: 1 },
+    sort: { date: sort === SortDirection.ASC ? 1 : -1 },
     populate: [
       {
         path: 'author',
@@ -1190,12 +1190,28 @@ export class CommunityRepository {
    * @param date 
    * @returns 
    */
-  async getCommunityMessages(community: string, page: number, limit: number, date?: string): Promise<PaginatedResult<any>> {
+  async getCommunityMessages(community: string, page: number, limit: number, sort: string, date?: string): Promise<PaginatedResult<any>> {
     const query: any = { community: new Types.ObjectId(community) }
     if (date) query.date = { $gt: new Date(date) }
 
     return await this.paginator.paginate(this.communityMessageModel,
-      query, getCommunityMessagesQuery(page, limit))
+      query, getCommunityMessagesQuery(page, limit, sort))
+  }
+
+/**
+ * 
+ * @param community 
+ * @param page 
+ * @param limit 
+ * @param date 
+ * @param sort 
+ * @returns 
+ */
+  async getCommunityPreviousMessages(community: string, page: number, limit: number, date: string, sort?: string): Promise<PaginatedResult<any>> {
+    const query: any = { community: new Types.ObjectId(community), date: { $lte: new Date(date) } }
+
+    return await this.paginator.paginate(this.communityMessageModel,
+      query, getCommunityMessagesQuery(page, limit, sort))
   }
 
   //async getCommunityMessageUsers(community: string)

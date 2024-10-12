@@ -1,6 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, Max, Min } from "class-validator";
+import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from "class-validator";
+
+export enum SortDirection {
+  ASC = 'asc',
+  DEC = 'dec'
+}
 
 export class PaginationRequestDto {
   @IsNotEmpty()
@@ -16,6 +21,11 @@ export class PaginationRequestDto {
   @Min(1)
   @Max(50)
   limit: number = 10
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ default: SortDirection.DEC })
+  sort?: string = SortDirection.DEC
 }
 
 export class DateRangeDto {
