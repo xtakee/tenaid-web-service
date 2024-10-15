@@ -1149,6 +1149,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(message.community),
       author: new Types.ObjectId(message.author),
       type: message.type,
+      description: message.description,
       body: message.body,
       repliedTo: message.repliedTo ? new Types.ObjectId(message.repliedTo) : null,
       messageId: message.messageId,
@@ -1198,15 +1199,15 @@ export class CommunityRepository {
       query, getCommunityMessagesQuery(page, limit, sort))
   }
 
-/**
- * 
- * @param community 
- * @param page 
- * @param limit 
- * @param date 
- * @param sort 
- * @returns 
- */
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param date 
+   * @param sort 
+   * @returns 
+   */
   async getCommunityPreviousMessages(community: string, page: number, limit: number, date: string, sort?: string): Promise<PaginatedResult<any>> {
     const query: any = { community: new Types.ObjectId(community), date: { $lte: new Date(date) } }
 
