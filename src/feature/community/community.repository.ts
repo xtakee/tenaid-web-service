@@ -120,7 +120,7 @@ const COMMUNITY_MEMBER_QUERY = [
 
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
-    select: '_id author messageId repliedTo body type description date community',
+    select: '_id author messageId repliedTo body name size extension type description date community',
     page: page,
     limit: limit,
     sort: { date: sort === SortDirection.ASC ? 1 : -1 },
@@ -1151,6 +1151,9 @@ export class CommunityRepository {
       type: message.type,
       description: message.description,
       body: message.body,
+      size: message.size,
+      name: message.name,
+      extension: message.extension,
       repliedTo: message.repliedTo ? new Types.ObjectId(message.repliedTo) : null,
       messageId: message.messageId,
       date: new Date(message.date)
@@ -1159,7 +1162,7 @@ export class CommunityRepository {
     communityMessage = await this.communityMessageModel.create(communityMessage)
 
     return (await this.communityMessageModel.findById((communityMessage as any)._id,
-      '_id author messageId repliedTo body type description date community')
+      '_id author messageId repliedTo body type description name size extension date community')
       .populate([
         {
           path: 'author',

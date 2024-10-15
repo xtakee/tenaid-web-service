@@ -21,5 +21,8 @@ export class MessageResonseDto {
   repliedTo: string | null;
   body: string
   type: string
+  name?: string
+  size?: number
+  extension?: string
   date: Date
 }

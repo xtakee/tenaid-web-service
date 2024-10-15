@@ -37,4 +37,13 @@ export class MessageDto {
   @IsOptional()
   @IsMongoId()
   repliedTo?: string
+
+  @IsOptional()
+  size?: number
+
+  @IsOptional()
+  name?: string
+
+  @IsOptional()
+  extension?: string
 }

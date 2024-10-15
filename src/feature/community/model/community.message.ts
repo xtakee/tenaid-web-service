@@ -43,6 +43,15 @@ export class CommunityMessage {
   @Prop()
   description?: string
 
+  @Prop()
+  name?: string
+
+  @Prop()
+  size?: number
+
+  @Prop()
+  extension?: string
+
   @Prop({ type: Date })
   date: Date
 }
