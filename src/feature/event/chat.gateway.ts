@@ -6,8 +6,13 @@ import { MessageDto } from "../community/dto/request/message.dto"
 import { PushMultipleDto } from "../notification/notification.controller"
 import { MessageResonseDto } from "../community/dto/response/message.response.dto"
 import { NotificationService } from "../notification/notification.service"
+import { DeleteMessageRequestDto } from "../community/dto/request/delete.message.request.dto"
+import { UpdateMessageRequestDto } from "../community/dto/request/update.message.request.dto"
+import { EventBufferType } from "../community/model/community.event.buffer"
 
 const EVENT_NAME = 'community-message'
+const EVENT_NAME_DELETE = 'community-message-delete'
+const EVENT_NAME_UPDATE = 'community-message-update'
 
 @WebSocketGateway({
   namespace: 'chat', pingInterval: 10000,  // Send a ping every 10 seconds
@@ -57,12 +62,62 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // join community chat room
       client.join(community)
+
+      // check for stale/offline events
+      const account: string = client.data.user.sub
+      const staleEvents = await this.communityRepository.getDeferredMessageEvents(account, community)
+      if (staleEvents.length > 0) {
+        for (const event of staleEvents) {
+          client.emit(event.type, event.event)
+        }
+      }
     } else client.disconnect()
   }
 
   // handle client disconnected
   async handleDisconnect(client: Socket) {
     await this.updateClientDisConnection(client)
+  }
+
+  @SubscribeMessage(EVENT_NAME_DELETE)
+  async handleMessageDelete(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: DeleteMessageRequestDto
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+    if (authenticated) {
+      const community = message.community
+      const account: string = client.data.user.sub
+
+      const response = await this.communityRepository.deleteMessage(account, message)
+      this.server.to(community).emit(EVENT_NAME_UPDATE, response)
+
+      const totalNodes = await this.communityRepository.getTotalCommunityEventNodes(community)
+      await this.communityRepository.createDeferredMessageEvent(community, response, EventBufferType.DELETE_MESSAGE, totalNodes)
+    }
+
+    return message
+  }
+
+  @SubscribeMessage(EVENT_NAME_UPDATE)
+  async handleMessageUpdate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: UpdateMessageRequestDto
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+
+    if (authenticated) {
+      const community = message.community
+      const account: string = client.data.user.sub
+
+      const response = await this.communityRepository.updateMessage(account, message)
+      this.server.to(community).emit(EVENT_NAME_UPDATE, response)
+
+      const totalNodes = await this.communityRepository.getTotalCommunityEventNodes(community)
+      await this.communityRepository.createDeferredMessageEvent(community, response, EventBufferType.UPDATE_MESSAGE, totalNodes)
+    }
+
+    return message
   }
 
   @SubscribeMessage(EVENT_NAME)
@@ -72,7 +127,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<MessageDto> {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-      const community = client.handshake.headers.community as string
+      const community = message.community
       const account: string = client.data.user.sub
       const response: MessageResonseDto = await this.communityRepository.createMessage(account, message)
 

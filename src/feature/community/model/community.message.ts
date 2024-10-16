@@ -46,6 +46,12 @@ export class CommunityMessage {
   @Prop()
   name?: string
 
+  @Prop({default: false})
+  edited?: Boolean
+
+  @Prop({default: false})
+  deleted?: Boolean
+
   @Prop()
   size?: number
 

@@ -24,6 +24,9 @@ import { MessageDto } from "./dto/request/message.dto";
 import { CommunityMessage } from "./model/community.message";
 import { MessageResonseDto } from "./dto/response/message.response.dto";
 import { SortDirection } from "../core/dto/pagination.request.dto";
+import { UpdateMessageRequestDto } from "./dto/request/update.message.request.dto";
+import { CommunityEventBuffer } from "./model/community.event.buffer";
+import { DeleteMessageRequestDto } from "./dto/request/delete.message.request.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -118,31 +121,33 @@ const COMMUNITY_MEMBER_QUERY = [
   }
 ]
 
-function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
-  return {
-    select: '_id author messageId repliedTo body name size extension type description date community',
-    page: page,
-    limit: limit,
-    sort: { date: sort === SortDirection.ASC ? 1 : -1 },
+const CommunityMessagePopulateQuery = [
+  {
+    path: 'author',
+    select: '_id isAdmin extra.firstName extra.lastName extra.photo'
+  },
+  { path: 'community', select: '_id name' },
+  {
+    path: 'repliedTo',
+    select: '_id author messageId body type description date community',
+    strictPopulate: false,
     populate: [
       {
         path: 'author',
         select: '_id isAdmin extra.firstName extra.lastName extra.photo'
       },
       { path: 'community', select: '_id name' },
-      {
-        path: 'repliedTo',
-        select: '_id author messageId body type description date community',
-        strictPopulate: false,
-        populate: [
-          {
-            path: 'author',
-            select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-          },
-          { path: 'community', select: '_id name' },
-        ]
-      }
     ]
+  }
+]
+
+function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
+  return {
+    select: '_id author messageId repliedTo body deleted edited name size extension type description date community',
+    page: page,
+    limit: limit,
+    sort: { date: sort === SortDirection.ASC ? 1 : -1 },
+    populate: CommunityMessagePopulateQuery
   }
 }
 
@@ -151,6 +156,7 @@ export class CommunityRepository {
   constructor(
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
+    @InjectModel(CommunityEventBuffer.name) private readonly communityEventBufferModel: Model<CommunityEventBuffer>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
@@ -1081,10 +1087,32 @@ export class CommunityRepository {
    * @param status 
    * @returns 
    */
-  async getCommunityEventNodes(community: string, status: string): Promise<CommunityEventNode[]> {
+  async getCommunityEventNodesByStatus(community: string, status: string): Promise<CommunityEventNode[]> {
     return await this.communityEventNodeModel.find({
       community: new Types.ObjectId(community),
       status: status
+    });
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityEventNodes(community: string): Promise<CommunityEventNode[]> {
+    return await this.communityEventNodeModel.find({
+      community: new Types.ObjectId(community)
+    });
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getTotalCommunityEventNodes(community: string): Promise<number> {
+    return await this.communityEventNodeModel.countDocuments({
+      community: new Types.ObjectId(community)
     });
   }
 
@@ -1162,28 +1190,41 @@ export class CommunityRepository {
     communityMessage = await this.communityMessageModel.create(communityMessage)
 
     return (await this.communityMessageModel.findById((communityMessage as any)._id,
-      '_id author messageId repliedTo body type description name size extension date community')
-      .populate([
-        {
-          path: 'author',
-          select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-        },
-        { path: 'community', select: '_id name' },
-        {
-          path: 'repliedTo',
-          select: '_id author messageId body type description date community',
-          strictPopulate: false,
-          populate: [
-            {
-              path: 'author',
-              select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-            },
-            { path: 'community', select: '_id name' },
-          ]
-        }
-      ]
-      ).exec() as any)
+      '_id author messageId repliedTo body deleted edited type description name size extension date community')
+      .populate(CommunityMessagePopulateQuery).exec() as any)
+  }
 
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async updateMessage(user: string, data: UpdateMessageRequestDto): Promise<MessageResonseDto> {
+    return (await this.communityMessageModel.findOneAndUpdate({
+      account: new Types.ObjectId(user),
+      _id: new Types.ObjectId(data.message),
+      community: new Types.ObjectId(data.community)
+    }, {
+      body: data.body,
+      edited: true
+    }, { returnDocument: 'after' })
+      .populate(CommunityMessagePopulateQuery).exec() as any)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async deleteMessage(user: string, data: DeleteMessageRequestDto): Promise<MessageResonseDto> {
+    return (await this.communityMessageModel.findOneAndUpdate({
+      account: new Types.ObjectId(user),
+      _id: new Types.ObjectId(data.message),
+      community: new Types.ObjectId(data.community)
+    }, { deleted: true }, { returnDocument: 'after' })
+      .populate(CommunityMessagePopulateQuery).exec() as any)
   }
 
   /**
@@ -1218,6 +1259,49 @@ export class CommunityRepository {
       query, getCommunityMessagesQuery(page, limit, sort))
   }
 
-  //async getCommunityMessageUsers(community: string)
+  /**
+   * 
+   * @param user 
+   * @param event 
+   * @param type 
+   */
+  async createDeferredMessageEvent(community: string, event: Object, type: string, targets: number): Promise<void> {
+    const bufferEvent: CommunityEventBuffer = {
+      community: new Types.ObjectId(community),
+      event: event,
+      type: type,
+      totalTarget: targets
+    }
+    await this.communityEventBufferModel.create(bufferEvent)
+  }
+
+/**
+ * Gets all events not seen by user, updates the event
+ * deletes if seen by everyone
+ * @param user 
+ * @param community 
+ * @returns 
+ */
+  async getDeferredMessageEvents(user: string, community: string): Promise<CommunityEventBuffer[]> {
+    const events = await this.communityEventBufferModel.find({
+      account: { $ne: new Types.ObjectId(user) },
+      community: new Types.ObjectId(community)
+    })
+
+    if (events.length < 1) return events
+
+    for (const event of events) {
+      const _event = await this.communityEventBufferModel.findOneAndUpdate({ _id: event._id }, {
+        $addToSet: { targets: new Types.ObjectId(user) }, // Add userID if it's not already there
+        $inc: { targetReached: 1 },    // Increment reachedTargets
+      }, { new: true })
+
+      if (_event.targetReached === _event.totalTarget) {
+        await this.communityEventBufferModel.findByIdAndDelete(_event._id);
+      }
+    }
+
+    return events
+  }
 
 }
