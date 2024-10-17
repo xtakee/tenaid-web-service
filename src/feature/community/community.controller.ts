@@ -494,7 +494,7 @@ export class CommunityController {
   async getCommunityMessages(
     @Param('community') community: string,
     @Query() paginate: PaginationRequestDto,
-    @Query('date') date?: DateDto,
+    @Query() date?: DateDto,
   ): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunityMessages(community, paginate.page, paginate.limit, paginate.sort, date.date)
