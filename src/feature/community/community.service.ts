@@ -403,8 +403,8 @@ export class CommunityService {
    * @param page 
    * @param limit 
    */
-  async getAllCommunityMembers(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllCommunityMembers(community, page, limit)
+  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status)
   }
 
   /**
@@ -677,7 +677,7 @@ export class CommunityService {
    * @param date 
    * @returns 
    */
-  async getCommunityPreviousMessages(community: string, page: number, limit: number,date: string, sort?: string): Promise<PaginatedResult<any>> {
+  async getCommunityPreviousMessages(community: string, page: number, limit: number, date: string, sort?: string): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getCommunityPreviousMessages(community, page, limit, date, sort)
   }
 }

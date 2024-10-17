@@ -537,8 +537,14 @@ export class CommunityRepository {
  * @param page 
  * @param limit 
  */
-  async getAllCommunityMembers(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    return await this.paginator.paginate(this.communityMemberModel, { community: new Types.ObjectId(community) }, {
+  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      account: { $ne: new Types.ObjectId(user) }
+    }
+    if (status) query.status = status
+
+    return await this.paginator.paginate(this.communityMemberModel, query, {
       select: '_id path description point code extra isAdmin',
       page: page,
       limit: limit,
@@ -1275,13 +1281,13 @@ export class CommunityRepository {
     await this.communityEventBufferModel.create(bufferEvent)
   }
 
-/**
- * Gets all events not seen by user, updates the event
- * deletes if seen by everyone
- * @param user 
- * @param community 
- * @returns 
- */
+  /**
+   * Gets all events not seen by user, updates the event
+   * deletes if seen by everyone
+   * @param user 
+   * @param community 
+   * @returns 
+   */
   async getDeferredMessageEvents(user: string, community: string): Promise<CommunityEventBuffer[]> {
     const events = await this.communityEventBufferModel.find({
       account: { $ne: new Types.ObjectId(user) },

@@ -341,9 +341,14 @@ export class CommunityController {
   @Get(':community/members')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community members' })
-  async getAllCommunityMembers(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+  @ApiQuery({ name: 'status', required: false, type: String })
+  async getAllCommunityMembers(
+    @User() user: string,
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Query('status') status?: string): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityMembers(community, paginate.page, paginate.limit)
+    return await this.communityService.getAllCommunityMembers(user, community, paginate.page, paginate.limit, status)
   }
 
   /**
@@ -489,7 +494,7 @@ export class CommunityController {
   async getCommunityMessages(
     @Param('community') community: string,
     @Query() paginate: PaginationRequestDto,
-    @Query() date?: DateDto,
+    @Query('date') date?: DateDto,
   ): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunityMessages(community, paginate.page, paginate.limit, paginate.sort, date.date)
