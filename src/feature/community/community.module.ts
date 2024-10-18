@@ -32,7 +32,7 @@ import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard';
 import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.checkins';
 import { CommunityEventNode, CommunityEventNodeSchema } from './model/community.event.node';
 import { CommunityMessage, CommunityMessageSchema } from './model/community.message';
-import { CommunityEventBuffer, CommunityEventBufferSchema } from './model/community.event.buffer';
+import { CommunityMessageCache, CommunityMessageCacheSchema } from './model/community.message.cache';
 
 @Module({
   providers: [
@@ -61,7 +61,7 @@ import { CommunityEventBuffer, CommunityEventBufferSchema } from './model/commun
   exports: [CommunityRepository, CommunityService],
   imports: [
     MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
-    MongooseModule.forFeature([{ name: CommunityEventBuffer.name, schema: CommunityEventBufferSchema }]),
+    MongooseModule.forFeature([{ name: CommunityMessageCache.name, schema: CommunityMessageCacheSchema }]),
     MongooseModule.forFeature([{ name: Community.name, schema: CommunitySchema }]),
     MongooseModule.forFeature([{ name: CommunityMessage.name, schema: CommunityMessageSchema }]),
     MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),

@@ -22,6 +22,7 @@ export class MessageResonseDto {
   body: string
   type: string
   name?: string
+  status?: string
   size?: number
   extension?: string
   date: Date

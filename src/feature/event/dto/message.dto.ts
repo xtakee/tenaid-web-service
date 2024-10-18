@@ -1,10 +1,5 @@
 import { IsNotEmpty, IsMongoId, IsOptional, IsEnum, IsDateString } from "class-validator"
-
-export enum MessageType {
-  TEXT = 'text',
-  IMAGE = 'image',
-  FILE = 'file'
-}
+import { MessageType } from "src/feature/community/model/community.message"
 
 export class MessageDto {
   @IsNotEmpty()

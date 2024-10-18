@@ -2,10 +2,21 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { Community } from "./community";
 import { CommunityMember } from "./community.member";
-import { MessageType } from "src/feature/community/dto/request/message.dto";
 import { Account } from "src/feature/account/model/account.model";
 
 export type CommunityMessageDocument = HydratedDocument<CommunityMessage>;
+
+export enum MessageType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  FILE = 'file',
+  VIDEO = 'video'
+}
+
+export enum MessageStatus {
+  SENT = 'sent',
+  DELIVERED = 'delivered'
+}
 
 @Schema({ timestamps: true })
 export class MessageReaction {
@@ -40,16 +51,19 @@ export class CommunityMessage {
   @Prop({ enum: MessageType })
   type: string
 
+  @Prop({ enum: MessageStatus, default: MessageStatus.SENT })
+  status?: string
+
   @Prop()
   description?: string
 
   @Prop()
   name?: string
 
-  @Prop({default: false})
+  @Prop({ default: false })
   edited?: Boolean
 
-  @Prop({default: false})
+  @Prop({ default: false })
   deleted?: Boolean
 
   @Prop()
