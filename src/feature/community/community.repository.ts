@@ -1120,7 +1120,7 @@ export class CommunityRepository {
    */
   async getTotalCommunityEventNodes(community: string): Promise<number> {
     return await this.communityEventNodeModel.countDocuments({
-      community: new Types.ObjectId(community)
+      communities: new Types.ObjectId(community)
     });
   }
 
@@ -1131,17 +1131,14 @@ export class CommunityRepository {
    * @param member 
    * @returns 
    */
-  async updateCommunityEventNodeConnection(community: string, account: string, member: string, token: string, device: string): Promise<CommunityEventNode> {
+  async updateCommunityEventNodeConnection(communities: string[], account: string, token: string, device: string): Promise<CommunityEventNode> {
     return await this.communityEventNodeModel.findOneAndUpdate({
-      community: new Types.ObjectId(community),
       account: new Types.ObjectId(account),
-      member: new Types.ObjectId(member),
       device: device
     }, {
       status: 'online',
-      community: new Types.ObjectId(community),
+      communities: communities.map(id => new Types.ObjectId(id)),
       account: new Types.ObjectId(account),
-      member: new Types.ObjectId(member),
       token: token,
       device: device
     }, { new: true, upsert: true }).exec()
@@ -1155,11 +1152,9 @@ export class CommunityRepository {
    * @param device 
    * @returns 
    */
-  async updateCommunityEventNodeDisConnection(community: string, account: string, member: string, device: string): Promise<CommunityEventNode> {
+  async updateCommunityEventNodeDisConnection(account: string, device: string): Promise<CommunityEventNode> {
     return await this.communityEventNodeModel.findOneAndUpdate({
-      community: new Types.ObjectId(community),
       account: new Types.ObjectId(account),
-      member: new Types.ObjectId(member),
       device: device
     }, {
       status: 'offline'
@@ -1170,8 +1165,12 @@ export class CommunityRepository {
    * 
    * @param account 
    */
-  async getOfflineCommunityEventNodesTokens(account: string): Promise<string[]> {
-    return await this.communityEventNodeModel.find({ account: { $ne: new Types.ObjectId(account) }, status: 'offline' }, 'token');
+  async getOfflineCommunityEventNodesTokens(account: string, community: string): Promise<string[]> {
+    return await this.communityEventNodeModel.find({
+      communities: new Types.ObjectId(community),
+      account: { $ne: new Types.ObjectId(account) },
+      status: 'offline'
+    }, 'token');
   }
 
   /**

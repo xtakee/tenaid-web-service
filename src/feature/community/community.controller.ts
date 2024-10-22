@@ -451,7 +451,7 @@ export class CommunityController {
  * @param community 
  * @returns 
  */
-  @Post('/:community/primary-access-point')
+  @Post('/:community/primary-community')
   @BasicAuth()
   @ApiOperation({ summary: 'Set a primary account community' })
   async setPrimaryAccountCommunity(@User() user: string, @Param('community') community: string): Promise<any> {

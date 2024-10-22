@@ -19,6 +19,13 @@ const EVENT_NAME_DELIVERY = 'community-message-delivery'
 const EVENT_NAME_DELETE = 'community-message-delete'
 const EVENT_NAME_UPDATE = 'community-message-update'
 
+class NodeData {
+  account: string
+  communities: string[]
+  token?: string
+  device: string
+}
+
 @WebSocketGateway({
   namespace: 'chat', pingInterval: 10000,  // Send a ping every 10 seconds
   pingTimeout: 5000,
@@ -34,42 +41,50 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server
 
-  private async updateClientConnection(client: Socket): Promise<void> {
+  private async updateClientConnection(node: NodeData): Promise<void> {
     // client authentication
-    const account: string = client.data.user.sub
-    const community: string = client.handshake.headers.community as string
-    const member: string = client.handshake.headers.member as string
-    const token: string = client.handshake.headers.token as string
-    const device: string = client.handshake.headers.device as string
+    const { account, communities, device, token } = node
 
-    if (community && member && account)
-      this.communityRepository.updateCommunityEventNodeConnection(community, account, member, token, device)
+    this.communityRepository.updateCommunityEventNodeConnection(communities, account, token, device)
   }
 
   private async updateClientDisConnection(client: Socket): Promise<void> {
     // client authentication
     if (!client.data.user) return
     const account: string = client.data.user.sub
-    const community: string = client.handshake.headers.community as string
-    const member: string = client.handshake.headers.member as string
     const device: string = client.handshake.headers.device as string
 
-    if (community && member && account)
-      this.communityRepository.updateCommunityEventNodeDisConnection(community, account, member, device)
+    if (account)
+      this.communityRepository.updateCommunityEventNodeDisConnection(account, device)
   }
 
   // handle client connected
   async handleConnection(client: Socket, ...args: any[]) {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-      await this.updateClientConnection(client)
+
       const account: string = client.data.user.sub
+      const token: string = client.handshake.headers.token as string
+      const device: string = client.handshake.headers.device as string
+
       const primaryCommunity: string = client.handshake.headers.community as string
       const communities = await this.communityRepository.getAllAccountActiveCommunities(account)
+      const communityIds: string[] = []
+
       // join all active community rooms
       for (const community of communities) {
-        client.join((community as any).community.toString())
+        const communityId = (community as any).community.toString()
+        client.join(communityId)
+        communityIds.push(communityId)
       }
+
+      // udpate client nodes
+      await this.updateClientConnection({
+        communities: communityIds,
+        device: device,
+        token: token,
+        account: account
+      })
 
       // get all unread messages/events
       const cachedMessages: CacheMessageDto[] = await this.communityRepository.getAllCachedCommunityMessages(account, primaryCommunity)
@@ -200,7 +215,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(community).emit(EVENT_NAME, response)
 
       // get all onffline devices and send push notifications
-      const offlineDevices = await this.communityRepository.getOfflineCommunityEventNodesTokens(account)
+      const offlineDevices = await this.communityRepository.getOfflineCommunityEventNodesTokens(community, account)
       const tokens = offlineDevices.map((device) => (device as any).token)
 
       const sender = response.author.isAdmin ? response.community.name : `${response.author.extra.firstName} ${response.author.extra.lastName}`
