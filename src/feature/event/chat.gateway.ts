@@ -18,6 +18,7 @@ const EVENT_NAME_DELIVERY_ACK = 'community-message-delivery-ack'
 const EVENT_NAME_DELIVERY = 'community-message-delivery'
 const EVENT_NAME_DELETE = 'community-message-delete'
 const EVENT_NAME_UPDATE = 'community-message-update'
+const EVENT_NAME_REFRESH = 'community-join-refresh'
 
 class NodeData {
   account: string
@@ -106,7 +107,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(EVENT_NAME_DELETE)
   async handleMessageDelete(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: DeleteMessageRequestDto
+    @MessageBody() message: MessageDto
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
@@ -137,6 +138,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // remove message from server
       await this.communityRepository.cleanUpCommunityMessage(account, community, message.message)
+    }
+
+    return message
+  }
+
+  // refresh communities joined
+  @SubscribeMessage(EVENT_NAME_REFRESH)
+  async handleJoinRefresh(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: string
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+
+    if (authenticated) {
+      const account: string = client.data.user.sub
+
+      const communities = await this.communityRepository.getAllAccountActiveCommunities(account)
+      // join all active community rooms
+      for (const community of communities) {
+        const communityId = (community as any).community.toString()
+        client.join(communityId)
+      }
+
     }
 
     return message
@@ -178,7 +202,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(EVENT_NAME_UPDATE)
   async handleMessageUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: UpdateMessageRequestDto
+    @MessageBody() message: MessageDto
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
 

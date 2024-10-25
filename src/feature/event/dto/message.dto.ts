@@ -34,6 +34,10 @@ export class MessageDto {
   repliedTo?: string
 
   @IsOptional()
+  @IsMongoId()
+  remoteId?: string
+
+  @IsOptional()
   size?: number
 
   @IsOptional()
