@@ -1185,7 +1185,7 @@ export class CommunityRepository {
         _id: new Types.ObjectId(message),
         community: new Types.ObjectId(community)
       },
-      '_id author messageId account status repliedTo body deleted edited type description name size extension date community')
+      '_id author messageId account path status repliedTo body deleted edited type description name size extension date community')
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }
 
@@ -1224,6 +1224,7 @@ export class CommunityRepository {
       type: message.type,
       description: message.description,
       body: message.body,
+      path: message.path,
       size: message.size,
       name: message.name,
       extension: message.extension,
@@ -1252,6 +1253,7 @@ export class CommunityRepository {
       author: new Types.ObjectId(data.author),
       account: new Types.ObjectId(user),
       body: data.body,
+      path: data.path,
       community: new Types.ObjectId(data.community),
       type: data.type,
       status: MessageStatus.SENT,

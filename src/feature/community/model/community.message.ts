@@ -48,6 +48,9 @@ export class CommunityMessage {
   @Prop()
   body: string
 
+  @Prop()
+  path?: string
+
   @Prop({ enum: MessageType })
   type: string
 
