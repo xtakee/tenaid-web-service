@@ -114,11 +114,24 @@ export class GoogleService {
     const payload = {
       'message': {
         'token': device,
-        'notification': {
-          'body': data.description,
-          'title': data.title
+        // 'notification': {
+        //   'body': data.description,
+        //   'title': data.title
+        // },
+        'data': data,
+        'android': {
+          'priority': 'high'
         },
-        'data': data
+        'apns': {
+          'headers': {
+            'apns-priority': '5'
+          },
+          'payload': {
+            'aps': {
+              'content-available': 1
+            }
+          }
+        }
       }
     }
 

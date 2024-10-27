@@ -21,6 +21,7 @@ import { CommunityAccessPointResonseDto } from './dto/response/community.access.
 import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
 import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
+import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 
 @Controller({
   version: '1',
@@ -317,6 +318,20 @@ export class CommunityController {
     return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
   }
 
+/**
+ * 
+ * @param email 
+ * @returns 
+ */
+  @Get('/member-create-requests-count')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community member create request count' })
+  async getCommunityMemberCreateCount(
+    @Query('email') email: string
+  ): Promise<{}> {
+    return await this.communityService.getCommunityMemberCreateCount(email)
+  }
+
   /**
   * 
   * @param community 
@@ -486,7 +501,27 @@ export class CommunityController {
     return await this.communityService.updateVisitorTerminalCode(user, community, body)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   * @returns 
+   */
+  @Post('/:community/member-create')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Add a community member' })
+  async addCommunityMember(@User() user: string, @Param('community') community: string, @Body() data: AddMemberRequestDto): Promise<void> {
+    return this.communityService.addCommunityMember(community, user, data)
+  }
 
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @param date 
+   * @returns 
+   */
   @Get(':community/messages')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community messages' })

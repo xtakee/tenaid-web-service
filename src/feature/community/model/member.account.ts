@@ -17,10 +17,13 @@ export class MemberAccount {
   email: Email
 
   @Prop()
-  photo: string
+  photo?: string
 
   @Prop()
   phone: string
+
+  @Prop({ default: false })
+  isAdmin?: Boolean
 
   @Prop()
   country: string

@@ -29,6 +29,7 @@ import { DeleteMessageRequestDto } from "./dto/request/delete.message.request.dt
 import { CommunityMessageCache, EventCacheType } from "./model/community.message.cache";
 import { MessageAckDto } from "../event/dto/message.ack.dto";
 import { CacheMessageDto } from "../event/dto/cache.message.dto";
+import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -321,6 +322,18 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param email 
+   * @returns 
+   */
+  async getCommunityMemberCreateCount(email: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      'extra.email.value': email.trim().toLowerCase(),
+      status: ACCOUNT_STATUS.INVITED
+    }).exec()
+  }
+
+  /**
+   * 
    * @param code 
    * @returns 
    */
@@ -545,9 +558,12 @@ export class CommunityRepository {
       account: { $ne: new Types.ObjectId(user) }
     }
     if (status) query.status = status
+    else query.status = {
+      $ne: ACCOUNT_STATUS.DENIED
+    }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
-      select: '_id path description point code extra isAdmin',
+      select: '_id path description point status code extra isAdmin',
       page: page,
       limit: limit,
       populate: {
@@ -1433,6 +1449,18 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param email 
+   * @returns 
+   */
+  async getCommunityMemberByEmail(email: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      'extra.email.value': email.trim().toLowerCase(),
+      status: ACCOUNT_STATUS.APPROVED
+    })
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @returns 
@@ -1448,6 +1476,36 @@ export class CommunityRepository {
         populate: CommunityMessagePopulateQuery
       }
     ).exec() as any
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   * @param account 
+   */
+  async addCommunityMember(community: string, data: AddMemberRequestDto, code: string, account?: string): Promise<CommunityMember> {
+    const member: CommunityMember = {
+      community: new Types.ObjectId(community),
+      account: account ? new Types.ObjectId(account) : null,
+      path: new Types.ObjectId(data.path),
+      description: data.description,
+      point: data.point,
+      code: code,
+      status: ACCOUNT_STATUS.INVITED,
+      extra: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        gender: data.gender,
+        email: {
+          value: data.emailAddress
+        },
+        phone: data.phoneNumber,
+        country: data.country
+      }
+    }
+
+    return await this.communityMemberModel.create(member)
   }
 
 }

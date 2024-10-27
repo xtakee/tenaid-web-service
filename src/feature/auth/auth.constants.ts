@@ -2,6 +2,7 @@ import { Permission } from "./model/permission"
 
 export enum ACCOUNT_STATUS {
   DEFAULT = 'default',
+  INVITED = 'invited',
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   APPROVED = 'approved',

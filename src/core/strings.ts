@@ -21,3 +21,4 @@ export const REQUEST_DENIED: string = "Request Denied!"
 
 export const REQUEST_DENIED_BODY: string = "Whoops! You are now a member of "
 export const REQUEST_APPROVED_BODY: string = "Congratulations! You are now a member of "
+export const REQUEST_INVITE_ERROR: string = "There was an error creating member invite"

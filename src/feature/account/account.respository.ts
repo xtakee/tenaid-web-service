@@ -38,7 +38,7 @@ export class AccountRepository implements IAccountRepository {
    * @returns Account
    */
   async getOneByEmail(email: string): Promise<Account> {
-    return await this.accountModel.findOne({ "email.value": email }).exec();
+    return await this.accountModel.findOne({ "email.value": email.trim().toLowerCase() }).exec();
   }
 
   /**

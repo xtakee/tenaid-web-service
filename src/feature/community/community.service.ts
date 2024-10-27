@@ -7,7 +7,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED } from 'src/core/strings';
+import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_ERROR } from 'src/core/strings';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
@@ -34,6 +34,7 @@ import { Types } from 'mongoose';
 import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
 import { CheckType } from '../core/dto/check.type';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
+import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 
 @Injectable()
 export class CommunityService {
@@ -248,6 +249,17 @@ export class CommunityService {
       return { count: await this.communityRepository.getCommunityJoinRequestsCount(community) }
 
     throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param email 
+   * @returns 
+   */
+  async getCommunityMemberCreateCount(email: string): Promise<{}> {
+    return {
+      count: await this.communityRepository.getCommunityMemberCreateCount(email)
+    }
   }
 
   /**
@@ -666,6 +678,48 @@ export class CommunityService {
    */
   async getCommunityMessages(community: string, page: number, limit: number, sort: string, date?: string): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getCommunityMessages(community, page, limit, sort, date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async addCommunityMember(community: string, user: string, data: AddMemberRequestDto): Promise<void> {
+    const member = await this.communityRepository.getCommunityMemberByEmail(data.emailAddress)
+    if (member) throw new ForbiddenException()
+
+    const account = await this.accountRepository.getOneByEmail(data.emailAddress)
+
+    const communityData = await this.communityRepository.getNextMemberCode(community, user)
+    if (!communityData) throw new NotFoundException()
+
+    const code = communityData.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')
+
+    const memberInvite = await this.communityRepository.addCommunityMember(community, data, code, account ? (account as any)._id.toString() : null)
+    if (!memberInvite) throw new BadRequestException(REQUEST_INVITE_ERROR)
+
+    // send push if account exists
+    if (account) {
+      const user = (account as any)._id.toString();
+      const deviceToken = await this.accountRepository.getDevicePushToken(user)
+
+      if (deviceToken) {
+        const body = `Congratulations! You have been invited to join ${communityData.name}`
+        this.notificationService.pushToDevice({
+          device: deviceToken.token, data: {
+            title: 'Invite Requested',
+            type: MessageType.INVITE_JOIN_COMMUNITY, description: body,
+            contentId: (memberInvite as any)._id,
+            link: 'community/invite-request',
+            community: community
+          }
+        })
+      }
+
+    }
   }
 
   /**
