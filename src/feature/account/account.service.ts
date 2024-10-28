@@ -332,6 +332,17 @@ export class AccountService {
 
   /**
    * 
+   * @param email 
+   * @returns 
+   */
+  async getAccountPendingCommunityInvites(email: string): Promise<any> {
+    const invite = await this.communityRepository.geCommunityMemberPendingInvite(email)
+    if (invite) return invite
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
    * @param user 
    * @param body 
    */

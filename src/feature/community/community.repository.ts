@@ -855,6 +855,21 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param email 
+   * @returns 
+   */
+  async geCommunityMemberPendingInvite(email: string): Promise<any> {
+    return await this.communityMemberModel.findOne(
+      {
+        'extra.email.value': email.trim().toLowerCase(),
+        status: ACCOUNT_STATUS.INVITED
+      },
+      '_id code path isAdmin isPrimary point description status community')
+      .populate(MEMBER_COMMUNITIES_QUERY).exec()
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @returns 
@@ -1455,7 +1470,7 @@ export class CommunityRepository {
   async getCommunityMemberByEmail(email: string): Promise<CommunityMember> {
     return await this.communityMemberModel.findOne({
       'extra.email.value': email.trim().toLowerCase(),
-      status: ACCOUNT_STATUS.APPROVED
+      status: { $ne: ACCOUNT_STATUS.DENIED }
     })
   }
 

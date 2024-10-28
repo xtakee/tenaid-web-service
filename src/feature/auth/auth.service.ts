@@ -77,7 +77,7 @@ export class AuthService {
 
     const permissions = await this.getUserManageAccountPermissions((account as any)._id)
 
-    const payload = { sub: (account as any)._id, sub_0: (account as any)._id, permissions: permissions };
+    const payload = { sub: (account as any)._id, sub_0: (account as any)._id, permissions: permissions, email: account.email.value };
     const token = this.jwtService.sign(payload)
 
     const key = (account as any)._id.toString()
@@ -177,7 +177,7 @@ export class AuthService {
       }
     }))
 
-    const payload = { sub: (account as any)._id, permissions: permissions };
+    const payload = { sub: (account as any)._id, permissions: permissions, email: account.email.value };
     const token = this.jwtService.sign(payload)
 
     const key = (account as any)._id.toString()
@@ -254,7 +254,7 @@ export class AuthService {
         account.accountTypes = owner.accountTypes
 
         const dto = this.accountToDtoMapper.map(account)
-        const payload = { sub: (owner as any)._id, sub_0: (account as any)._id, permissions: permissions };
+        const payload = { sub: (owner as any)._id, sub_0: (account as any)._id, permissions: permissions, email: owner.email.value };
 
         const token = this.jwtService.sign(payload)
 

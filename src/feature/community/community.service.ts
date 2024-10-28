@@ -7,7 +7,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_ERROR } from 'src/core/strings';
+import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
@@ -689,7 +689,7 @@ export class CommunityService {
    */
   async addCommunityMember(community: string, user: string, data: AddMemberRequestDto): Promise<void> {
     const member = await this.communityRepository.getCommunityMemberByEmail(data.emailAddress)
-    if (member) throw new ForbiddenException()
+    if (member) throw new ForbiddenException(REQUEST_INVITE_DUPLICATE)
 
     const account = await this.accountRepository.getOneByEmail(data.emailAddress)
 

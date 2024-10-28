@@ -114,24 +114,24 @@ export class GoogleService {
     const payload = {
       'message': {
         'token': device,
-        // 'notification': {
-        //   'body': data.description,
-        //   'title': data.title
-        // },
-        'data': data,
-        'android': {
-          'priority': 'high'
+        'notification': {
+          'body': data.description,
+          'title': data.title
         },
-        'apns': {
-          'headers': {
-            'apns-priority': '5'
-          },
-          'payload': {
-            'aps': {
-              'content-available': 1
-            }
-          }
-        }
+        'data': data,
+        // 'android': {
+        //   'priority': 'high'
+        // },
+        // 'apns': {
+        //   'headers': {
+        //     'apns-priority': '5'
+        //   },
+        //   'payload': {
+        //     'aps': {
+        //       'content-available': true
+        //     }
+        //   }
+        // }
       }
     }
 

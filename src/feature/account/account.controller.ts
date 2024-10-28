@@ -8,7 +8,7 @@ import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.ac
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
 import { AddOnRequestDto } from "src/feature/account/dto/request/add.on.request.dto";
-import { RootUser, User } from "src/core/decorators/current.user";
+import { Email, RootUser, User } from "src/core/decorators/current.user";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
 import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth, BasicAuth } from "../auth/guards/auth.decorator";
@@ -246,6 +246,18 @@ export class AccountController {
   @ApiOperation({ summary: 'Get all account communities' })
   async getAccountCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.accountService.getAccountCommunities(user, paginate.page, paginate.limit)
+  }
+
+  /**
+   * 
+   * @param email 
+   * @returns 
+   */
+  @Get('community/pending-invite')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get account pending community invite' })
+  async getAccountPendingCommunityInvites(@Email() email: string): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountPendingCommunityInvites(email)
   }
 
   @Post('push-token')

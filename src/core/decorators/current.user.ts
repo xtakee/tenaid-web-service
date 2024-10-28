@@ -13,3 +13,10 @@ export const RootUser = createParamDecorator(
     return request.user['sub_0'];
   },
 );
+
+export const Email = createParamDecorator(
+  (param: any, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+    return request.user['email'];
+  },
+);
