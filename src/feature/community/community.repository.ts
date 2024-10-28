@@ -1196,7 +1196,7 @@ export class CommunityRepository {
    * 
    * @param account 
    */
-  async getOfflineCommunityEventNodesTokens(account: string, community: string): Promise<string[]> {
+  async getOfflineCommunityEventNodesTokens(community: string, account: string): Promise<any> {
     return await this.communityEventNodeModel.find({
       communities: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(account) },

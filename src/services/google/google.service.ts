@@ -112,26 +112,27 @@ export class GoogleService {
    */
   async pushOne(device: string, data: PushBody): Promise<Result> {
     const payload = {
-      'message': {
-        'token': device,
-        'notification': {
-          'body': data.description,
-          'title': data.title
-        },
-        'data': data,
-        // 'android': {
-        //   'priority': 'high'
+      message: {
+        token: device,
+        // 'notification': {
+        //   'body': data.description,
+        //   'title': data.title
         // },
-        // 'apns': {
-        //   'headers': {
-        //     'apns-priority': '5'
-        //   },
-        //   'payload': {
-        //     'aps': {
-        //       'content-available': true
-        //     }
-        //   }
-        // }
+        data: data,
+        android: {
+          priority: 'high'
+        },
+        apns: {
+          headers: {
+            'apns-priority': '5',
+            'apns-push-type': 'background'
+          },
+          payload: {
+            'aps': {
+              contentAvailable: true
+            }
+          }
+        }
       }
     }
 
