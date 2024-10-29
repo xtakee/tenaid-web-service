@@ -1517,7 +1517,7 @@ export class CommunityRepository {
         lastName: data.lastName,
         gender: data.gender,
         email: {
-          value: data.emailAddress
+          value: data.emailAddress.trim().toLowerCase()
         },
         phone: data.phoneNumber,
         country: data.country
