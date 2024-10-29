@@ -688,7 +688,7 @@ export class CommunityService {
    * @returns 
    */
   async addCommunityMember(community: string, user: string, data: AddMemberRequestDto): Promise<void> {
-    const member = await this.communityRepository.getCommunityMemberByEmail(data.emailAddress)
+    const member = await this.communityRepository.getCommunityMemberByEmail(community, data.emailAddress)
     if (member) throw new ForbiddenException(REQUEST_INVITE_DUPLICATE)
 
     const account = await this.accountRepository.getOneByEmail(data.emailAddress)

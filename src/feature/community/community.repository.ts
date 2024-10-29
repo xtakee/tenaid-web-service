@@ -1470,9 +1470,10 @@ export class CommunityRepository {
    * @param email 
    * @returns 
    */
-  async getCommunityMemberByEmail(email: string): Promise<CommunityMember> {
+  async getCommunityMemberByEmail(community: string, email: string): Promise<CommunityMember> {
     return await this.communityMemberModel.findOne({
       'extra.email.value': email.trim().toLowerCase(),
+      community: new Types.ObjectId(community),
       status: { $ne: ACCOUNT_STATUS.DENIED }
     })
   }
