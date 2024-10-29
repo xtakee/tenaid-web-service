@@ -33,9 +33,8 @@ export class CommunityMessageCache {
   @Prop()
   total: number
 
-  @Prop({ type: [Types.ObjectId], default: [] })
+  @Prop([{ type: Types.ObjectId, ref: Account.name }])
   targets?: Types.ObjectId[]
-
 }
 
 export const CommunityMessageCacheSchema = SchemaFactory.createForClass(CommunityMessageCache);
