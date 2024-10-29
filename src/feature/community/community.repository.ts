@@ -843,7 +843,10 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityMemberModel,
       {
         account: new Types.ObjectId(user),
-        status: { $ne: ACCOUNT_STATUS.DENIED }
+        $or: [
+          { status: ACCOUNT_STATUS.APPROVED },
+          { status: ACCOUNT_STATUS.PENDING },
+        ]
       },
       {
         select: '_id code path isAdmin isPrimary point description status community',
