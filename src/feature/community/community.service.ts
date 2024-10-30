@@ -724,6 +724,46 @@ export class CommunityService {
 
   /**
    * 
+   * @param user 
+   * @param email 
+   * @param member 
+   * @returns 
+   */
+  async acceptCommunityMemberInvite(user: string, email: string, member: string): Promise<void> {
+    const account = await this.accountRepository.getOneById(user)
+    if (user) {
+      const request = this.communityRepository.acceptCommunityMemberInvite(user, email, member, account.photo)
+      if (!request) throw new NotFoundException()
+
+      await this.accountRepository.setAllDashboardFlagStatus(user)
+
+      // sync data on user device
+      await this.eventGateway.sendEvent(`${user}-events-sync`, {
+        id: (request as any)._id,
+        type: EventType.SYNC,
+        body: {}
+      })
+      return
+    }
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param email 
+   * @param member 
+   * @returns 
+   */
+  async declineCommunityMemberInvite(email: string, member: string, comment: string): Promise<void> {
+    const request = await this.communityRepository.declineCommunityMemberInvite(email, member, comment)
+
+    if (!request) throw new NotFoundException()
+  }
+
+  /**
+   * 
    * @param community 
    * @param page 
    * @param limit 

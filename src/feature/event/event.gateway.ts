@@ -5,7 +5,8 @@ import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard';
 export enum EventType {
   VISITOR = 'visitor',
   MESSAGE = 'message',
-  PAYMENT = 'payment'
+  PAYMENT = 'payment',
+  SYNC = 'sync'
 }
 
 export class EventBody {

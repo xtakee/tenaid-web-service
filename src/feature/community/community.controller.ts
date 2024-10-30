@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query, UnauthorizedException } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
-import { User } from 'src/core/decorators/current.user';
+import { Email, User } from 'src/core/decorators/current.user';
 import { CommunityService } from './community.service';
 import { BasicAuth } from '../auth/guards/auth.decorator';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
@@ -22,6 +22,7 @@ import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.
 import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
+import { DeclineCommunityInviteDto } from './dto/request/decline.community.invite.dto';
 
 @Controller({
   version: '1',
@@ -161,6 +162,40 @@ export class CommunityController {
   async getCommunityUpcomingVisitors(@Param('community') community: string, @Query() paginate: PaginationRequestDto, @Query('status') status?: string): Promise<PaginatedResult<CommunityVisitorsDto>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getUpcomingCommunityVisitors(community, paginate.page, paginate.limit, status)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param email 
+   * @param community 
+   * @param invite 
+   * @returns 
+   */
+  @Post(':community/member-invite/:invite/accept')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Accept community member invite' })
+  async acceptCommunityMemberInvite(@User() user: string, @Email() email: string, @Param('community') community: string, @Param('invite') invite: string): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(invite)) throw new BadRequestException()
+    return await this.communityService.acceptCommunityMemberInvite(user, email, invite)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param email 
+   * @param community 
+   * @param data 
+   * @returns 
+   */
+  @Post(':community/member-invite/decline')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Decline community member invite' })
+  async declineCommunityMemberInvite(@User() user: string, @Email() email: string, @Param('community') community: string, @Body() data: DeclineCommunityInviteDto): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+
+    return await this.communityService.declineCommunityMemberInvite(email, data.invite, data.comment)
   }
 
   /**
@@ -318,11 +353,11 @@ export class CommunityController {
     return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
   }
 
-/**
- * 
- * @param email 
- * @returns 
- */
+  /**
+   * 
+   * @param email 
+   * @returns 
+   */
   @Get('/member-create-requests-count')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community member create request count' })

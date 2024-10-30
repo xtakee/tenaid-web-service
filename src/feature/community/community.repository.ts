@@ -846,10 +846,11 @@ export class CommunityRepository {
         $or: [
           { status: ACCOUNT_STATUS.APPROVED },
           { status: ACCOUNT_STATUS.PENDING },
+          { status: ACCOUNT_STATUS.ACCEPTED },
         ]
       },
       {
-        select: '_id code path isAdmin isPrimary point description status community',
+        select: '_id code path extra isAdmin isPrimary point description status community',
         limit: limit,
         page: page,
         populate: MEMBER_COMMUNITIES_QUERY
@@ -867,7 +868,7 @@ export class CommunityRepository {
         'extra.email.value': email.trim().toLowerCase(),
         status: ACCOUNT_STATUS.INVITED
       },
-      '_id code path isAdmin isPrimary point description status community')
+      '_id code path isAdmin extra isPrimary point description status community')
       .populate(MEMBER_COMMUNITIES_QUERY).exec()
   }
 
@@ -1525,6 +1526,37 @@ export class CommunityRepository {
     }
 
     return await this.communityMemberModel.create(member)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param member 
+   * @param photo 
+   */
+  async acceptCommunityMemberInvite(user: string, email: string, member: string, photo: string): Promise<void> {
+    this.communityMemberModel.findOneAndUpdate({
+      _id: new Types.ObjectId(member),
+      'extra.email.value': email.trim().toLowerCase()
+    }, {
+      'extra.photo': photo,
+      status: ACCOUNT_STATUS.ACCEPTED,
+      account: new Types.ObjectId(user)
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param email 
+   * @param member 
+   */
+  async declineCommunityMemberInvite(email: string, member: string, comment: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOneAndUpdate({
+      _id: new Types.ObjectId(member),
+      'extra.email.value': email.trim().toLowerCase()
+    }, { status: ACCOUNT_STATUS.REJECTED, comment: comment },
+      { returnDocument: 'after' }).exec()
   }
 
 }
