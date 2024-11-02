@@ -425,7 +425,6 @@ export class CommunityController {
     return await this.communityService.getCommunityByCode(code)
   }
 
-
   /**
    * 
    * @param user 

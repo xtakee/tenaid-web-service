@@ -10,7 +10,7 @@ import { NotificationService } from '../notification/notification.service';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  providers: [EventGateway, WsJwtAuthGuard, AuthHelper, ChatGateway, NotificationService, EventService, CommunityRepository, Paginator],
+  providers: [ChatGateway, EventGateway, WsJwtAuthGuard, AuthHelper, NotificationService, EventService, CommunityRepository, Paginator],
   imports: [
     BullModule.registerQueue({
       name: 'notification',

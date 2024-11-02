@@ -15,7 +15,7 @@ export class EventBody {
   body: {}
 }
 
-@WebSocketGateway({ namespace: 'events', cors: { origin: '*' } })
+@WebSocketGateway({ namespace: 'events'})
 export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly authGuard: WsJwtAuthGuard) { }
 

@@ -2,12 +2,10 @@ import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketSe
 import { Server, Socket } from "socket.io"
 import { WsJwtAuthGuard } from "../auth/guards/jwt.guard/ws.jwt.auth.guard"
 import { CommunityRepository } from "../community/community.repository"
-import { MessageDto } from "./dto/message.dto"
+import { MessageDto, MessageTypingDto } from "./dto/message.dto"
 import { PushMultipleDto } from "../notification/notification.controller"
 import { MessageResonseDto } from "../community/dto/response/message.response.dto"
 import { NotificationService } from "../notification/notification.service"
-import { DeleteMessageRequestDto } from "../community/dto/request/delete.message.request.dto"
-import { UpdateMessageRequestDto } from "../community/dto/request/update.message.request.dto"
 import { MessageAckDto } from "./dto/message.ack.dto"
 import { MessageStatus } from "../community/model/community.message"
 import { CacheMessageDto } from "./dto/cache.message.dto"
@@ -19,6 +17,7 @@ const EVENT_NAME_DELIVERY = 'community-message-delivery'
 const EVENT_NAME_DELETE = 'community-message-delete'
 const EVENT_NAME_UPDATE = 'community-message-update'
 const EVENT_NAME_REFRESH = 'community-join-refresh'
+const EVENT_NAME_TYPING = 'community-message-typing'
 
 class NodeData {
   account: string
@@ -28,9 +27,9 @@ class NodeData {
 }
 
 @WebSocketGateway({
-  namespace: 'chat', pingInterval: 10000,  // Send a ping every 10 seconds
-  pingTimeout: 5000,
-  cors: { origin: '*' }
+  namespace: 'chat',
+  pingInterval: 10000,  // Send a ping every 10 seconds
+  pingTimeout: 5000
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
@@ -49,11 +48,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.communityRepository.updateCommunityEventNodeConnection(communities, account, token, device)
   }
 
+  // process disconnected
   private async updateClientDisConnection(client: Socket): Promise<void> {
     // client authentication
-    if (!client.data.user) return
     const account: string = client.data.user.sub
     const device: string = client.handshake.headers.device as string
+    const community: string = client.handshake.headers.community as string
+
+    this.sendTypingEvent(community, account, false, null)
 
     if (account)
       this.communityRepository.updateCommunityEventNodeDisConnection(account, device)
@@ -193,6 +195,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.server.emit(`${author}-${EVENT_NAME_DELIVERY}`, deliveredMessage)
         }
       }
+    }
+
+    return message
+  }
+
+  // process and send typing events to user
+  private async sendTypingEvent(community: string, account: string, typing: Boolean, client?: Socket): Promise<void> {
+    const member = await this.communityRepository.getCommunityMemberChatInfo(account, community)
+    const message = {
+      id: (member as any)._id,
+      typing: typing,
+      firstName: member.extra.firstName,
+      lastName: member.extra.lastName,
+      community: member.community,
+      photo: member.extra.photo,
+      isAdmin: member.isAdmin
+    }
+    
+    if (client) client.to(community).emit(EVENT_NAME_TYPING, message)
+    else this.server.to(community).emit(EVENT_NAME_TYPING, message)
+  }
+
+  // handle message update
+  @SubscribeMessage(EVENT_NAME_TYPING)
+  async handleMessageTyping(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: MessageTypingDto
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+
+    if (authenticated) {
+      const community = message.community
+      const account: string = client.data.user.sub
+
+      // send typing event to users
+      await this.sendTypingEvent(community, account, message.typing, client)
     }
 
     return message

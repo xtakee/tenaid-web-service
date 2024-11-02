@@ -1547,6 +1547,18 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param account 
+   * @param community 
+   */
+  async getCommunityMemberChatInfo(account: string, community: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(account)
+    })
+  }
+
+  /**
+   * 
    * @param user 
    * @param email 
    * @param member 

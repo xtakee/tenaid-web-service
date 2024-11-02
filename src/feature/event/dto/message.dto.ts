@@ -49,3 +49,12 @@ export class MessageDto {
   @IsOptional()
   extension?: string
 }
+
+export class MessageTypingDto {
+  @IsNotEmpty()
+  typing: Boolean
+
+  @IsNotEmpty()
+  @IsMongoId()
+  community: string
+}
