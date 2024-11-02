@@ -1511,6 +1511,7 @@ export class CommunityRepository {
       path: new Types.ObjectId(data.path),
       description: data.description,
       point: data.point,
+      isPrimary: account ? false : true,
       code: code,
       status: ACCOUNT_STATUS.INVITED,
       extra: {
