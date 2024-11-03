@@ -2,7 +2,7 @@ import { Prop, Schema } from "@nestjs/mongoose"
 import { GENDER } from "src/feature/auth/auth.constants"
 import { Email } from "src/feature/core/model/email.model"
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class MemberAccount {
   @Prop()
   firstName: string
@@ -10,10 +10,10 @@ export class MemberAccount {
   @Prop()
   lastName: string
 
-  @Prop({enum: GENDER})
+  @Prop({ enum: GENDER })
   gender: string
 
-  @Prop({type: Email})
+  @Prop({ type: Email })
   email: Email
 
   @Prop()
@@ -21,6 +21,9 @@ export class MemberAccount {
 
   @Prop()
   phone: string
+
+  @Prop()
+  dob?: Date
 
   @Prop({ default: false })
   isAdmin?: Boolean

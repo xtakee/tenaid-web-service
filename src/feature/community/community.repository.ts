@@ -1535,12 +1535,13 @@ export class CommunityRepository {
    * @param member 
    * @param photo 
    */
-  async acceptCommunityMemberInvite(user: string, email: string, member: string, photo: string): Promise<void> {
+  async acceptCommunityMemberInvite(user: string, email: string, member: string, photo: string, dob: Date): Promise<void> {
     this.communityMemberModel.findOneAndUpdate({
       _id: new Types.ObjectId(member),
       'extra.email.value': email.trim().toLowerCase()
     }, {
       'extra.photo': photo,
+      'extra.dob': dob,
       status: ACCOUNT_STATUS.ACCEPTED,
       account: new Types.ObjectId(user)
     }, { returnDocument: 'after' }).exec()

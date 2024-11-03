@@ -6,7 +6,16 @@ import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
 import { CommunityPath } from "./community.path";
 import { MemberAccount } from "./member.account";
 
-export type CommunityMemberDocument = HydratedDocument<CommunityMember>;
+export type CommunityMemberDocument = HydratedDocument<CommunityMember>
+
+@Schema()
+export class AuthorizedAccess {
+  @Prop({ type: Types.ObjectId, ref: 'CommunityMember' })
+  member?: Types.ObjectId;
+
+  @Prop()
+  relationship?: string;
+}
 
 @Schema({ timestamps: true })
 export class CommunityMember {
@@ -25,6 +34,24 @@ export class CommunityMember {
   @Prop()
   comment?: string
 
+  @Prop({ default: 0 })
+  authorizedCount?: number
+
+  @Prop({ default: true })
+  canCreateInvite?: Boolean
+
+  @Prop({ default: true })
+  canCreateExit?: Boolean
+
+  @Prop({ default: true })
+  isOwner?: Boolean
+
+  @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
+  linkedTo?: Types.ObjectId
+
+  @Prop([{ type: AuthorizedAccess }])
+  authorizedAccess?: AuthorizedAccess[]
+
   @Prop({ type: MemberAccount })
   extra: MemberAccount
 
@@ -33,6 +60,9 @@ export class CommunityMember {
 
   @Prop()
   code: string
+
+  @Prop({ index: true })
+  searchable?: string
 
   @Prop({ default: false })
   isAdmin?: Boolean
@@ -44,4 +74,7 @@ export class CommunityMember {
   status?: string
 }
 
-export const CommunityMemberSchema = SchemaFactory.createForClass(CommunityMember);
+const CommunityMemberSchema = SchemaFactory.createForClass(CommunityMember)
+CommunityMemberSchema.index({ searchable: 'text' })
+
+export { CommunityMemberSchema }

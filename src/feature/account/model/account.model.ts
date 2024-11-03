@@ -85,7 +85,10 @@ export class Account {
   @Prop()
   photo?: string
 
-  @Prop({enum: GENDER})
+  @Prop({ index: true })
+  searchable?: string
+
+  @Prop({ enum: GENDER })
   gender?: string
 
   @Prop()
@@ -113,4 +116,7 @@ export class Account {
 
 }
 
-export const AccountSchema = SchemaFactory.createForClass(Account);
+const AccountSchema = SchemaFactory.createForClass(Account)
+AccountSchema.index({ searchable: 'text' })
+
+export { AccountSchema }

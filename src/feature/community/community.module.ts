@@ -27,12 +27,12 @@ import { CommunityAccessPoint, CommunityAccessPointSchema } from './model/commun
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { NotificationService } from '../notification/notification.service';
 import { BullModule } from '@nestjs/bullmq';
-import { EventGateway } from '../event/event.gateway';
 import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard';
 import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.checkins';
 import { CommunityEventNode, CommunityEventNodeSchema } from './model/community.event.node';
 import { CommunityMessage, CommunityMessageSchema } from './model/community.message';
 import { CommunityMessageCache, CommunityMessageCacheSchema } from './model/community.message.cache';
+import { MessageRelayGateway } from '../event/message.relay.gateway';
 
 @Module({
   providers: [
@@ -43,7 +43,7 @@ import { CommunityMessageCache, CommunityMessageCacheSchema } from './model/comm
     CodeGenerator,
     AuthHelper,
     Paginator,
-    EventGateway,
+    MessageRelayGateway,
     WsJwtAuthGuard,
     NotificationService,
     CommunityAccessPointToDtoMapper,

@@ -29,12 +29,12 @@ import { CommunityAccessPointResonseDto } from './dto/response/community.access.
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { MessageType, NotificationService } from '../notification/notification.service';
 import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
-import { EventGateway, EventType } from '../event/event.gateway';
 import { Types } from 'mongoose';
 import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
 import { CheckType } from '../core/dto/check.type';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
+import { MessageRelayGateway, EventType } from '../event/message.relay.gateway';
 
 @Injectable()
 export class CommunityService {
@@ -48,7 +48,7 @@ export class CommunityService {
     private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
-    private readonly eventGateway: EventGateway,
+    private readonly eventGateway: MessageRelayGateway,
     private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
@@ -400,6 +400,7 @@ export class CommunityService {
       member: {
         firstName: account.firstName,
         lastName: account.lastName,
+        dob: account.dob,
         gender: account.gender,
         email: account.email,
         phone: account.phone,
@@ -732,7 +733,7 @@ export class CommunityService {
   async acceptCommunityMemberInvite(user: string, email: string, member: string): Promise<void> {
     const account = await this.accountRepository.getOneById(user)
     if (user) {
-      const request = this.communityRepository.acceptCommunityMemberInvite(user, email, member, account.photo)
+      const request = this.communityRepository.acceptCommunityMemberInvite(user, email, member, account.photo, account.dob)
       if (!request) throw new NotFoundException()
 
       await this.accountRepository.setAllDashboardFlagStatus(user)

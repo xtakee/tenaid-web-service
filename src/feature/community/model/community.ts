@@ -4,6 +4,7 @@ import { Account } from "src/feature/account/model/account.model";
 import { COMMUNITY_TYPE } from "../community.constants";
 import { Address } from "src/feature/core/model/address.model";
 import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
+import { searchable } from "src/core/util/searchable";
 
 export type CommunityDocument = HydratedDocument<Community>;
 
@@ -14,6 +15,9 @@ export class Community {
 
   @Prop({ index: true })
   name: string
+
+  @Prop({ index: true })
+  searchable?: string
 
   @Prop()
   description: string
@@ -41,6 +45,6 @@ export class Community {
 }
 
 const CommunitySchema = SchemaFactory.createForClass(Community);
-CommunitySchema.index({ name: 'text', code: 'text' })
+CommunitySchema.index({ searchable: 'text', code: 'text' })
 
 export { CommunitySchema }
