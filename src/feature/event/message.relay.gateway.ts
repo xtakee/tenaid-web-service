@@ -40,7 +40,7 @@ export class EventBody {
 }
 
 @WebSocketGateway({
-  namespace: 'chat',
+  namespace: 'rt-message',
   pingInterval: 10000,  // Send a ping every 10 seconds
   pingTimeout: 5000
 })
