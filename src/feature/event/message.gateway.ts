@@ -106,6 +106,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     await this.updateClientDisConnection(client)
   }
 
+  // handle message delete events
   @SubscribeMessage(EVENT_NAME_DELETE)
   async handleMessageDelete(
     @ConnectedSocket() client: Socket,
@@ -291,7 +292,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           link: 'home/message',
           type: 'message',
           title: sender,
-          description: body
+          description: body,
+          contentId: (response as any)._id
         }
       }
 
