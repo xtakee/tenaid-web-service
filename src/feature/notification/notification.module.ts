@@ -6,11 +6,14 @@ import { CacheService } from 'src/services/cache/cache.service';
 import { BullModule } from '@nestjs/bullmq/dist/bull.module';
 import { NotificationProcessor } from './consumer/notification.processor';
 
+const queue = BullModule.registerQueue({
+  name: 'notification',
+})
+
 @Module({
   controllers: [NotificationController],
   providers: [NotificationService, GoogleService, CacheService, NotificationProcessor],
-  imports: [BullModule.registerQueue({
-    name: 'notification',
-  })]
+  imports: [queue],
+  exports: [queue, NotificationService]
 })
-export class NotificationModule {}
+export class NotificationModule { }

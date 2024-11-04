@@ -19,18 +19,9 @@ import { AdminRepository } from '../admin/admin.repository';
 import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
 import { Paginator } from 'src/core/helpers/paginator';
-import { CommunityRepository } from '../community/community.repository';
-import { Community, CommunitySchema } from '../community/model/community';
-import { CommunityInvite, CommunityInviteSchema } from '../community/model/community.invite';
-import { CommunityPath, CommunityPathSchema } from '../community/model/community.path';
-import { CommunityMember, CommunityMemberSchema } from '../community/model/community.member';
 import { DeviceToken, DeviceTokenSchema } from './model/device.token';
-import { CommunityAccessPoint, CommunityAccessPointSchema } from '../community/model/community.access.point';
-import { CommunityCheckins, CommunityCheckinsSchema } from '../community/model/community.checkins';
-import { CommunityEventNode, CommunityEventNodeSchema } from '../community/model/community.event.node';
-import { CommunityMessage, CommunityMessageSchema } from '../community/model/community.message';
-import { CommunityMessageCache, CommunityMessageCacheSchema } from '../community/model/community.message.cache';
 import { searchable } from 'src/core/util/searchable';
+import { CommunityModule } from '../community/community.module';
 
 @Global()
 @Module({
@@ -63,25 +54,6 @@ import { searchable } from 'src/core/util/searchable';
       },
     }]),
     MongooseModule.forFeatureAsync([{
-      name: CommunityMember.name,
-      useFactory: async () => {
-        const schema = CommunityMemberSchema;
-        schema.pre('save', async function () {
-          if (this.isModified('extra.firstName') || this.isModified('extra.lastName') || this.isNew) {
-            this.searchable = searchable(`${this.extra.firstName} ${this.extra.lastName}`)
-          }
-        });
-
-        schema.pre('findOneAndUpdate', async function (next) {
-          if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
-            (this.getUpdate() as any).searchable = searchable(`${(this.getUpdate() as any).extra.firstName} ${(this.getUpdate() as any).extra.lastName}`)
-          }
-          next()
-        });
-        return schema;
-      },
-    }]),
-    MongooseModule.forFeatureAsync([{
       name: AccountAdmin.name, useFactory: async () => {
         const schema = AccountAdminSchema;
         schema.pre('save', async function () {
@@ -100,55 +72,13 @@ import { searchable } from 'src/core/util/searchable';
         return schema;
       },
     }]),
-    MongooseModule.forFeatureAsync([{
-      name: Community.name, useFactory: async () => {
-        const schema = CommunitySchema;
-        schema.pre('save', async function () {
-          if (this.isModified('name') || this.isNew) {
-            this.searchable = searchable(this.name)
-          }
-        });
 
-        schema.pre('findOneAndUpdate', async function (next) {
-          if ((this.getUpdate() as any).name) {
-            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
-          }
-          next()
-        });
-
-        return schema;
-      },
-    }]),
-    MongooseModule.forFeatureAsync([{
-      name: CommunityAccessPoint.name,
-      useFactory: async () => {
-        const schema = CommunityAccessPointSchema;
-        schema.pre('save', async function () {
-          if (this.isModified('password') || this.isNew) {
-            this.password = await (new AuthHelper()).hash(this.password)
-          }
-        });
-
-        schema.pre('findOneAndUpdate', async function (next) {
-          if ((this.getUpdate() as any).password) {
-            (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
-          }
-          next()
-        });
-        return schema;
-      },
-    }]),
-    MongooseModule.forFeature([{ name: CommunityMessage.name, schema: CommunityMessageSchema }]),
-    MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),
-    MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
     MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
     MongooseModule.forFeature([{ name: DeviceToken.name, schema: DeviceTokenSchema }]),
     MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
     MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }]),
-    MongooseModule.forFeature([{ name: CommunityMessageCache.name, schema: CommunityMessageCacheSchema }]),
-    MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
-    MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }]),
-    MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }])
+    MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }]),
+    CommunityModule
   ],
   providers: [
     AccountService,
@@ -159,7 +89,6 @@ import { searchable } from 'src/core/util/searchable';
     BankRepository,
     PoliciesGuard,
     CaslAbilityFactory,
-    CommunityRepository,
     CacheService,
     AdminRepository,
     AccountAdminToDtoMapper,

@@ -22,6 +22,7 @@ import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
 import { CommunityRepository } from '../community/community.repository';
 import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper';
+import { CommunityModule } from '../community/community.module';
 
 @Global()
 @Module({
@@ -31,9 +32,7 @@ import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper';
     AccountRepository,
     AccountToDtoMapper,
     AuthHelper,
-    CommunityToDtoMapper,
     AuthRepository,
-    CommunityRepository,
     CaslAbilityFactory,
     PoliciesGuard,
     CacheService,
@@ -50,31 +49,9 @@ import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper';
       secret: JwtConstants.Jwt_Secret,
       //signOptions: { expiresIn: '24h' }, // no expiry
     }),
-    MongooseModule.forFeatureAsync([{
-      name: Account.name,
-      useFactory: async () => {
-        const schema = AccountSchema;
-        schema.pre('save', async function () {
-          if (this.isModified('password') || this.isNew) {
-            this.password = await (new AuthHelper()).hash(this.password)
-          }
-        });
-        return schema;
-      },
-    }]),
-    MongooseModule.forFeatureAsync([{
-      name: AccountAdmin.name, useFactory: async () => {
-        const schema = AccountAdminSchema;
-        schema.pre('save', async function () {
-          if (this.isModified('password') || this.isNew) {
-            this.password = await (new AuthHelper()).hash(this.password)
-          }
-        });
-        return schema;
-      },
-    }]),
     MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
-    MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }])
+    MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
+    CommunityModule
   ]
 })
 export class AuthModule { }

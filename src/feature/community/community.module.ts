@@ -32,7 +32,9 @@ import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.ch
 import { CommunityEventNode, CommunityEventNodeSchema } from './model/community.event.node';
 import { CommunityMessage, CommunityMessageSchema } from './model/community.message';
 import { CommunityMessageCache, CommunityMessageCacheSchema } from './model/community.message.cache';
-import { MessageRelayGateway } from '../event/message.relay.gateway';
+import { EventGateway } from '../event/event.gateway';
+import { searchable } from 'src/core/util/searchable';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   providers: [
@@ -43,7 +45,7 @@ import { MessageRelayGateway } from '../event/message.relay.gateway';
     CodeGenerator,
     AuthHelper,
     Paginator,
-    MessageRelayGateway,
+    EventGateway,
     WsJwtAuthGuard,
     NotificationService,
     CommunityAccessPointToDtoMapper,
@@ -58,21 +60,73 @@ import { MessageRelayGateway } from '../event/message.relay.gateway';
     CommunityMemberToDtoMapper,
     AddressToDtoMapper],
   controllers: [CommunityController],
-  exports: [CommunityRepository, CommunityService],
+  exports: [CommunityRepository, CommunityService, CommunityToDtoMapper],
   imports: [
-    MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
     MongooseModule.forFeature([{ name: CommunityMessageCache.name, schema: CommunityMessageCacheSchema }]),
-    MongooseModule.forFeature([{ name: Community.name, schema: CommunitySchema }]),
+    MongooseModule.forFeatureAsync([{
+      name: Community.name, useFactory: async () => {
+        const schema = CommunitySchema;
+        schema.pre('save', async function () {
+          if (this.isModified('name') || this.isNew) {
+            this.searchable = searchable(this.name)
+          }
+        });
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).name) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
+          }
+          next()
+        });
+
+        return schema;
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityAccessPoint.name,
+      useFactory: async () => {
+        const schema = CommunityAccessPointSchema;
+        schema.pre('save', async function () {
+          if (this.isModified('password') || this.isNew) {
+            this.password = await (new AuthHelper()).hash(this.password)
+          }
+        });
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).password) {
+            (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
+          }
+          next()
+        });
+        return schema;
+      },
+    }]),
     MongooseModule.forFeature([{ name: CommunityMessage.name, schema: CommunityMessageSchema }]),
     MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
-    MongooseModule.forFeature([{ name: CommunityMember.name, schema: CommunityMemberSchema }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityMember.name,
+      useFactory: async () => {
+        const schema = CommunityMemberSchema;
+        schema.pre('save', async function () {
+          if (this.isModified('extra.firstName') || this.isModified('extra.lastName') || this.isNew) {
+            this.searchable = searchable(`${this.extra.firstName} ${this.extra.lastName}`)
+          }
+        });
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
+            (this.getUpdate() as any).searchable = searchable(`${(this.getUpdate() as any).extra.firstName} ${(this.getUpdate() as any).extra.lastName}`)
+          }
+          next()
+        });
+        return schema;
+      },
+    }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
     MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
     MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }]),
-    BullModule.registerQueue({
-      name: 'notification',
-    })
+    NotificationModule
   ]
 })
 

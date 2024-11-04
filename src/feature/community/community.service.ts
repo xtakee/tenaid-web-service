@@ -34,7 +34,7 @@ import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.
 import { CheckType } from '../core/dto/check.type';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
-import { MessageRelayGateway, EventType } from '../event/message.relay.gateway';
+import { EventGateway, EventType } from '../event/event.gateway';
 
 @Injectable()
 export class CommunityService {
@@ -48,7 +48,7 @@ export class CommunityService {
     private readonly pathMapper: CommunityPathToDtoMapper,
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
-    private readonly eventGateway: MessageRelayGateway,
+    private readonly eventGateway: EventGateway,
     private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
