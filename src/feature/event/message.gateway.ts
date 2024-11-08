@@ -18,6 +18,7 @@ const EVENT_NAME_DELETE = 'community-message-delete'
 const EVENT_NAME_UPDATE = 'community-message-update'
 const EVENT_NAME_REFRESH = 'community-join-refresh'
 const EVENT_NAME_TYPING = 'community-message-typing'
+const EVENT_NAME_OFFLINE = 'community-message-offline'
 
 class NodeData {
   account: string
@@ -55,7 +56,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const device: string = client.handshake.headers.device as string
     const community: string = client.handshake.headers.community as string
 
-    this.sendTypingEvent(community, account, false, null)
+    const data = await this.getTypingEventData(community, account, false)
+    this.server.to(community).emit(EVENT_NAME_TYPING, data)
 
     if (account)
       this.communityRepository.updateCommunityEventNodeDisConnection(account, device)
@@ -95,7 +97,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       // check for stale/offline events
       if (cachedMessages.length > 0) {
         for (const cache of cachedMessages) {
-          client.emit(cache.type, cache.message)
+          //send to only connected client
+          this.server.to(`${account}-${EVENT_NAME_OFFLINE}`).emit(cache.type, cache.message)
         }
       }
     } else client.disconnect()
@@ -163,6 +166,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const communityId = (community as any).community.toString()
         client.join(communityId)
       }
+
+      // join account private room
+      client.join(`${account}-${EVENT_NAME_OFFLINE}`)
     }
 
     return message
@@ -201,11 +207,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   // process and send typing events to user
-  private async sendTypingEvent(community: string, account: string, typing: Boolean, client?: Socket): Promise<void> {
+  private async getTypingEventData(community: string, account: string, typing: Boolean): Promise<any> {
     const member = await this.communityRepository.getCommunityMemberChatInfo(account, community)
     if (!member) return
 
-    const message = {
+    return {
       id: (member as any)._id,
       typing: typing,
       firstName: member.extra.firstName,
@@ -214,9 +220,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       photo: member.extra.photo,
       isAdmin: member.isAdmin
     }
-
-    if (client) client.to(community).emit(EVENT_NAME_TYPING, message)
-    else this.server.to(community).emit(EVENT_NAME_TYPING, message)
   }
 
   // handle message update
@@ -232,7 +235,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const account: string = client.data.user.sub
 
       // send typing event to users
-      await this.sendTypingEvent(community, account, message.typing, client)
+      const data = await this.getTypingEventData(community, account, message.typing)
+      client.to(community).emit(EVENT_NAME_TYPING, data)
     }
 
     return message
