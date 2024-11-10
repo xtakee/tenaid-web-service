@@ -20,7 +20,7 @@ import { CheckType } from "../core/dto/check.type";
 import { CommunityCheckins } from "./model/community.checkins";
 import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto";
 import { CommunityEventNode } from "./model/community.event.node";
-import { MessageDto } from "../event/dto/message.dto";
+import { MessageDto, ReactionDto } from "../event/dto/message.dto";
 import { CommunityMessage, MessageStatus } from "./model/community.message";
 import { MessageResonseDto } from "./dto/response/message.response.dto";
 import { SortDirection } from "../core/dto/pagination.request.dto";
@@ -30,6 +30,7 @@ import { CommunityMessageCache, EventCacheType } from "./model/community.message
 import { MessageAckDto } from "../event/dto/message.ack.dto";
 import { CacheMessageDto } from "../event/dto/cache.message.dto";
 import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
+import { count } from "console";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -130,18 +131,12 @@ const CommunityMessagePopulateQuery = [
     select: '_id isAdmin extra.firstName extra.lastName extra.photo'
   },
   { path: 'community', select: '_id name' },
-  // {
-  //   path: 'repliedTo',
-  //   select: '_id author messageId body type description date community',
-  //   strictPopulate: false,
-  //   populate: [
-  //     {
-  //       path: 'author',
-  //       select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-  //     },
-  //     { path: 'community', select: '_id name' },
-  //   ]
-  // }
+  {
+    path: 'reactions.users',
+    model: 'CommunityMember',
+    select: { _id: 1, 'extra.firstName': 1, 'extra.lastName': 1, 'extra.photo': 1, isAdmin: 1 },
+    strictPopulate: false
+  }
 ]
 
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
@@ -288,6 +283,7 @@ export class CommunityRepository {
     const member: CommunityMember = {
       community: new Types.ObjectId(community),
       code: data.code,
+      proofOfAddress: data.proofOfAddress,
       isAdmin: data.isAdmin,
       description: data.description,
       path: data.path ? new Types.ObjectId(data.path) : null,
@@ -1289,6 +1285,15 @@ export class CommunityRepository {
       account: new Types.ObjectId(user),
       body: data.body,
       path: data.path,
+      reactions: data.reactions.map((react) => {
+        return {
+          reaction: react.reaction,
+          count: react.count,
+          users: react.users.map((user) => {
+            return new Types.ObjectId(user)
+          })
+        }
+      }),
       community: new Types.ObjectId(data.community),
       type: data.type,
       status: MessageStatus.SENT,
@@ -1325,6 +1330,104 @@ export class CommunityRepository {
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }
+
+  /**
+   * 
+   * @param reactions 
+   * @param reaction 
+   * @returns 
+   */
+  removeOrAddMessageReaction(reactions: any[], reaction: ReactionDto): any {
+    const reactionType = reaction.reaction
+    const user = reaction.user
+
+    const existingReaction = reactions.find((react) => react.reaction === reactionType)
+    if (existingReaction) {
+      // Check if the user already reacted with this type
+      const userIndex = existingReaction.users.findIndex(
+        (u) => u.toString() === user.toString()
+      )
+
+      if (userIndex !== -1) {
+        // If user already reacted, decrement count and remove the user
+        existingReaction.count--
+        existingReaction.users.splice(userIndex, 1)
+      } else {
+        existingReaction.count++
+        existingReaction.users.push(new Types.ObjectId(user))
+      }
+
+      const reactionIndex = reactions.findIndex((reaction) => reaction.reaction === reactionType)
+      // If count becomes zero, remove the reaction entry entirely
+      if (existingReaction.count === 0) {
+        const reactionIndex = reactions.findIndex(
+          (reaction) => reaction.reaction === reactionType
+        )
+        reactions.splice(reactionIndex, 1);
+      } else {
+        reactions[reactionIndex] = existingReaction
+      }
+
+    } else {
+      // If reaction type doesn't exist, create a new entry
+      reactions.push({
+        reaction: reactionType,
+        count: 1,
+        users: [new Types.ObjectId(user)],
+      });
+    }
+
+    return reactions
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @param targets 
+   * @returns 
+   */
+  async updateMessageReaction(user: string, data: MessageDto, targets: number): Promise<MessageResonseDto> {
+    const message = await this.communityMessageModel.findOne({
+      _id: new Types.ObjectId(data.remoteId),
+      community: new Types.ObjectId(data.community)
+    })
+
+    let messageReactions = []
+
+    if (message) {
+      messageReactions = this.removeOrAddMessageReaction(message.reactions, data.reaction)
+
+    } else {
+      messageReactions = this.removeOrAddMessageReaction(data.reactions.map((reaction) => {
+        return {
+          reaction: reaction.reaction,
+          count: reaction.count,
+          users: reaction.users.map((user: string) => new Types.ObjectId(user))
+        }
+      }), data.reaction)
+    }
+
+    data.reactions = messageReactions
+
+    // create cache message for offline and delivery status
+    await this.createCommunityMessageCache(
+      data.community, user,
+      data.remoteId,
+      EventCacheType.REACT_MESSAGE,
+      targets
+    )
+
+    return (await this.communityMessageModel.findOneAndUpdate({
+      account: new Types.ObjectId(user),
+      _id: new Types.ObjectId(data.remoteId),
+      community: new Types.ObjectId(data.community)
+    }, {
+      ...this.buildMessage(user, data)
+    }, { new: true, upsert: true })
+      .populate(CommunityMessagePopulateQuery).exec() as any)
+  }
+
 
   /**
    * 
@@ -1492,7 +1595,7 @@ export class CommunityRepository {
     }, '_id type message').populate(
       {
         path: 'message',
-        select: '_id author account messageId status repliedTo body deleted edited name size extension type description date community',
+        select: '_id author account reactions messageId status repliedTo body deleted edited name size extension type description date community',
         populate: CommunityMessagePopulateQuery
       }
     ).exec() as any

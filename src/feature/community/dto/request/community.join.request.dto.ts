@@ -19,6 +19,10 @@ export class CommunityJoinRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  proofOfAddress: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   point: string
 
   @ApiProperty()

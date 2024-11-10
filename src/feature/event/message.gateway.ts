@@ -19,6 +19,7 @@ const EVENT_NAME_UPDATE = 'community-message-update'
 const EVENT_NAME_REFRESH = 'community-join-refresh'
 const EVENT_NAME_TYPING = 'community-message-typing'
 const EVENT_NAME_OFFLINE = 'community-message-offline'
+const EVENT_NAME_REACTION = 'community-message-reaction'
 
 class NodeData {
   account: string
@@ -259,6 +260,29 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       const response = await this.communityRepository.updateMessage(account, message, totalNodes)
       this.server.to(community).emit(EVENT_NAME_UPDATE, response)
+    }
+
+    return message
+  }
+
+  // handle message update
+  @SubscribeMessage(EVENT_NAME_REACTION)
+  async handleMessageReaction(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: MessageDto
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+
+    if (authenticated) {
+      const community = message.community
+      const account: string = client.data.user.sub
+
+      // get total expected audience
+      const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
+
+      const response = await this.communityRepository.updateMessageReaction(account, message, totalNodes)
+
+      this.server.to(community).emit(EVENT_NAME_REACTION, response)
     }
 
     return message

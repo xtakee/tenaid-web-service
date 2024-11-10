@@ -465,6 +465,7 @@ export class CommunityService {
     const request = await this.communityRepository.createCommunityMember(user, member, data.community, {
       path: data.path,
       point: data.point,
+      proofOfAddress: data.proofOfAddress,
       status: ACCOUNT_STATUS.PENDING,
       isPrimary: data.isPrimary,
       code: '-1',

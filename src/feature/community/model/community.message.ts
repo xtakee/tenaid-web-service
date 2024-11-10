@@ -20,9 +20,14 @@ export enum MessageStatus {
 
 @Schema({ timestamps: true })
 export class MessageReaction {
+  @Prop()
   reaction: string
-  @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
-  author: Types.ObjectId
+
+  @Prop({ default: 0 })
+  count: number
+
+  @Prop([{ type: Types.ObjectId, ref: CommunityMember.name }])
+  users: Types.ObjectId[]
 }
 
 @Schema({ timestamps: true })
@@ -39,7 +44,7 @@ export class CommunityMessage {
   @Prop({ unique: true, index: true })
   messageId: string
 
-  @Prop({ type: [MessageReaction], default: [] })
+  @Prop([{ type: MessageReaction }])
   reactions?: MessageReaction[]
 
   @Prop({ type: Types.ObjectId, ref: CommunityMessage.name })

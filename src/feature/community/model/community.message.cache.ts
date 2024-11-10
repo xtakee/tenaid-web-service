@@ -9,7 +9,8 @@ export type CommunityMessageCacheDocument = HydratedDocument<CommunityMessageCac
 export enum EventCacheType {
   NEW_MESSAGE = 'community-message',
   UPDATE_MESSAGE = 'community-message-update',
-  DELETE_MESSAGE = 'community-message-delete'
+  DELETE_MESSAGE = 'community-message-delete',
+  REACT_MESSAGE = 'community-message-reaction'
 }
 
 @Schema({ timestamps: true })

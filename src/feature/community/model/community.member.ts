@@ -17,6 +17,18 @@ export class AuthorizedAccess {
   relationship?: string;
 }
 
+@Schema()
+export class ProofOfAddress {
+  @Prop()
+  url?: string
+
+  @Prop()
+  name?: string
+
+  @Prop()
+  size?: number;
+}
+
 @Schema({ timestamps: true })
 export class CommunityMember {
   @Prop({ type: Types.ObjectId, ref: Community.name })

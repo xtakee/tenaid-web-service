@@ -19,6 +19,10 @@ export class CommunityMemberRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  proofOfAddress?: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   @IsBoolean()
   isPrimary?: boolean
 

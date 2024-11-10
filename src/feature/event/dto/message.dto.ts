@@ -1,5 +1,26 @@
-import { IsNotEmpty, IsMongoId, IsOptional, IsEnum, IsDateString } from "class-validator"
+import { IsNotEmpty, IsMongoId, IsOptional, IsEnum, IsDateString, IsArray } from "class-validator"
 import { MessageType } from "src/feature/community/model/community.message"
+
+export class ReactionDto {
+  @IsNotEmpty()
+  reaction: string
+
+  @IsNotEmpty()
+  @IsMongoId()
+  user: string
+}
+
+export class MessageReaction {
+  @IsNotEmpty()
+  reaction: string
+
+  @IsNotEmpty()
+  count: number
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  users: string[]
+}
 
 export class MessageDto {
   @IsNotEmpty()
@@ -48,6 +69,12 @@ export class MessageDto {
 
   @IsOptional()
   extension?: string
+
+  @IsArray()
+  reactions: any[]
+
+  @IsOptional()
+  reaction?: ReactionDto
 }
 
 export class MessageTypingDto {
@@ -58,3 +85,4 @@ export class MessageTypingDto {
   @IsMongoId()
   community: string
 }
+
