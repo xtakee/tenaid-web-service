@@ -1342,10 +1342,11 @@ export class CommunityRepository {
     const user = reaction.user
 
     const existingReaction = reactions.find((react) => react.reaction === reactionType)
+
     if (existingReaction) {
       // Check if the user already reacted with this type
       const userIndex = existingReaction.users.findIndex(
-        (u) => u.toString() === user.toString()
+        (u: Types.ObjectId) => u.toString() === user.toString()
       )
 
       if (userIndex !== -1) {
@@ -1374,7 +1375,7 @@ export class CommunityRepository {
         reaction: reactionType,
         count: 1,
         users: [new Types.ObjectId(user)],
-      });
+      })
     }
 
     return reactions
