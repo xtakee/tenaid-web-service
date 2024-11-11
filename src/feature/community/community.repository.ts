@@ -1423,7 +1423,8 @@ export class CommunityRepository {
       _id: new Types.ObjectId(data.remoteId),
       community: new Types.ObjectId(data.community)
     }, {
-      ...this.buildMessage(user, data)
+      ...this.buildMessage(user, data),
+      status: data.status
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }

@@ -68,6 +68,9 @@ export class MessageDto {
   name?: string
 
   @IsOptional()
+  status?: string
+
+  @IsOptional()
   extension?: string
 
   @IsArray()
