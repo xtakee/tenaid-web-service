@@ -1289,8 +1289,8 @@ export class CommunityRepository {
         return {
           reaction: react.reaction,
           count: react.count,
-          users: react.users.map((user) => {
-            return new Types.ObjectId(user)
+          users: react.users.map((usr: string) => {
+            return new Types.ObjectId(usr)
           })
         }
       }),
