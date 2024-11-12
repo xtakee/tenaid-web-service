@@ -1229,17 +1229,20 @@ export class CommunityRepository {
    * @param targets 
    */
   async createCommunityMessageCache(community: string, user: string, message: string, type: string, targets: number): Promise<void> {
-    // cache message
-    const messageCache: CommunityMessageCache = {
+    // create cache message for offline and delivery status
+    await this.communityMessageCacheModel.findOneAndUpdate({
       message: new Types.ObjectId(message),
       community: new Types.ObjectId(community),
       type: type,
+    }, {
+      message: new Types.ObjectId(message),
+      community: new Types.ObjectId(community),
       author: new Types.ObjectId(user),
-      total: targets
-    }
-
-    // create cache message for offline and delivery status
-    await this.communityMessageCacheModel.create(messageCache)
+      reached: 0,
+      total: targets,
+      targets: [],
+      type: type,
+    }, { new: true, upsert: true }).exec()
   }
 
   /**
