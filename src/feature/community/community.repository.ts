@@ -1357,12 +1357,9 @@ export class CommunityRepository {
         existingReaction.users.push(new Types.ObjectId(user))
       }
 
-      const reactionIndex = reactions.findIndex((reaction) => reaction.reaction === reactionType)
+      const reactionIndex = reactions.findIndex((react) => react.reaction === reactionType)
       // If count becomes zero, remove the reaction entry entirely
       if (existingReaction.count === 0) {
-        const reactionIndex = reactions.findIndex(
-          (reaction) => reaction.reaction === reactionType
-        )
         reactions.splice(reactionIndex, 1);
       } else {
         reactions[reactionIndex] = existingReaction
