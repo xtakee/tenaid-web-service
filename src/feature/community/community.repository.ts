@@ -1340,7 +1340,6 @@ export class CommunityRepository {
   removeOrAddMessageReaction(reactions: any[], reaction: ReactionDto): any {
     const reactionType = reaction.reaction
     const user = reaction.user
-
     const existingReaction = reactions.find((react) => react.reaction === reactionType)
 
     if (existingReaction) {
