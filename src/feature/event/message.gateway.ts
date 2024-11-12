@@ -232,12 +232,16 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const authenticated = await this.authGuard.validate(client)
 
     if (authenticated) {
-      const community = message.community
-      const account: string = client.data.user.sub
+      try {
+        const community = message.community
+        const account: string = client.data.user.sub
 
-      // send typing event to users
-      const data = await this.getTypingEventData(community, account, message.typing)
-      client.to(community).emit(EVENT_NAME_TYPING, data)
+        // send typing event to users
+        const data = await this.getTypingEventData(community, account, message.typing)
+        client.to(community).emit(EVENT_NAME_TYPING, data)
+      } catch (error) {
+
+      }
     }
 
     return message
