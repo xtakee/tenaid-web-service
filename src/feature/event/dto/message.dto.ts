@@ -35,6 +35,10 @@ export class MessageDto {
   @IsMongoId()
   community: string
 
+  @IsOptional()
+  @IsMongoId()
+  account?: string
+
   @IsNotEmpty()
   @IsMongoId()
   author: string

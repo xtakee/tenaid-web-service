@@ -1282,7 +1282,7 @@ export class CommunityRepository {
       messageId: data.messageId,
       repliedTo: data.repliedTo ? new Types.ObjectId(data.repliedTo) : null,
       author: new Types.ObjectId(data.author),
-      account: new Types.ObjectId(user),
+      account: new Types.ObjectId(data.account ? data.account : user),
       body: data.body,
       path: data.path,
       reactions: data.reactions.map((react) => {
