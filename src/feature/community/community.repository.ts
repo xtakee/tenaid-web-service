@@ -1296,7 +1296,6 @@ export class CommunityRepository {
       }),
       community: new Types.ObjectId(data.community),
       type: data.type,
-      status: MessageStatus.SENT,
       description: data.description,
       name: data.name,
       size: data.size,
@@ -1326,6 +1325,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community)
     }, {
       ...this.buildMessage(user, data),
+      status: MessageStatus.SENT,
       edited: true
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)
@@ -1398,7 +1398,6 @@ export class CommunityRepository {
 
     if (message) {
       messageReactions = this.removeOrAddMessageReaction(message.reactions, data.reaction)
-
     } else {
       messageReactions = this.removeOrAddMessageReaction(data.reactions.map((reaction) => {
         return {
@@ -1413,7 +1412,8 @@ export class CommunityRepository {
 
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
-      data.community, user,
+      data.community,
+      user,
       data.remoteId,
       EventCacheType.REACT_MESSAGE,
       targets
@@ -1425,7 +1425,8 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community)
     }, {
       ...this.buildMessage(user, data),
-      status: data.status
+      status: data.status === MessageStatus.DELIVERED ? MessageStatus.SENT : data.status,
+      retained: data.status === MessageStatus.DELIVERED ? true : false
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }

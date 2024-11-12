@@ -72,6 +72,9 @@ export class CommunityMessage {
   edited?: Boolean
 
   @Prop({ default: false })
+  retained?: Boolean
+
+  @Prop({ default: false })
   deleted?: Boolean
 
   @Prop()
