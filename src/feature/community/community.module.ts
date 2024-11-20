@@ -123,6 +123,25 @@ import { NotificationModule } from '../notification/notification.module';
         return schema;
       },
     }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityPath.name,
+      useFactory: async () => {
+        const schema = CommunityPathSchema;
+        schema.pre('save', async function () {
+          if (this.isModified('extra.firstName') || this.isModified('extra.lastName') || this.isNew) {
+            this.searchable = searchable(this.name)
+          }
+        });
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
+          }
+          next()
+        });
+        return schema;
+      },
+    }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
     MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
     MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }]),

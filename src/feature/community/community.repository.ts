@@ -548,15 +548,19 @@ export class CommunityRepository {
  * @param page 
  * @param limit 
  */
-  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
+  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) }
     }
+
     if (status) query.status = status
     else query.status = {
       $ne: ACCOUNT_STATUS.DENIED
     }
+
+    if (filter)
+      query.$text = { $search: filter }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
       select: '_id path description point status code extra isAdmin',

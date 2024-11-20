@@ -16,8 +16,14 @@ export class CommunityPath {
   @Prop()
   name: string
 
+  @Prop({ index: true })
+  searchable?: string
+
   @Prop()
   description: string
 }
 
-export const CommunityPathSchema = SchemaFactory.createForClass(CommunityPath);
+const CommunityPathSchema = SchemaFactory.createForClass(CommunityPath);
+CommunityPathSchema.index({ searchable: 'text', code: 'text' })
+
+export { CommunityPathSchema }

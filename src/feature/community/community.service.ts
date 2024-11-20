@@ -416,8 +416,8 @@ export class CommunityService {
    * @param page 
    * @param limit 
    */
-  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status)
+  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status, filter)
   }
 
   /**

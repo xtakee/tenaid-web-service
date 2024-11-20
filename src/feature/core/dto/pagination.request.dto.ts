@@ -26,6 +26,10 @@ export class PaginationRequestDto {
   @IsString()
   @ApiProperty({ default: SortDirection.DEC })
   sort?: string = SortDirection.DEC
+
+  @IsOptional()
+  @ApiProperty({ required: false })
+  filter?: string
 }
 
 export class DateRangeDto {
