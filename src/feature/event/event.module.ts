@@ -15,4 +15,5 @@ import { CommunityModule } from '../community/community.module';
     CommunityModule
   ]
 })
+
 export class EventModule { }

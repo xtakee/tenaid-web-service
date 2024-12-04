@@ -10,4 +10,8 @@ export class AccountAuthRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   password: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  platform: string
 }

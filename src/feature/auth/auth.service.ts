@@ -72,7 +72,7 @@ export class AuthService {
    * @param account 
    * @returns AccountAuthResponseDto
    */
-  private async getAuthorizationResponse(account: Account): Promise<AccountAuthResponseDto> {
+  private async getAuthorizationResponse(account: Account, platform: string): Promise<AccountAuthResponseDto> {
     const dto = this.accountToDtoMapper.map(account)
 
     const permissions = await this.getUserManageAccountPermissions((account as any)._id)
@@ -80,9 +80,10 @@ export class AuthService {
     const payload = { sub: (account as any)._id, sub_0: (account as any)._id, permissions: permissions, email: account.email.value };
     const token = this.jwtService.sign(payload)
 
-    const key = (account as any)._id.toString()
-    const authorization = this.authHelper.encrypt(key)
-    this.authRepository.saveAuthToken(key, token)
+    const platformKey = `${(account as any)._id.toString()}-${platform}`
+
+    const authorization = this.authHelper.encrypt(platformKey)
+    this.authRepository.saveAuthToken(platformKey, token)
 
     return {
       account: dto,
@@ -96,14 +97,14 @@ export class AuthService {
    * @param password 
    * @returns AccountAuthResponseDto
    */
-  async login(username: string, password: string): Promise<AccountAuthResponseDto> {
+  async login(username: string, password: string, platform: string): Promise<AccountAuthResponseDto> {
     const account: Account = await this.accountRepository.getOneByEmail(username.trim().toLowerCase())
 
     if (account) {
       const isMatch = await this.authHelper.isMatch(password, account.password);
 
       if (isMatch) {
-        return await this.getAuthorizationResponse(account)
+        return await this.getAuthorizationResponse(account, platform)
       }
     }
 
@@ -149,17 +150,6 @@ export class AuthService {
   async setDefaultOwnerPermissions(addOnType: string, user: string): Promise<void> {
     const permissions = addOnType === MANAGER ? defaultManagerPermissions : defaultAgentPermissions
     await this.accountRepository.setPermissions(user, permissions)
-  }
-
-  /**
-   * Signs and returns a account authorization payload
-   * @param id 
-   * @returns AccountAuthResponseDto
-   */
-  async sign(id: string): Promise<AccountAuthResponseDto> {
-    const account: Account = await this.accountRepository.getOneById(id)
-    if (account) return await this.getAuthorizationResponse(account)
-    throw new BadRequestException();
   }
 
   /**

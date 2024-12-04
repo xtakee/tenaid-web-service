@@ -17,6 +17,8 @@ import { NotificationModule } from './feature/notification/notification.module';
 import { BullModule } from '@nestjs/bullmq';
 import { EventModule } from './feature/event/event.module';
 import { HealthModule } from './feature/health/health.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -45,7 +47,9 @@ import { HealthModule } from './feature/health/health.module';
     CommunityModule,
     NotificationModule,
     EventModule,
-    HealthModule
+    HealthModule,
+    ScheduleModule.forRoot(),
+    JobsModule
   ],
   providers: []
 })

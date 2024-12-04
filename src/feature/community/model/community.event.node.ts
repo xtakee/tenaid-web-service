@@ -14,10 +14,13 @@ export class CommunityEventNode {
   account: Types.ObjectId
 
   @Prop()
-  token: string
+  token?: string
 
   @Prop()
   device: string
+
+  @Prop()
+  platform: string
 
   @Prop({ enum: ['online', 'offline'], default: 'online' })
   status: string

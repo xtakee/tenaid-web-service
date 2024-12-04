@@ -28,7 +28,7 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login to a registered account' })
   async login(@Body() data: AccountAuthRequestDto): Promise<AccountAuthResponseDto> {
-    return await this.authService.login(data.username, data.password)
+    return await this.authService.login(data.username, data.password, data.platform)
   }
 
   /**

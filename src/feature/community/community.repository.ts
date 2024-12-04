@@ -24,13 +24,10 @@ import { MessageDto, ReactionDto } from "../event/dto/message.dto";
 import { CommunityMessage, MessageStatus } from "./model/community.message";
 import { MessageResonseDto } from "./dto/response/message.response.dto";
 import { SortDirection } from "../core/dto/pagination.request.dto";
-import { UpdateMessageRequestDto } from "./dto/request/update.message.request.dto";
-import { DeleteMessageRequestDto } from "./dto/request/delete.message.request.dto";
 import { CommunityMessageCache, EventCacheType } from "./model/community.message.cache";
 import { MessageAckDto } from "../event/dto/message.ack.dto";
 import { CacheMessageDto } from "../event/dto/cache.message.dto";
 import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
-import { count } from "console";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -1162,19 +1159,35 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @returns 
+   */
+  async getTotalCommunityEffectiveEventNodes(community: string): Promise<number> {
+    const result = await this.communityEventNodeModel.aggregate([
+      { $match: { communities: new Types.ObjectId(community) } },
+      { $group: { _id: '$account' } },
+      { $count: 'sum' },
+    ])
+
+    return result[0].sum
+  }
+
+  /**
+   * 
+   * @param community 
    * @param account 
    * @param member 
    * @returns 
    */
-  async updateCommunityEventNodeConnection(communities: string[], account: string, token: string, device: string): Promise<CommunityEventNode> {
+  async updateCommunityEventNodeConnection(communities: string[], account: string, token: string, device: string, platform: string): Promise<CommunityEventNode> {
     return await this.communityEventNodeModel.findOneAndUpdate({
       account: new Types.ObjectId(account),
-      device: device
+      platform: platform
     }, {
       status: 'online',
       communities: communities.map(id => new Types.ObjectId(id)),
       account: new Types.ObjectId(account),
       token: token,
+      platform: platform,
       device: device
     }, { new: true, upsert: true }).exec()
   }
@@ -1232,7 +1245,7 @@ export class CommunityRepository {
    * @param type 
    * @param targets 
    */
-  async createCommunityMessageCache(community: string, user: string, message: string, type: string, targets: number): Promise<void> {
+  async createCommunityMessageCache(community: string, user: string, message: string, type: string, totalNodes: number, targetNodes: number): Promise<void> {
     // create cache message for offline and delivery status
     await this.communityMessageCacheModel.findOneAndUpdate({
       message: new Types.ObjectId(message),
@@ -1243,7 +1256,8 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       author: new Types.ObjectId(user),
       reached: 0,
-      total: targets,
+      totalNodes: totalNodes,
+      targetNodes: targetNodes,
       targets: [],
       type: type,
     }, { new: true, upsert: true }).exec()
@@ -1254,7 +1268,7 @@ export class CommunityRepository {
    * @param user 
    * @param message 
    */
-  async createMessage(user: string, message: MessageDto, targets: number): Promise<MessageResonseDto> {
+  async createMessage(user: string, message: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
     let communityMessage: CommunityMessage = {
       account: new Types.ObjectId(user),
       community: new Types.ObjectId(message.community),
@@ -1278,7 +1292,7 @@ export class CommunityRepository {
       message.community, user,
       (communityMessage as any)._id.toString(),
       EventCacheType.NEW_MESSAGE,
-      targets)
+      targets, targetNodes)
 
     return await this.getCommunityMessage(message.community, (communityMessage as any)._id.toString())
   }
@@ -1317,13 +1331,13 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async updateMessage(user: string, data: MessageDto, targets: number): Promise<MessageResonseDto> {
+  async updateMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
       data.community, user,
       data.remoteId,
       EventCacheType.UPDATE_MESSAGE,
-      targets
+      targets, targetNodes
     )
 
     return (await this.communityMessageModel.findOneAndUpdate({
@@ -1391,7 +1405,7 @@ export class CommunityRepository {
    * @param targets 
    * @returns 
    */
-  async updateMessageReaction(user: string, data: MessageDto, targets: number): Promise<MessageResonseDto> {
+  async updateMessageReaction(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
     const message = await this.communityMessageModel.findOne({
       _id: new Types.ObjectId(data.remoteId),
       community: new Types.ObjectId(data.community)
@@ -1419,7 +1433,7 @@ export class CommunityRepository {
       user,
       data.remoteId,
       EventCacheType.REACT_MESSAGE,
-      targets
+      targets, targetNodes
     )
 
     return (await this.communityMessageModel.findOneAndUpdate({
@@ -1440,14 +1454,14 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async deleteMessage(user: string, data: MessageDto, targets: number): Promise<MessageResonseDto> {
+  async deleteMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
 
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
       data.community, user,
       data.remoteId,
       EventCacheType.DELETE_MESSAGE,
-      targets
+      targets, targetNodes
     )
 
     return (await this.communityMessageModel.findOneAndUpdate({
@@ -1530,15 +1544,52 @@ export class CommunityRepository {
    * @param message 
    * @returns 
    */
-  async acknowledgeCommunityMessage(user: string, data: MessageAckDto): Promise<CommunityMessageCache> {
+  async acknowledgeCommunityMessage(user: string, data: MessageAckDto, platform: string): Promise<any> {
     return await this.communityMessageCacheModel.findOneAndUpdate({
       community: new Types.ObjectId(data.community),
       message: new Types.ObjectId(data.message),
-      targets: { $ne: new Types.ObjectId(user) }
+      'targets.target': {
+        $ne: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      }
     }, {
-      $addToSet: { targets: new Types.ObjectId(user) },
+      $addToSet: {
+        targets: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      },
       $inc: { reached: 1 }
-    }, { new: true })
+    }, { new: true }).populate(
+      {
+        path: 'message',
+        select: '_id status'
+      }
+    ).exec()
+  }
+
+  /**
+ * 
+ * @param community 
+ * @param message 
+ * @returns 
+ */
+  async getTotalCommunityMessageUniqueAck(community: string, message: string): Promise<number> {
+    const result = await this.communityMessageCacheModel.aggregate([
+      {
+        $match: {
+          community: new Types.ObjectId(community),
+          message: new Types.ObjectId(message)
+        }
+      },
+      { $unwind: '$targets' },
+      { $group: { _id: '$targets.target', count: { $sum: 1 } } },
+      { $count: 'sum' },
+    ])
+
+    return result[0].sum
   }
 
   /**
@@ -1574,6 +1625,25 @@ export class CommunityRepository {
     })
   }
 
+/**
+ * 
+ * @param days 
+ */
+  async cleanUpCommunityStaleMessages(days: number = 7): Promise<void> {
+    const minLivePeriod = new Date()
+    minLivePeriod.setDate(minLivePeriod.getDate() - days)
+
+    // remove messages later than minLivePeriod
+    await this.communityMessageModel.deleteOne({
+      createdAt: { $lt: minLivePeriod }
+    })
+
+     // remove message caches later than minLivePeriod
+    await this.communityMessageCacheModel.deleteOne({
+      createdAt: { $lt: minLivePeriod }
+    })
+  }
+
   /**
    * 
    * @param email 
@@ -1593,9 +1663,9 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getAllCachedCommunityMessages(user: string, community: string): Promise<CacheMessageDto[]> {
+  async getAllCachedCommunityMessages(user: string, communities: Types.ObjectId[]): Promise<CacheMessageDto[]> {
     return await this.communityMessageCacheModel.find({
-      community: new Types.ObjectId(community),
+      community: { $in: communities },
       targets: { $ne: new Types.ObjectId(user) }
     }, '_id type message').populate(
       {

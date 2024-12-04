@@ -21,6 +21,7 @@ export class WsJwtAuthGuard {
     if (!encryptedKey) return false
     try {
       const key = this.authHelper.decrypt(encryptedKey)
+
       if (!key) return false
 
       const token = await this.authRepository.getAuthToken(key)
