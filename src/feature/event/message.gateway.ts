@@ -102,7 +102,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       // get all unread messages/events
       const cachedMessages: CacheMessageDto[] =
-        await this.communityRepository.getAllCachedCommunityMessages(account, communities.map(id => (id as any).community))
+        await this.communityRepository.getAllCachedCommunityMessages(account, communities.map(id => (id as any).community), platform)
 
       // check for stale/offline events
       if (cachedMessages.length > 0)
@@ -210,9 +210,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const author = ackMessage.author.toString()
         const uniqueAckCount = await this.communityRepository.getTotalCommunityMessageUniqueAck(community, message.message)
         // check if message delivered to all clients
+
         if (uniqueAckCount >= ackMessage.targetNodes && ackMessage.message.status !== MessageStatus.DELIVERED) {
           // remove author from ack list so delivery status is sent when connected
-          await this.communityRepository.removeCommunityMessageAck(author, message)
+          await this.communityRepository.removeCommunityMessageAck(author, message, platform)
           const deliveredMessage = await this.communityRepository.setCommunityMessageStatus(community, message.message, MessageStatus.DELIVERED)
 
           // send delivery status to author

@@ -1548,7 +1548,7 @@ export class CommunityRepository {
     return await this.communityMessageCacheModel.findOneAndUpdate({
       community: new Types.ObjectId(data.community),
       message: new Types.ObjectId(data.message),
-      'targets.target': {
+      targets: {
         $ne: {
           target: new Types.ObjectId(user),
           platform: platform
@@ -1562,11 +1562,10 @@ export class CommunityRepository {
         }
       },
       $inc: { reached: 1 }
-    }, { new: true }).populate(
-      {
-        path: 'message',
-        select: '_id status'
-      }
+    }, { new: true }).populate({
+      path: 'message',
+      select: '_id status'
+    }
     ).exec()
   }
 
@@ -1598,12 +1597,17 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async removeCommunityMessageAck(user: string, data: MessageAckDto): Promise<CommunityMessageCache> {
+  async removeCommunityMessageAck(user: string, data: MessageAckDto, platform: string): Promise<CommunityMessageCache> {
     return await this.communityMessageCacheModel.findOneAndUpdate({
       community: new Types.ObjectId(data.community),
       message: new Types.ObjectId(data.message)
     }, {
-      $pull: { targets: new Types.ObjectId(user) },
+      $pull: {
+        targets: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      },
     }, { new: true })
   }
 
@@ -1625,10 +1629,10 @@ export class CommunityRepository {
     })
   }
 
-/**
- * 
- * @param days 
- */
+  /**
+   * 
+   * @param days 
+   */
   async cleanUpCommunityStaleMessages(days: number = 7): Promise<void> {
     const minLivePeriod = new Date()
     minLivePeriod.setDate(minLivePeriod.getDate() - days)
@@ -1638,7 +1642,7 @@ export class CommunityRepository {
       createdAt: { $lt: minLivePeriod }
     })
 
-     // remove message caches later than minLivePeriod
+    // remove message caches later than minLivePeriod
     await this.communityMessageCacheModel.deleteOne({
       createdAt: { $lt: minLivePeriod }
     })
@@ -1663,10 +1667,15 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getAllCachedCommunityMessages(user: string, communities: Types.ObjectId[]): Promise<CacheMessageDto[]> {
+  async getAllCachedCommunityMessages(user: string, communities: Types.ObjectId[], platform: string): Promise<CacheMessageDto[]> {
     return await this.communityMessageCacheModel.find({
       community: { $in: communities },
-      targets: { $ne: new Types.ObjectId(user) }
+      targets: {
+        $ne: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      }
     }, '_id type message').populate(
       {
         path: 'message',
