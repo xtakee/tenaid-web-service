@@ -28,6 +28,8 @@ import { CommunityMessageCache, EventCacheType } from "./model/community.message
 import { MessageAckDto } from "../event/dto/message.ack.dto";
 import { CacheMessageDto } from "../event/dto/cache.message.dto";
 import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
+import { MessageCategoryDto } from "./dto/request/message.category.dto";
+import { CommunityMessageGroup } from "./model/community.message.group";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -128,6 +130,7 @@ const CommunityMessagePopulateQuery = [
     select: '_id isAdmin extra.firstName extra.lastName extra.photo'
   },
   { path: 'community', select: '_id name' },
+ // { path: 'category', select: '_id name description  readOnly', strictPopulate: false },
   {
     path: 'reactions.users',
     model: 'CommunityMember',
@@ -138,7 +141,7 @@ const CommunityMessagePopulateQuery = [
 
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
-    select: '_id author messageId status repliedTo body deleted edited name size extension type description date community',
+    select: '_id author messageId status repliedTo body deleted edited name size extension type description date community category',
     page: page,
     limit: limit,
     sort: { date: sort === SortDirection.ASC ? 1 : -1 },
@@ -152,6 +155,7 @@ export class CommunityRepository {
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
     @InjectModel(CommunityMessageCache.name) private readonly communityMessageCacheModel: Model<CommunityMessageCache>,
+    @InjectModel(CommunityMessageGroup.name) private readonly communityMessageGroupModel: Model<CommunityMessageGroup>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
@@ -860,6 +864,8 @@ export class CommunityRepository {
    * @returns 
    */
   async geCommunityMemberPendingInvite(email: string): Promise<any> {
+    if (!email) return null
+
     return await this.communityMemberModel.findOne(
       {
         'extra.email.value': email.trim().toLowerCase(),
@@ -1279,6 +1285,7 @@ export class CommunityRepository {
       path: message.path,
       size: message.size,
       name: message.name,
+      category: message.category ? new Types.ObjectId(message.category) : null,
       extension: message.extension,
       repliedTo: message.repliedTo ? new Types.ObjectId(message.repliedTo) : null,
       messageId: message.messageId,
@@ -1315,6 +1322,7 @@ export class CommunityRepository {
           })
         }
       }),
+      category: data.category ? new Types.ObjectId(data.category) : null,
       community: new Types.ObjectId(data.community),
       type: data.type,
       description: data.description,
@@ -1679,7 +1687,7 @@ export class CommunityRepository {
     }, '_id type message').populate(
       {
         path: 'message',
-        select: '_id author account reactions messageId status repliedTo body deleted edited name size extension type description date community',
+        select: '_id author account reactions messageId status repliedTo body deleted edited name size extension type description date community category',
         populate: CommunityMessagePopulateQuery
       }
     ).exec() as any
@@ -1760,4 +1768,42 @@ export class CommunityRepository {
       { returnDocument: 'after' }).exec()
   }
 
+  /**
+   * 
+   * @param community 
+   * @param data 
+   */
+  async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<void> {
+    const messageGroup: CommunityMessageGroup = {
+      community: new Types.ObjectId(community),
+      name: data.name.toLowerCase().replaceAll(' ', ''),
+      description: data.description,
+      readOnly: data.isReadOnly
+    }
+
+    await this.communityMessageGroupModel.create(messageGroup)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param category 
+   */
+  async getCommunityMessageCategory(community: string, category: string): Promise<CommunityMessageGroup> {
+    return this.communityMessageGroupModel.findOne({
+      community: new Types.ObjectId(community),
+      name: category
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityMessageCategories(community: string): Promise<CommunityMessageGroup[]> {
+    return this.communityMessageGroupModel.find({
+      community: new Types.ObjectId(community)
+    })
+  }
 }

@@ -35,6 +35,8 @@ import { CheckType } from '../core/dto/check.type';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 import { EventGateway, EventType } from '../event/event.gateway';
+import { MessageCategoryDto } from './dto/request/message.category.dto';
+import { CommunityMember } from './model/community.member';
 
 @Injectable()
 export class CommunityService {
@@ -67,6 +69,7 @@ export class CommunityService {
     if (community) {
 
       const { member, _ } = await this.getMemberAccountExtras(user)
+      member.isAdmin = true
 
       await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
         code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
@@ -418,6 +421,38 @@ export class CommunityService {
    */
   async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status, filter)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   */
+  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<void> {
+    const member: CommunityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
+
+    if (member && (member.isAdmin === true || member.extra?.isAdmin === true))
+      await this.communityRepository.createCommunityMessageCategory(community, data)
+
+    else throw new BadRequestException()
+  }
+
+  /**
+ * 
+ * @param community 
+ * @returns 
+ */
+  async getCommunityMessageCategories(community: string): Promise<MessageCategoryDto[]> {
+    const categories = await this.communityRepository.getCommunityMessageCategories(community)
+    return categories.map((data) => {
+      return {
+        _id: (data as any)._id,
+        name: data.name,
+        description: data.description,
+        isReadOnly: data.readOnly
+      }
+    })
   }
 
   /**

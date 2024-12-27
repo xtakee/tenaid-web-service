@@ -53,6 +53,9 @@ export class MessageDto {
   @IsOptional()
   path?: string
 
+  @IsOptional()
+  category?: string
+
   @IsNotEmpty()
   @IsEnum(MessageType)
   type: string

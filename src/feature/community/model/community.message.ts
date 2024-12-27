@@ -3,6 +3,7 @@ import { HydratedDocument, Types } from "mongoose";
 import { Community } from "./community";
 import { CommunityMember } from "./community.member";
 import { Account } from "src/feature/account/model/account.model";
+import { CommunityMessageGroup } from "./community.message.group";
 
 export type CommunityMessageDocument = HydratedDocument<CommunityMessage>;
 
@@ -37,6 +38,9 @@ export class CommunityMessage {
 
   @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
   author: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: CommunityMessageGroup.name })
+  category?: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId

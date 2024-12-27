@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { Email, User } from 'src/core/decorators/current.user';
@@ -23,6 +23,7 @@ import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 import { DeclineCommunityInviteDto } from './dto/request/decline.community.invite.dto';
+import { MessageCategoryDto } from './dto/request/message.category.dto';
 
 @Controller({
   version: '1',
@@ -126,6 +127,40 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate.page, paginate.limit);
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param status 
+   * @param paginate 
+   * @returns 
+   */
+  @Post(':community/message/category')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Create a community message category' })
+  async createCommunityMessageCategory(@User() user: string,
+    @Param('community') community: string,
+    @Body() data: MessageCategoryDto): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    await this.communityService.createCommunityMessageCategory(user, community, data)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  @Get(':community/message/category')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community message categories' })
+  async getCommunityMessageCategory(
+    @User() user: string,
+    @Param('community') community: string): Promise<MessageCategoryDto[]> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return this.communityService.getCommunityMessageCategories(community)
   }
 
   /**
@@ -440,7 +475,12 @@ export class CommunityController {
     return await this.communityService.createCommunityAccessPoint(user, community, body)
   }
 
-
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
   @Get('/:community/join-request-count')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community join request count' })

@@ -35,6 +35,7 @@ import { CommunityMessageCache, CommunityMessageCacheSchema } from './model/comm
 import { EventGateway } from '../event/event.gateway';
 import { searchable } from 'src/core/util/searchable';
 import { NotificationModule } from '../notification/notification.module';
+import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/community.message.group';
 
 @Module({
   providers: [
@@ -102,6 +103,7 @@ import { NotificationModule } from '../notification/notification.module';
       },
     }]),
     MongooseModule.forFeature([{ name: CommunityMessage.name, schema: CommunityMessageSchema }]),
+    MongooseModule.forFeature([{ name: CommunityMessageGroup.name, schema: CommunityMessageGroupSchema }]),
     MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
     MongooseModule.forFeatureAsync([{
