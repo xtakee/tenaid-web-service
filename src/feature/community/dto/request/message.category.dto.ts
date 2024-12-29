@@ -2,6 +2,9 @@ import { ApiProperty } from "@nestjs/swagger"
 import { IsNotEmpty } from "class-validator"
 
 export class MessageCategoryDto {
+
+  id?: string
+
   @ApiProperty()
   @IsNotEmpty()
   name: string

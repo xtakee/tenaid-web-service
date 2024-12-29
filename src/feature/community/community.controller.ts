@@ -142,9 +142,10 @@ export class CommunityController {
   @ApiOperation({ summary: 'Create a community message category' })
   async createCommunityMessageCategory(@User() user: string,
     @Param('community') community: string,
-    @Body() data: MessageCategoryDto): Promise<void> {
+    @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
     if (!isMongoId(community)) throw new BadRequestException()
-    await this.communityService.createCommunityMessageCategory(user, community, data)
+      
+    return await this.communityService.createCommunityMessageCategory(user, community, data)
   }
 
   /**

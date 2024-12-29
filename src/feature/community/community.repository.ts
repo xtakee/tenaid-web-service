@@ -130,7 +130,7 @@ const CommunityMessagePopulateQuery = [
     select: '_id isAdmin extra.firstName extra.lastName extra.photo'
   },
   { path: 'community', select: '_id name' },
- // { path: 'category', select: '_id name description  readOnly', strictPopulate: false },
+  { path: 'category', select: '_id name description readOnly', strictPopulate: false },
   {
     path: 'reactions.users',
     model: 'CommunityMember',
@@ -1174,7 +1174,7 @@ export class CommunityRepository {
       { $count: 'sum' },
     ])
 
-    return result[0].sum
+    return result ? result[0].sum : 0
   }
 
   /**
@@ -1239,7 +1239,7 @@ export class CommunityRepository {
         _id: new Types.ObjectId(message),
         community: new Types.ObjectId(community)
       },
-      '_id author messageId account path status repliedTo body deleted edited type description name size extension date community')
+      '_id author messageId account path status repliedTo body deleted edited type description name size extension date community category')
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }
 
@@ -1773,7 +1773,7 @@ export class CommunityRepository {
    * @param community 
    * @param data 
    */
-  async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<void> {
+  async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<CommunityMessageGroup> {
     const messageGroup: CommunityMessageGroup = {
       community: new Types.ObjectId(community),
       name: data.name.toLowerCase().replaceAll(' ', ''),
@@ -1781,7 +1781,7 @@ export class CommunityRepository {
       readOnly: data.isReadOnly
     }
 
-    await this.communityMessageGroupModel.create(messageGroup)
+    return await this.communityMessageGroupModel.create(messageGroup)
   }
 
   /**

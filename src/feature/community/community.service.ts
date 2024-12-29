@@ -79,6 +79,13 @@ export class CommunityService {
       })
 
       await this.accountRepository.setCreateFlagStatus(user, false)
+
+      await this.communityRepository.createCommunityMessageCategory((community as any)._id, {
+        name: 'General',
+        description: 'General community group chat',
+        isReadOnly: false
+      })
+
       return this.communityMapper.map(community)
     }
 
@@ -429,11 +436,21 @@ export class CommunityService {
    * @param community 
    * @param data 
    */
-  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<void> {
+  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<MessageCategoryDto> {
     const member: CommunityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
 
-    if (member && (member.isAdmin === true || member.extra?.isAdmin === true))
-      await this.communityRepository.createCommunityMessageCategory(community, data)
+    if (member && (member.isAdmin === true || member.extra?.isAdmin === true)) {
+      const category = await this.communityRepository.createCommunityMessageCategory(community, data)
+      if (category)
+        return {
+          id: (category as any)._id,
+          name: category.name,
+          description: category.description,
+          isReadOnly: category.readOnly
+        }
+
+      else throw new BadRequestException()
+    }
 
     else throw new BadRequestException()
   }
