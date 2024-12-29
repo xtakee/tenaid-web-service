@@ -9,8 +9,6 @@ import { ADMIN_SYSTEM_FEATURES, CLAIM } from '../auth/auth.constants';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
 import { PaginatedResult } from 'src/core/helpers/paginator';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
-import { CreateAdminDto } from './dto/request/create.admin.dto';
-import { AccountAdminAuthResponseDto } from './dto/response/account.admin.auth.response';
 import { ReviewCommunityRequestDto } from './dto/request/review.community.request.dto';
 
 @Controller({

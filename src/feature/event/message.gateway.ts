@@ -9,7 +9,6 @@ import { NotificationService } from "../notification/notification.service"
 import { MessageAckDto } from "./dto/message.ack.dto"
 import { MessageStatus } from "../community/model/community.message"
 import { CacheMessageDto } from "./dto/cache.message.dto"
-import { Type } from "@nestjs/common"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -351,7 +350,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           type: 'message',
           title: sender,
           description: body,
-          contentId: (response as any)._id
+          contentId: (response as any).messageId
         }
       }
 

@@ -15,7 +15,6 @@ export class AccountCreateDto {
   @IsNotEmpty()
   phone: string
 
-
   @ApiProperty()
   @IsNotEmpty()
   country: string
