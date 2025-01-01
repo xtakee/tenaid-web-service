@@ -16,6 +16,9 @@ export class Community {
   @Prop({ index: true })
   name: string
 
+  @Prop({ default: 0 })
+  size: number
+
   @Prop({ index: true })
   searchable?: string
 
@@ -34,7 +37,7 @@ export class Community {
   @Prop()
   images?: string[]
 
-  @Prop({enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.PENDING})
+  @Prop({ enum: ACCOUNT_STATUS, default: ACCOUNT_STATUS.PENDING })
   status?: string
 
   @Prop()

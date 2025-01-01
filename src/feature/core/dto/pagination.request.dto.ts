@@ -45,6 +45,7 @@ export class DateRangeDto {
 }
 
 export class DateDto {
+  @ApiProperty()
   @IsOptional()
   @IsDateString()
   date: string

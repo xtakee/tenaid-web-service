@@ -12,6 +12,7 @@ export class CommunityToDtoMapper implements Mapper<Community, CommunityDto> {
     return {
       id: (from as any)._id,
       name: from.name,
+      size: from.size,
       description: from.description,
       address: this.addressMapper.map(from.address),
       code: from.code,

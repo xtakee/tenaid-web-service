@@ -24,8 +24,9 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // client authentication
     } else client.disconnect()
   }
+
   // handle client disconnected
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     //console.log(client)
   }
   /**

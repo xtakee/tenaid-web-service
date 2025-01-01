@@ -17,6 +17,14 @@ export interface PaginatedResult<T> {
   itemsPerPage: number;
 }
 
+export const PaginatedEmptyResult = {
+  docs: [],
+  totalItems: 0,
+  totalPages: 0,
+  currentPage: 0,
+  itemsPerPage: 0
+}
+
 @Injectable()
 export class Paginator {
 

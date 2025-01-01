@@ -144,7 +144,7 @@ export class CommunityController {
     @Param('community') community: string,
     @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
     if (!isMongoId(community)) throw new BadRequestException()
-      
+
     return await this.communityService.createCommunityMessageCategory(user, community, data)
   }
 
@@ -435,6 +435,26 @@ export class CommunityController {
     @Query('status') status?: string): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityMembers(user, community, paginate.page, paginate.limit, status, paginate.filter)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get(':community/messaging/members')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community messaging members' })
+  @ApiQuery({ name: 'date', required: false, type: Date })
+  async getAllCommunityMessagingMembers(
+    @User() user: string,
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Query() date?: DateDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate.page, paginate.limit, paginate.filter, date.date)
   }
 
   /**

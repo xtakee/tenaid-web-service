@@ -18,7 +18,7 @@ import { CommunityPath } from './model/community.path';
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
-import { PaginatedResult } from 'src/core/helpers/paginator';
+import { PaginatedEmptyResult, PaginatedResult } from 'src/core/helpers/paginator';
 import { INVITE_STATUS, MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
@@ -429,6 +429,26 @@ export class CommunityService {
   async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status, filter)
   }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param filter 
+   * @returns 
+   */
+  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, filter?: string, date?: string): Promise<PaginatedResult<any>> {
+
+    const member = await this.communityRepository.getApprovedCommunityMember(user, community)
+
+    if (member)
+      return await this.communityRepository.getAllCommunityMessagingMembers(user, community, page, limit, filter, date)
+
+    else return PaginatedEmptyResult
+  }
+
 
   /**
    * 

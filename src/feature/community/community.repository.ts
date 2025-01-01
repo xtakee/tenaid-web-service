@@ -174,6 +174,7 @@ export class CommunityRepository {
   async createCommunity(user: string, data: CommunityDto): Promise<Community> {
     const community: Community = {
       name: data.name,
+      size: data.size,
       description: data.description,
       code: data.code,
       type: data.type,
@@ -572,6 +573,37 @@ export class CommunityRepository {
         select: '_id name description',
         strictPopulate: false,
       }
+    })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param filter 
+   * @returns 
+   */
+  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, filter?: string, date?: string): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      account: { $ne: new Types.ObjectId(user) },
+      status: {
+        $ne: ACCOUNT_STATUS.DENIED
+      }
+    }
+
+    if (filter)
+      query.$text = { $search: filter }
+
+    if (date)
+      query.updatedAt = { $gte: new Date(date) }
+
+    return await this.paginator.paginate(this.communityMemberModel, query, {
+      select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt',
+      page: page,
+      limit: limit
     })
   }
 
