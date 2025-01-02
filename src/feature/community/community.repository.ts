@@ -598,7 +598,7 @@ export class CommunityRepository {
       query.$text = { $search: filter }
 
     if (date)
-      query.updatedAt = { $gte: new Date(date) }
+      query.updatedAt = { $gt: new Date(date) }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
       select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt',
