@@ -1,5 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEmail, IsNotEmpty } from "class-validator"
+import { IsEmail, IsEnum, IsNotEmpty } from "class-validator"
+
+enum Platform {
+  WEB = 'web',
+  MOBILE = 'mobile'
+}
 
 export class AccountAuthRequestDto {
   @ApiProperty()
@@ -13,5 +18,6 @@ export class AccountAuthRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsEnum(Platform)
   platform: string
 }

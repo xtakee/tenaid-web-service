@@ -7,7 +7,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
+import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
@@ -37,6 +37,7 @@ import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 import { EventGateway, EventType } from '../event/event.gateway';
 import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityMember } from './model/community.member';
+import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
 
 @Injectable()
 export class CommunityService {
@@ -398,6 +399,74 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @param member 
+   */
+  async getCommunityMemberAuthorizedAccess(community: string, member: string): Promise<any> {
+    return await this.communityRepository.getCommunityMemberAuthorizedUsers(community, member)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param body 
+   * @returns 
+   */
+  async createCommunityMemberAuthorizedAccess(user: string, community: string, member: string, body: CommunityAuthorizedUserDto): Promise<any> {
+    const email = body.email.trim().toLowerCase()
+    const authorizedUser = await this.communityRepository.getCommunityMemberByEmail(community, email)
+
+    if (!authorizedUser) {
+      const communityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
+      if (!communityMember) throw new NotFoundException()
+
+      if(communityMember.isAdmin) throw new ForbiddenException()
+
+      const account = await this.accountRepository.getOneByEmail(email)
+      const communityData = await this.communityRepository.getNextMemberCode(community)
+      const code = communityData.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')
+
+      if (!account) {
+        body.path = communityMember.path.toString()
+        body.point = communityMember.point
+        body.description = communityMember.description
+        body.isPrimary = true
+
+        const savedMember = await this.communityRepository.createCommunityMemberAuthorizedUser(community, member, { ...body }, code)
+
+        // send invite email to user - authorized user
+        return savedMember
+      } else {
+        const savedMember = await this.communityRepository.createCommunityMemberAuthorizedUser(community, member, {
+          firstName: account.firstName,
+          lastName: account.lastName,
+          email: account.email.value,
+          relationship: body.relationship,
+          account: (account as any)._id.toString(),
+          phone: account.phone,
+          photo: account.photo,
+          isPrimary: false,
+          point: communityMember.point,
+          path: communityMember.path.toString(),
+          description: communityMember.description,
+          gender: account.gender,
+          country: account.country,
+          canCreateExit: body.canCreateExit,
+          canCreateInvite: body.canCreateInvite,
+          canSendMessage: body.canSendMessage
+        }, code)
+
+        // send email/push notification to existing account / authorized user
+        return savedMember
+      }
+    }
+
+    throw new BadRequestException(COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE)
+  }
+
+  /**
+   * 
    * @param user 
    * @returns 
    */
@@ -615,7 +684,7 @@ export class CommunityService {
     let pushBody = ''
     let code = '-1'
 
-    const community = await this.communityRepository.getNextMemberCode(data.community, user)
+    const community = await this.communityRepository.getNextMemberCode(data.community)
     if (!community) throw new NotFoundException()
 
     if (data.status === ACCOUNT_STATUS.APPROVED) {
@@ -767,7 +836,7 @@ export class CommunityService {
 
     const account = await this.accountRepository.getOneByEmail(data.emailAddress)
 
-    const communityData = await this.communityRepository.getNextMemberCode(community, user)
+    const communityData = await this.communityRepository.getNextMemberCode(community)
     if (!communityData) throw new NotFoundException()
 
     const code = communityData.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')

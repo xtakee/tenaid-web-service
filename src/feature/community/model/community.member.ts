@@ -8,27 +8,6 @@ import { MemberAccount } from "./member.account";
 
 export type CommunityMemberDocument = HydratedDocument<CommunityMember>
 
-@Schema()
-export class AuthorizedAccess {
-  @Prop({ type: Types.ObjectId, ref: 'CommunityMember' })
-  member?: Types.ObjectId;
-
-  @Prop()
-  relationship?: string;
-}
-
-@Schema()
-export class ProofOfAddress {
-  @Prop()
-  url?: string
-
-  @Prop()
-  name?: string
-
-  @Prop()
-  size?: number;
-}
-
 @Schema({ timestamps: true })
 export class CommunityMember {
   @Prop({ type: Types.ObjectId, ref: Community.name })
@@ -53,6 +32,9 @@ export class CommunityMember {
   canCreateInvite?: Boolean
 
   @Prop({ default: true })
+  canSendMessage?: Boolean
+
+  @Prop({ default: true })
   canCreateExit?: Boolean
 
   @Prop({ default: true })
@@ -61,8 +43,8 @@ export class CommunityMember {
   @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
   linkedTo?: Types.ObjectId
 
-  @Prop([{ type: AuthorizedAccess }])
-  authorizedAccess?: AuthorizedAccess[]
+  @Prop()
+  relationship?: string;
 
   @Prop({ type: MemberAccount })
   extra: MemberAccount

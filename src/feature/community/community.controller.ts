@@ -24,6 +24,7 @@ import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 import { DeclineCommunityInviteDto } from './dto/request/decline.community.invite.dto';
 import { MessageCategoryDto } from './dto/request/message.category.dto';
+import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
 
 @Controller({
   version: '1',
@@ -91,6 +92,45 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getCommunityMemberVisitorsByDate(user, community, date.start, date.end, paginate.page, paginate.limit);
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @returns 
+   */
+  @Get(':community/:member/aurhorized-users')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get community member authorized users' })
+  async getCommunityMemberAuthorizedAccess(
+    @Param('community') community: string,
+    @Param('member') member: string,
+  ): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(member)) throw new BadRequestException()
+    return await this.communityService.getCommunityMemberAuthorizedAccess(community, member);
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param body 
+   * @returns 
+   */
+  @Post(':community/:member/aurhorized-users')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Create community member authorized user' })
+  async createCommunityMemberAuthorizedAccess(
+    @User() user: string,
+    @Param('community') community: string,
+    @Param('member') member: string,
+    @Body() body: CommunityAuthorizedUserDto
+  ): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(member)) throw new BadRequestException()
+    return await this.communityService.createCommunityMemberAuthorizedAccess(user, community, member, body);
   }
 
   /**

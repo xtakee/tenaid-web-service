@@ -7,6 +7,12 @@ export class CommunityMemberResponseDto {
   status: string
   code: string
   point: number
+  isOwner?: Boolean
+  isAdmin?: Boolean
+  canCreateInvite?: Boolean
+  canCreateExit?: Boolean
+  canSendMessage?: Boolean
+  linkedTo?: string
   description: string
   createdAt: string
   updatedAt: string

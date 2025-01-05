@@ -30,6 +30,7 @@ import { CacheMessageDto } from "../event/dto/cache.message.dto";
 import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
 import { MessageCategoryDto } from "./dto/request/message.category.dto";
 import { CommunityMessageGroup } from "./model/community.message.group";
+import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -308,6 +309,49 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
+   * @param member 
+   * @param data 
+   * @param code 
+   * @returns 
+   */
+  async createCommunityMemberAuthorizedUser(community: string, member: string, data: CommunityAuthorizedUserDto, code: string): Promise<CommunityMember> {
+
+    const authorizedUser: CommunityMember = {
+      community: new Types.ObjectId(community),
+      code: code,
+      isAdmin: false,
+      isOwner: false,
+      description: data.description,
+      path: data.path ? new Types.ObjectId(data.path) : null,
+      status: ACCOUNT_STATUS.PENDING,
+      linkedTo: new Types.ObjectId(member),
+      relationship: data.relationship,
+      canCreateExit: data.canCreateExit,
+      canCreateInvite: data.canCreateInvite,
+      canSendMessage: data.canSendMessage,
+      point: data.point,
+      extra: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        photo: data.photo,
+        country: data.country,
+        isAdmin: false,
+        gender: data.gender,
+        email: {
+          value: data.email
+        }
+      },
+      isPrimary: data.isPrimary,
+      account: data.account ? new Types.ObjectId(data.account) : null
+    }
+
+    return await this.communityMemberModel.create(authorizedUser)
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    */
@@ -553,7 +597,8 @@ export class CommunityRepository {
   async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
-      account: { $ne: new Types.ObjectId(user) }
+      account: { $ne: new Types.ObjectId(user) },
+      isOwner: true
     }
 
     if (status) query.status = status
@@ -589,6 +634,7 @@ export class CommunityRepository {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
+      isAdmin: false,
       status: {
         $ne: ACCOUNT_STATUS.DENIED
       }
@@ -856,9 +902,9 @@ export class CommunityRepository {
    * @param id 
    * @returns 
    */
-  async getNextMemberCode(id: string, user: string): Promise<Community> {
+  async getNextMemberCode(id: string): Promise<Community> {
     const community = await this.communityModel.findOneAndUpdate(
-      { _id: new Types.ObjectId(id), account: new Types.ObjectId(user) },
+      { _id: new Types.ObjectId(id) },
       { $inc: { members: 1 } },
       { new: true, upsert: false },
     ).exec()
@@ -883,7 +929,7 @@ export class CommunityRepository {
         ]
       },
       {
-        select: '_id code path extra isAdmin isPrimary point description status community',
+        select: '_id code path extra isAdmin linkedTo isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community',
         limit: limit,
         page: page,
         populate: MEMBER_COMMUNITIES_QUERY
@@ -1698,6 +1744,23 @@ export class CommunityRepository {
       'extra.email.value': email.trim().toLowerCase(),
       community: new Types.ObjectId(community),
       status: { $ne: ACCOUNT_STATUS.DENIED }
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @returns 
+   */
+  async getCommunityMemberAuthorizedUsers(community: string, member: string): Promise<CommunityMember[]> {
+    return await this.communityMemberModel.find({
+      linkedTo: new Types.ObjectId(member),
+      community: new Types.ObjectId(community),
+    }).populate({
+      path: 'community',
+      select: '_id name',
+      strictPopulate: false
     })
   }
 
