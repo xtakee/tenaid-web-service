@@ -635,9 +635,8 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
       isAdmin: false,
-      status: {
-        $ne: ACCOUNT_STATUS.DENIED
-      }
+      canSendMessage: true,
+      status: ACCOUNT_STATUS.APPROVED
     }
 
     if (filter)
