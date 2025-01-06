@@ -1756,7 +1756,7 @@ export class CommunityRepository {
     return await this.communityMemberModel.find({
       linkedTo: new Types.ObjectId(member),
       community: new Types.ObjectId(community),
-    }, '_id code path extra isAdmin linkedTo isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community')
+    }, '_id code path extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community')
       .populate(MEMBER_COMMUNITIES_QUERY)
   }
 
