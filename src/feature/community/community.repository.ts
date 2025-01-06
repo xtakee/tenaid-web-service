@@ -1756,11 +1756,8 @@ export class CommunityRepository {
     return await this.communityMemberModel.find({
       linkedTo: new Types.ObjectId(member),
       community: new Types.ObjectId(community),
-    }, '_id code path extra isAdmin linkedTo isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community').populate({
-      path: 'community',
-      select: '_id name images code description',
-      strictPopulate: false
-    })
+    }, '_id code path extra isAdmin linkedTo isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community')
+      .populate(MEMBER_COMMUNITIES_QUERY)
   }
 
   /**
