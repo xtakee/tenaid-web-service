@@ -100,7 +100,7 @@ export class CommunityController {
    * @param member 
    * @returns 
    */
-  @Get(':community/:member/aurhorized-users')
+  @Get(':community/:member/authorized-users')
   @BasicAuth()
   @ApiOperation({ summary: 'Get community member authorized users' })
   async getCommunityMemberAuthorizedAccess(
@@ -119,7 +119,7 @@ export class CommunityController {
    * @param body 
    * @returns 
    */
-  @Post(':community/:member/aurhorized-users')
+  @Post(':community/:member/authorized-users')
   @BasicAuth()
   @ApiOperation({ summary: 'Create community member authorized user' })
   async createCommunityMemberAuthorizedAccess(
