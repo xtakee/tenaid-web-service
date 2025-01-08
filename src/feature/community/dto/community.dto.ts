@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsUrl } from "class-validator"
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsUrl } from "class-validator"
 import { AddressDto } from "src/feature/core/dto/address.dto"
 import { COMMUNITY_TYPE } from "src/feature/community/community.constants"
 

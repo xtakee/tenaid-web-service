@@ -112,6 +112,18 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberAuthorizedAccess(community, member);
   }
 
+  @Get(':community/:member/authorized-users')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get community member authorized users' })
+  async updateCommunityMemberAuthorizedAccessPermissions(
+    @Param('community') community: string,
+    @Param('member') member: string,
+  ): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(member)) throw new BadRequestException()
+    return await this.communityService.getCommunityMemberAuthorizedAccess(community, member);
+  }
+
   /**
    * 
    * @param community 

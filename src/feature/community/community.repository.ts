@@ -92,6 +92,8 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
   }
 }
 
+const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code path extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community'
+
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'path',
   select: '_id name description'
@@ -928,7 +930,7 @@ export class CommunityRepository {
         ]
       },
       {
-        select: '_id code path extra isAdmin linkedTo isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community',
+        select: COMMUNITY_MEMBER_PRIMARY_QUERY,
         limit: limit,
         page: page,
         populate: MEMBER_COMMUNITIES_QUERY
@@ -1756,7 +1758,7 @@ export class CommunityRepository {
     return await this.communityMemberModel.find({
       linkedTo: new Types.ObjectId(member),
       community: new Types.ObjectId(community),
-    }, '_id code path extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community')
+    }, COMMUNITY_MEMBER_PRIMARY_QUERY)
       .populate(MEMBER_COMMUNITIES_QUERY)
   }
 
