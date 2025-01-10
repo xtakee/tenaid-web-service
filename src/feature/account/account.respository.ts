@@ -78,11 +78,27 @@ export class AccountRepository implements IAccountRepository {
     return await this.accountModel.findById(id);
   }
 
+  /**
+   * 
+   * @param id 
+   * @param data 
+   * @returns 
+   */
   async updateAccount(id: string, data: AccountUpdateDto): Promise<Account> {
     return this.accountModel.findByIdAndUpdate(id, {
       firstName: data.firstName,
       lastName: data.lastName
     }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  async setHasAccountCommunity(user: string): Promise<void> {
+    await this.accountModel.findOneAndUpdate({ _id: new Types.ObjectId(user) }, {
+      hasCommunity: true
+    })
   }
 
   /**
@@ -478,6 +494,7 @@ export class AccountRepository implements IAccountRepository {
       'flags.quickActions': false
     }, {
       'flags.createCommunity': status,
+      hasCommunity: true
     }, { returnDocument: 'after' }).exec()
   }
 

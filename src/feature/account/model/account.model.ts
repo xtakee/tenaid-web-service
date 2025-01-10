@@ -88,6 +88,9 @@ export class Account {
   @Prop({ index: true })
   searchable?: string
 
+  @Prop({ type: Boolean, default: false })
+  hasCommunity?: Boolean
+
   @Prop({ enum: GENDER })
   gender?: string
 

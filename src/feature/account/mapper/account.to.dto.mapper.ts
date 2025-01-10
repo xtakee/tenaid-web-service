@@ -27,6 +27,7 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
       lastName: from.lastName,
       firstName: from.firstName,
       country: from.country,
+      hasCommunity: from.hasCommunity,
       flags: {
         welcome: from.flags?.welcome ?? true,
         joinCommunity: from.flags?.joinCommunity ?? true,
