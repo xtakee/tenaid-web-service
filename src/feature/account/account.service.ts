@@ -254,7 +254,7 @@ export class AccountService {
       firstName: account.firstName,
       lastName: account.lastName,
       country: account.country,
-      email: account.email.value,
+      email: account.email,
       phone: account.phone,
       photo: account.photo,
       dob: account.dob,
