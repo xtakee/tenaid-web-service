@@ -254,8 +254,8 @@ export class AccountController {
   @Get('community/managed')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all account managed communities' })
-  async getAccountManagedCommunities(@User() user: string): Promise<PaginatedResult<any>> {
-    return await this.accountService.getAccountManagedCommunities(user)
+  async getAccountManagedCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountManagedCommunities(user, paginate)
   }
 
   /**

@@ -22,6 +22,7 @@ import { CommunityRepository } from "../community/community.repository";
 import { PaginatedResult } from "src/core/helpers/paginator";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
+import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 
 @Injectable()
 export class AccountService {
@@ -290,6 +291,11 @@ export class AccountService {
     throw new NotFoundException()
   }
 
+  /**
+   * 
+   * @param email 
+   * @returns 
+   */
   async forgotPassword(email: string): Promise<ForgotPasswordResponseDto> {
     const account = await this.accountRepository.getOneByEmail(email)
     let signature: string = ''
@@ -359,8 +365,8 @@ export class AccountService {
  * @param limit 
  * @returns 
  */
-  async getAccountManagedCommunities(user: string): Promise<any> {
-    return await this.communityRepository.getAccountManagedCommunities(user)
+  async getAccountManagedCommunities(user: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAccountManagedCommunities(user, paginate)
   }
 
   /**

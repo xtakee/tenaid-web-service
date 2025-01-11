@@ -23,7 +23,7 @@ import { CommunityEventNode } from "./model/community.event.node";
 import { MessageDto, ReactionDto } from "../event/dto/message.dto";
 import { CommunityMessage, MessageStatus } from "./model/community.message";
 import { MessageResonseDto } from "./dto/response/message.response.dto";
-import { SortDirection } from "../core/dto/pagination.request.dto";
+import { PaginationRequestDto, SortDirection } from "../core/dto/pagination.request.dto";
 import { CommunityMessageCache, EventCacheType } from "./model/community.message.cache";
 import { MessageAckDto } from "../event/dto/message.ack.dto";
 import { CacheMessageDto } from "../event/dto/cache.message.dto";
@@ -939,18 +939,27 @@ export class CommunityRepository {
       })
   }
 
-
   /**
  * 
  * @param user 
+ * @param paginate 
  * @returns 
  */
-  async getAccountManagedCommunities(user: string): Promise<Community[]> {
-    return await this.communityModel.find({
+  async getAccountManagedCommunities(user: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
       account: new Types.ObjectId(user)
-    }, COMMUNITY_SELECT_QUERY)
-  }
+    }
 
+    if (paginate.filter)
+      query.$text = { $search: paginate.filter }
+
+    return await this.paginator.paginate(this.communityModel, query, {
+      select: COMMUNITY_SELECT_QUERY,
+      sort: paginate.sort,
+      page: paginate.page,
+      limit: paginate.limit
+    })
+  }
 
   /**
    * 
