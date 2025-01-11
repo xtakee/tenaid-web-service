@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsBoolean, IsEmail, IsEnum, IsMongoId, IsNotEmpty, IsUrl } from "class-validator"
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsUrl } from "class-validator"
 import { GENDER } from "src/feature/auth/auth.constants"
 
 export class CommunityAuthorizedUserDto {

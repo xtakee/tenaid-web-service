@@ -500,6 +500,14 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param email 
+   */
+  async getAccountByEmail(email: string): Promise<any> {
+    
+  }
+
+  /**
+   * 
    * @param user 
    * @param status 
    */

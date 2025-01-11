@@ -43,6 +43,9 @@ export class Community {
   @Prop()
   comment?: string
 
+  @Prop({ type: Boolean, default: false })
+  isPrimary?: Boolean
+
   @Prop({ type: Address })
   address: Address
 }

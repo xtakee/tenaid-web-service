@@ -5,6 +5,7 @@ import { COMMUNITY_TYPE } from "src/feature/community/community.constants"
 
 export class CommunityDto {
   id?: string
+  isPrimary?: Boolean
 
   @ApiProperty()
   @IsNotEmpty()

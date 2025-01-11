@@ -623,6 +623,20 @@ export class CommunityController {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  @Post('/:community/managed/primary')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Set a primary managed community' })
+  async setPrimaryCommunity(@User() user: string, @Param('community') community: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.setPrimaryCommunity(user, community)
+  }
+
+  /**
+   * 
    * @param community 
    * @param body 
    */

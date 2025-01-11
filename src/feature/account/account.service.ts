@@ -244,6 +244,28 @@ export class AccountService {
 
   /**
    * 
+   * @param email 
+   * @returns 
+   */
+  async getAccountByEmail(email: string): Promise<any> {
+    const account = await this.accountRepository.getOneByEmail(email)
+    if (account) return {
+      _id: (account as any)._id,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      country: account.country,
+      email: account.email.value,
+      phone: account.phone,
+      photo: account.photo,
+      dob: account.dob,
+      gender: account.gender
+    }
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
    * @param user 
    * @param data 
    * @returns AccountResponseDto
@@ -328,6 +350,17 @@ export class AccountService {
  */
   async getAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllAccountCommunities(user, page, limit)
+  }
+
+  /**
+ * 
+ * @param user 
+ * @param page 
+ * @param limit 
+ * @returns 
+ */
+  async getAccountManagedCommunities(user: string): Promise<any> {
+    return await this.communityRepository.getAccountManagedCommunities(user)
   }
 
   /**

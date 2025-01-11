@@ -14,7 +14,7 @@ import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth, BasicAuth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
-import { isMongoId } from "class-validator";
+import { isEmail, IsEmail, isMongoId } from "class-validator";
 import { ForgotPasswordDto } from "src/feature/account/dto/request/forgot.password.dto";
 import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
@@ -212,6 +212,19 @@ export class AccountController {
 
   /**
    * 
+   * @param email 
+   * @returns 
+   */
+  @Get('exists')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Check if an account exists using email address' })
+  async getAccountByEmail(@Query('email') email: string): Promise<any> {
+    if (!isEmail(email)) throw new BadRequestException()
+    return await this.accountService.getAccountByEmail(email)
+  }
+
+  /**
+   * 
    * @param body 
    * @returns 
    */
@@ -232,6 +245,17 @@ export class AccountController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
   async changePassword(@RootUser() user: string, @Body() body: ChangePasswordDto): Promise<void> {
     return await this.accountService.changePassword(user, body.password)
+  }
+/**
+ * 
+ * @param user 
+ * @returns 
+ */
+  @Get('community/managed')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all account managed communities' })
+  async getAccountManagedCommunities(@User() user: string): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountManagedCommunities(user)
   }
 
   /**

@@ -93,10 +93,11 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
 }
 
 const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code path extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary point description status community'
+const COMMUNITY_SELECT_QUERY = '_id name size description code members type images status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'path',
-  select: '_id name description'
+  select: '_id name description isPrimary'
 },
 {
   path: 'community',
@@ -178,6 +179,7 @@ export class CommunityRepository {
     const community: Community = {
       name: data.name,
       size: data.size,
+      isPrimary: data.isPrimary ? data.isPrimary : false,
       description: data.description,
       code: data.code,
       type: data.type,
@@ -937,6 +939,19 @@ export class CommunityRepository {
       })
   }
 
+
+  /**
+ * 
+ * @param user 
+ * @returns 
+ */
+  async getAccountManagedCommunities(user: string): Promise<Community[]> {
+    return await this.communityModel.find({
+      account: new Types.ObjectId(user)
+    }, COMMUNITY_SELECT_QUERY)
+  }
+
+
   /**
    * 
    * @param email 
@@ -961,16 +976,51 @@ export class CommunityRepository {
    * @returns 
    */
   async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
-    const prev = await this.communityMemberModel.updateMany({ account: new Types.ObjectId(user), status: ACCOUNT_STATUS.APPROVED },
+    const prev = await this.communityMemberModel.updateMany({
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.APPROVED
+    },
       { $set: { isPrimary: false } }
     ).exec()
 
     if (prev) {
       return await this.communityMemberModel.findOneAndUpdate(
-        { account: new Types.ObjectId(user), community: new Types.ObjectId(community) },
+        {
+          account: new Types.ObjectId(user),
+          community: new Types.ObjectId(community)
+        },
         { isPrimary: true },
         { returnDocument: 'after' }
       ).populate(MEMBER_COMMUNITIES_QUERY).exec()
+    }
+
+    return null
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async setPrimaryCommunity(user: string, community: string): Promise<any> {
+    const updateResult = await this.communityModel.updateMany({
+      account: new Types.ObjectId(user),
+      _id: new Types.ObjectId(community)
+    },
+      { $set: { isPrimary: false } }
+    ).exec()
+
+    if (updateResult) {
+      return await this.communityModel.findOneAndUpdate(
+        {
+          account: new Types.ObjectId(user),
+          _id: new Types.ObjectId(community)
+        },
+        { isPrimary: true },
+        { returnDocument: 'after', fields: COMMUNITY_SELECT_QUERY }
+      ).exec()
     }
 
     return null

@@ -66,6 +66,11 @@ export class CommunityService {
     const counter = await this.counterRepository.getCounter(COUNTER_TYPE.COMMUNITY)
     data.code = counter.toString()
 
+    const account = await this.accountRepository.getOneById(user)
+    if (account) {
+      data.isPrimary = !account.hasCommunity
+    } else throw new BadRequestException()
+
     const community = await this.communityRepository.createCommunity(user, data)
     if (community) {
 
@@ -421,7 +426,7 @@ export class CommunityService {
       const communityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
       if (!communityMember) throw new NotFoundException()
 
-      if(communityMember.isAdmin) throw new ForbiddenException()
+      if (communityMember.isAdmin) throw new ForbiddenException()
 
       const account = await this.accountRepository.getOneByEmail(email)
       const communityData = await this.communityRepository.getNextMemberCode(community)
@@ -655,6 +660,19 @@ export class CommunityService {
    */
   async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
     const response = await this.communityRepository.setPrimaryAccountCommunity(user, community)
+    if (response) return response
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async setPrimaryCommunity(user: string, community: string): Promise<any> {
+    const response = await this.communityRepository.setPrimaryCommunity(user, community)
     if (response) return response
 
     throw new NotFoundException()
