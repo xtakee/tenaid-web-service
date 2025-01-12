@@ -443,7 +443,7 @@ export class CommunityService {
         const savedMember = await this.communityRepository.createCommunityMemberAuthorizedUser(community, member, { ...body }, code)
 
         // send invite email to user - authorized user
-        return savedMember
+        return await this.communityRepository.getCommunityMember((savedMember as any)._id.toString(), community)
       } else {
         const savedMember = await this.communityRepository.createCommunityMemberAuthorizedUser(community, member, {
           firstName: account.firstName,
@@ -465,7 +465,7 @@ export class CommunityService {
         }, code)
 
         // send email/push notification to existing account / authorized user
-        return savedMember
+        return await this.communityRepository.getCommunityMember((savedMember as any)._id.toString(), community)
       }
     }
 

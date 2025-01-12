@@ -509,7 +509,7 @@ export class CommunityRepository {
     return await this.communityMemberModel.findOne({
       _id: new Types.ObjectId(member),
       community: new Types.ObjectId(community)
-    })
+    }, COMMUNITY_MEMBER_PRIMARY_QUERY).populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
   /**
