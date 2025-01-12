@@ -114,10 +114,10 @@ export class GoogleService {
     const payload = {
       message: {
         token: device,
-        // 'notification': {
-        //   'body': data.description,
-        //   'title': data.title
-        // },
+        'notification': {
+          'body': data.description,
+          'title': data.title
+        },
         data: data,
         android: {
           priority: 'high'
