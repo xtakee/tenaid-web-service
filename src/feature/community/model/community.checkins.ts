@@ -32,4 +32,4 @@ export class CommunityCheckins {
   type: string
 }
 
-export const CommunityCheckinsSchema = SchemaFactory.createForClass(CommunityCheckins);
+export const CommunityCheckinsSchema = SchemaFactory.createForClass(CommunityCheckins)

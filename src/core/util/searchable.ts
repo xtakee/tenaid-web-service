@@ -1,4 +1,4 @@
-export function searchable(input: string, minLength = 3): string {
+export function searchable(input: string, minLength = 2): string {
   const maxLength = input.length;
   const substrings: string[] = [];
 

@@ -38,6 +38,8 @@ import { EventGateway, EventType } from '../event/event.gateway';
 import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityMember } from './model/community.member';
 import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
+import { CommunityBuildingDto } from './dto/request/community.building.dto';
+import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
 
 @Injectable()
 export class CommunityService {
@@ -500,8 +502,8 @@ export class CommunityService {
    * @param page 
    * @param limit 
    */
-  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status, filter)
+  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, search?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status, search)
   }
 
   /**
@@ -513,16 +515,45 @@ export class CommunityService {
    * @param filter 
    * @returns 
    */
-  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, filter?: string, date?: string): Promise<PaginatedResult<any>> {
+  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, search?: string, date?: string): Promise<PaginatedResult<any>> {
 
     const member = await this.communityRepository.getApprovedCommunityMember(user, community)
 
     if (member)
-      return await this.communityRepository.getAllCommunityMessagingMembers(user, community, page, limit, filter, date)
+      return await this.communityRepository.getAllCommunityMessagingMembers(user, community, page, limit, search, date)
 
     else return PaginatedEmptyResult
   }
 
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   */
+  async createCommunityBuilding(user: string, community: string, data: CommunityBuildingDto): Promise<any> {
+    const building = await this.communityRepository.getCommunityBuilding(community, data.path, data.buildingNumber)
+    if (building) throw new ForbiddenException()
+
+    // check if user is owner
+    const _community = await this.communityRepository.getCommunityByUser(user, community)
+    if (_community) {
+      const result = await this.communityRepository.createCommunityBuilding(community, data)
+      return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
+    }
+
+    throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityBuildings(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return this.communityRepository.getAllCommunityBuildings(community, paginate)
+  }
 
   /**
    * 

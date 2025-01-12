@@ -26,7 +26,6 @@ import { Paginator } from 'src/core/helpers/paginator';
 import { CommunityAccessPoint, CommunityAccessPointSchema } from './model/community.access.point';
 import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point.to.dto.mapper';
 import { NotificationService } from '../notification/notification.service';
-import { BullModule } from '@nestjs/bullmq';
 import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard';
 import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.checkins';
 import { CommunityEventNode, CommunityEventNodeSchema } from './model/community.event.node';
@@ -36,6 +35,7 @@ import { EventGateway } from '../event/event.gateway';
 import { searchable } from 'src/core/util/searchable';
 import { NotificationModule } from '../notification/notification.module';
 import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/community.message.group';
+import { CommunityBuilding, CommunityBuildingSchema } from './model/community.building';
 
 @Module({
   providers: [
@@ -130,13 +130,13 @@ import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/comm
       useFactory: async () => {
         const schema = CommunityPathSchema;
         schema.pre('save', async function () {
-          if (this.isModified('extra.firstName') || this.isModified('extra.lastName') || this.isNew) {
+          if (this.isModified('name') || this.isNew) {
             this.searchable = searchable(this.name)
           }
         });
 
         schema.pre('findOneAndUpdate', async function (next) {
-          if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
+          if ((this.getUpdate() as any).name) {
             (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
           }
           next()
@@ -145,8 +145,8 @@ import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/comm
       },
     }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
+    MongooseModule.forFeature([{ name: CommunityBuilding.name, schema: CommunityBuildingSchema }]),
     MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
-    MongooseModule.forFeature([{ name: CommunityPath.name, schema: CommunityPathSchema }]),
     NotificationModule
   ]
 })

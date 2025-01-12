@@ -25,6 +25,7 @@ import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 import { DeclineCommunityInviteDto } from './dto/request/decline.community.invite.dto';
 import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
+import { CommunityBuildingDto } from './dto/request/community.building.dto';
 
 @Controller({
   version: '1',
@@ -486,7 +487,7 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto,
     @Query('status') status?: string): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityMembers(user, community, paginate.page, paginate.limit, status, paginate.filter)
+    return await this.communityService.getAllCommunityMembers(user, community, paginate.page, paginate.limit, status, paginate.search)
   }
 
   /**
@@ -506,7 +507,7 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto,
     @Query() date?: DateDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate.page, paginate.limit, paginate.filter, date.date)
+    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate.page, paginate.limit, paginate.search, date.date)
   }
 
   /**
@@ -519,6 +520,37 @@ export class CommunityController {
   @ApiOperation({ summary: 'Search a community - No Auth' })
   async searchCommunityNoAuth(@Query('query') query: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityService.searchCommunityNoAuth(query, paginate.page, paginate.limit);
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/:community/building')
+  @ApiOperation({ summary: 'Create a community building' })
+  async createCommunityBuilding(
+    @User() user: string,
+    @Param('community') community: string,
+    @Body() body: CommunityBuildingDto): Promise<any> {
+    return await this.communityService.createCommunityBuilding(user, community, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/:community/building')
+  @ApiOperation({ summary: 'Get all community buildings' })
+  async getAllCommunityBuildings(
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto): Promise<any> {
+    return await this.communityService.getAllCommunityBuildings(community, paginate)
   }
 
   /**

@@ -31,6 +31,8 @@ import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
 import { MessageCategoryDto } from "./dto/request/message.category.dto";
 import { CommunityMessageGroup } from "./model/community.message.group";
 import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto";
+import { CommunityBuilding } from "./model/community.building";
+import { CommunityBuildingDto } from "./dto/request/community.building.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -160,6 +162,7 @@ export class CommunityRepository {
     private readonly paginator: Paginator,
     @InjectModel(CommunityMessageCache.name) private readonly communityMessageCacheModel: Model<CommunityMessageCache>,
     @InjectModel(CommunityMessageGroup.name) private readonly communityMessageGroupModel: Model<CommunityMessageGroup>,
+    @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
@@ -511,12 +514,78 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
+   * @param street 
+   * @param buildingNumber 
+   */
+  async getCommunityBuilding(community: string, street: string, buildingNumber: string): Promise<CommunityBuilding> {
+    return await this.communityBuildingModel.findOne({
+      buildingNumber: buildingNumber.toLowerCase().trim(),
+      path: new Types.ObjectId(street),
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   * @returns 
+   */
+  async createCommunityBuilding(community: string, data: CommunityBuildingDto): Promise<CommunityBuilding> {
+    const building: CommunityBuilding = {
+      community: new Types.ObjectId(community),
+      path: new Types.ObjectId(data.path),
+      contactPerson: data.contactPerson,
+      contactPhone: data.contactPerson,
+      type: data.type,
+      buildingNumber: data.buildingNumber,
+      contactEmail: {
+        value: data.contactEmail
+      }
+    }
+
+    return await this.communityBuildingModel.create(building)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  async getCommunityBuildingById(community: string, building: string): Promise<any> {
+    return await this.communityBuildingModel.findOne({
+      _id: new Types.ObjectId(building),
+      community: new Types.ObjectId(community)
+    }).populate(COMMUNITY_MEMBER_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @param status 
+   */
+  async getAllCommunityBuildings(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityBuilding>> {
+
+    return await this.paginator.paginate(this.communityBuildingModel, {
+      community: new Types.ObjectId(community)
+    }, {
+      page: paginate.page,
+      limit: paginate.limit,
+      sort: paginate.sort,
+      populate: COMMUNITY_MEMBER_QUERY
+    })
+  }
+
+  /**
+   * 
    * @param code 
    */
   async getVisitorByCode(code: string, community: string): Promise<any> {
-    return await this.communityInviteModel.findOne(
-      { community: new Types.ObjectId(community), code: code },
-      '_id name code photo start end status checkIn checkOut member community account')
+    return await this.communityInviteModel.findOne({ community: new Types.ObjectId(community), code: code })
       .populate(COMMUNITY_VISITOR_QUERY).exec()
   }
 
@@ -598,7 +667,7 @@ export class CommunityRepository {
  * @param page 
  * @param limit 
  */
-  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, filter?: string): Promise<PaginatedResult<any>> {
+  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, search?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
@@ -610,8 +679,8 @@ export class CommunityRepository {
       $ne: ACCOUNT_STATUS.DENIED
     }
 
-    if (filter)
-      query.$text = { $search: filter }
+    if (search)
+      query.$text = { $search: search }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
       select: '_id path description point status code extra isAdmin',
@@ -634,7 +703,7 @@ export class CommunityRepository {
    * @param filter 
    * @returns 
    */
-  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, filter?: string, date?: string): Promise<PaginatedResult<any>> {
+  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, search?: string, date?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
@@ -643,8 +712,8 @@ export class CommunityRepository {
       status: ACCOUNT_STATUS.APPROVED
     }
 
-    if (filter)
-      query.$text = { $search: filter }
+    if (search)
+      query.$text = { $search: search }
 
     if (date)
       query.updatedAt = { $gt: new Date(date) }
@@ -950,8 +1019,8 @@ export class CommunityRepository {
       account: new Types.ObjectId(user)
     }
 
-    if (paginate.filter)
-      query.$text = { $search: paginate.filter }
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityModel, query, {
       select: COMMUNITY_SELECT_QUERY,

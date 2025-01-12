@@ -29,7 +29,7 @@ export class PaginationRequestDto {
 
   @IsOptional()
   @ApiProperty({ required: false })
-  filter?: string
+  search?: string
 }
 
 export class DateRangeDto {
