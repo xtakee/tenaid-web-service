@@ -26,6 +26,7 @@ import { DeclineCommunityInviteDto } from './dto/request/decline.community.invit
 import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
 import { CommunityBuildingDto } from './dto/request/community.building.dto';
+import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto';
 
 @Controller({
   version: '1',
@@ -563,6 +564,27 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get a community by code' })
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
     return await this.communityService.getCommunityByCode(code)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param member 
+   * @param body 
+   */
+  @Patch(':community/:member/authorized-users')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Update community authorized access user permissions' })
+  async updateCommunityAuthorizedUserPermissions(
+    @User() user: string,
+    @Param('community') community: string,
+    @Param('member') member: string,
+    @Body() body: CommunityAuthorizedUserPermissionsDto): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(member)) throw new BadRequestException()
+
+    return await this.communityService.updateCommunityAuthorizedUserPermissions(community, member, body)
   }
 
   /**

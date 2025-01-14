@@ -33,6 +33,7 @@ import { CommunityMessageGroup } from "./model/community.message.group";
 import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto";
 import { CommunityBuilding } from "./model/community.building";
 import { CommunityBuildingDto } from "./dto/request/community.building.dto";
+import { CommunityAuthorizedUserPermissionsDto } from "./dto/request/community.authorized.user.permissions.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -266,6 +267,40 @@ export class CommunityRepository {
         images: data.images,
         address: data.address,
       }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param body 
+   */
+  async updateCommunityAuthorizedUserPermissions(community: string, member: string, body: CommunityAuthorizedUserPermissionsDto): Promise<any> {
+    return await this.communityMemberModel.findOneAndUpdate({
+      _id: new Types.ObjectId(body.user),
+      linkedTo: new Types.ObjectId(member),
+      community: new Types.ObjectId(community)
+    }, {
+      canCreateExit: body.canCreateExit,
+      canCreateInvite: body.canCreateInvite,
+      canSendMessage: body.canSendMessage
+    }, {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      returnDocument: 'after'
+    }).populate(COMMUNITY_MEMBER_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @returns 
+   */
+  async getCommunityAuthorizedUser(community: string, member: string): Promise<any> {
+    return await this.communityMemberModel.findOne({
+      linkedTo: new Types.ObjectId(member),
+      community: new Types.ObjectId(community)
+    }, COMMUNITY_MEMBER_PRIMARY_QUERY).populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
   /**
@@ -594,7 +629,7 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async checkInVisitor(community: string, member: string, code: string, type: string = CheckType.CHECK_IN): Promise<void> {
+  async checkInVisitor(community: string, member: string, code: string, type: string = CheckType.CHECK_IN): Promise<CommunityInvite> {
     return await this.communityInviteModel.findOneAndUpdate(
       {
         community: new Types.ObjectId(community),
@@ -602,7 +637,7 @@ export class CommunityRepository {
         member: new Types.ObjectId(member)
       },
       { status: type }, { returnDocument: 'after' }
-    )
+    ).exec()
   }
 
   /**

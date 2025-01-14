@@ -40,6 +40,7 @@ import { CommunityMember } from './model/community.member';
 import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
 import { CommunityBuildingDto } from './dto/request/community.building.dto';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
+import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto';
 
 @Injectable()
 export class CommunityService {
@@ -504,6 +505,21 @@ export class CommunityService {
    */
   async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, search?: string): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityMembers(user, community, page, limit, status, search)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param body 
+   */
+  async updateCommunityAuthorizedUserPermissions(community: string, member: string, body: CommunityAuthorizedUserPermissionsDto): Promise<any> {
+    let memberData = await this.communityRepository.getCommunityAuthorizedUser(community, member)
+
+    if (memberData)
+      return await this.communityRepository.updateCommunityAuthorizedUserPermissions(community, member, body)
+
+    throw new NotFoundException()
   }
 
   /**
