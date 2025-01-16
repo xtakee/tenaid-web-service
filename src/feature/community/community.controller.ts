@@ -27,6 +27,8 @@ import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
 import { CommunityBuildingDto } from './dto/request/community.building.dto';
 import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto';
+import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto';
+import { CommunityDirectorDto } from './dto/response/community.director.dto';
 
 @Controller({
   version: '1',
@@ -552,6 +554,58 @@ export class CommunityController {
     @Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<any> {
     return await this.communityService.getAllCommunityBuildings(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/:community/director')
+  @ApiOperation({ summary: 'Get all community directors' })
+  async getAllCommunityDirectors(
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityDirectors(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/:community/director')
+  @ApiOperation({ summary: 'Create a community director' })
+  async createCommunityDirector(
+    @User() user: string,
+    @Param('community') community: string,
+    @Body() body: CreateCommunityDirectorDto): Promise<CommunityDirectorDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.createCommunityDirector(user, community, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param director 
+   * @param body 
+   * @returns 
+   */
+  @Patch('/:community/director/:director')
+  @ApiOperation({ summary: 'Update a community director' })
+  async updateCommunityDirector(
+    @User() user: string,
+    @Param('community') community: string,
+    @Param('director') director: string,
+    @Body() body: CreateCommunityDirectorDto): Promise<CommunityDirectorDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(director)) throw new BadRequestException()
+    return await this.communityService.updateCommunityDirector(user, community, director, body)
   }
 
   /**

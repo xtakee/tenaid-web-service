@@ -34,6 +34,8 @@ import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.u
 import { CommunityBuilding } from "./model/community.building";
 import { CommunityBuildingDto } from "./dto/request/community.building.dto";
 import { CommunityAuthorizedUserPermissionsDto } from "./dto/request/community.authorized.user.permissions.dto";
+import { CommunityDirector } from "./model/community.director";
+import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -169,6 +171,7 @@ export class CommunityRepository {
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
     @InjectModel(CommunityMessage.name) private readonly communityMessageModel: Model<CommunityMessage>,
+    @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
     @InjectModel(CommunityEventNode.name) private readonly communityEventNodeModel: Model<CommunityEventNode>,
     @InjectModel(CommunityPath.name) private readonly communityPathModel: Model<CommunityPath>
   ) { }
@@ -1908,6 +1911,72 @@ export class CommunityRepository {
       'extra.email.value': email.trim().toLowerCase(),
       community: new Types.ObjectId(community),
       status: { $ne: ACCOUNT_STATUS.DENIED }
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param director 
+   * @param data 
+   */
+  async updateCommunityDirector(community: string, director: string, data: CreateCommunityDirectorDto): Promise<CommunityDirector> {
+    return await this.communityDirectorModel.findOneAndUpdate({
+      _id: new Types.ObjectId(director),
+      community: new Types.ObjectId(community)
+    }, {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      idType: data.identityType,
+      validId: data.identity,
+      email: {
+        value: data.email
+      },
+      phone: data.phone,
+      country: data.country
+    }).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param data 
+   */
+  async createCommunityDirector(community: string, data: CreateCommunityDirectorDto): Promise<CommunityDirector> {
+    const director: CommunityDirector = {
+      community: new Types.ObjectId(community),
+      firstName: data.firstName,
+      lastName: data.lastName,
+      identityType: data.identityType,
+      identity: data.identity,
+      email: {
+        value: data.email
+      },
+      phone: data.phone,
+      country: data.country
+    }
+
+    return await this.communityDirectorModel.create(director)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getAllCommunityDirectors(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityMessageModel, query, {
+      select: '_id firstName lastName email.value email.verified country phone identityType identity createdAt updatedAt',
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort
     })
   }
 

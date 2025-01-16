@@ -27,10 +27,10 @@ export class CommunityDirector {
   country: string
 
   @Prop({ enum: IDENTITY_TYPE })
-  id_type?: string
+  identityType?: string
 
   @Prop()
-  valid_id?: string
+  identity?: string
 
   @Prop({ index: true })
   searchable?: string

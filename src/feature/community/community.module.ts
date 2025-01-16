@@ -36,6 +36,8 @@ import { searchable } from 'src/core/util/searchable';
 import { NotificationModule } from '../notification/notification.module';
 import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/community.message.group';
 import { CommunityBuilding, CommunityBuildingSchema } from './model/community.building';
+import { CommunityDirector, CommunityDirectorSchema } from './model/community.director';
+import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper';
 
 @Module({
   providers: [
@@ -54,6 +56,7 @@ import { CommunityBuilding, CommunityBuildingSchema } from './model/community.bu
     InviteToDtoMapper,
     CommunityPathToDtoMapper,
     CacheService,
+    CommunityDirectorToDtoMapper,
     CommunityMemberResponseToDtoMapper,
     AccountCommunityToDtoMapper,
     CommunityAccountToDtoMapper,
@@ -119,6 +122,25 @@ import { CommunityBuilding, CommunityBuildingSchema } from './model/community.bu
         schema.pre('findOneAndUpdate', async function (next) {
           if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
             (this.getUpdate() as any).searchable = searchable(`${(this.getUpdate() as any).extra.firstName} ${(this.getUpdate() as any).extra.lastName}`)
+          }
+          next()
+        });
+        return schema;
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityDirector.name,
+      useFactory: async () => {
+        const schema = CommunityDirectorSchema;
+        schema.pre('save', async function () {
+          if (this.isModified('firstName') || this.isModified('lastName') || this.isNew) {
+            this.searchable = searchable(this.firstName + ' ' + this.lastName)
+          }
+        });
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).firstName + ' ' + (this.getUpdate() as any).lastName)
           }
           next()
         });

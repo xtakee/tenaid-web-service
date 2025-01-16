@@ -41,6 +41,9 @@ import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.u
 import { CommunityBuildingDto } from './dto/request/community.building.dto';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
 import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto';
+import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto';
+import { CommunityDirectorDto } from './dto/response/community.director.dto';
+import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper';
 
 @Injectable()
 export class CommunityService {
@@ -48,6 +51,7 @@ export class CommunityService {
     private readonly communityRepository: CommunityRepository,
     private readonly counterRepository: CounterRepository,
     private readonly accountRepository: AccountRepository,
+    private readonly communityDirectorMapper: CommunityDirectorToDtoMapper,
     private readonly notificationService: NotificationService,
     private readonly inviteMapper: InviteToDtoMapper,
     private readonly accessPointMapper: CommunityAccessPointToDtoMapper,
@@ -412,6 +416,42 @@ export class CommunityService {
    */
   async getCommunityMemberAuthorizedAccess(community: string, member: string): Promise<any> {
     return await this.communityRepository.getCommunityMemberAuthorizedUsers(community, member)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getAllCommunityDirectors(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityDirectors(community, paginate)
+  }
+
+  async updateCommunityDirector(user: string, community: string, director: string, data: CreateCommunityDirectorDto): Promise<CommunityDirectorDto> {
+    const communityData = await this.communityRepository.getCommunityByUser(user, community)
+    if (communityData) {
+      const _directorData = await this.communityRepository.updateCommunityDirector(community, director, data)
+      return this.communityDirectorMapper.map(_directorData)
+    }
+
+    throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   * @returns 
+   */
+  async createCommunityDirector(user: string, community: string, data: CreateCommunityDirectorDto): Promise<CommunityDirectorDto> {
+    const communityData = await this.communityRepository.getCommunityByUser(user, community)
+    if (communityData) {
+      const director = await this.communityRepository.createCommunityDirector(community, data)
+      return this.communityDirectorMapper.map(director)
+    }
+
+    throw new ForbiddenException()
   }
 
   /**
