@@ -129,12 +129,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
+      const member: string = client.handshake.headers.member as string
 
       // get total expected audience
       const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
       const targetNodes: number = await this.communityRepository.getTotalCommunityEffectiveEventNodes(community)
 
-      const response = await this.communityRepository.deleteMessage(account, message, totalNodes, targetNodes)
+      const response = await this.communityRepository.deleteMessage(account, member, message, totalNodes, targetNodes)
       this.server.to(community).emit(EVENT_NAME_DELETE, response)
     }
 

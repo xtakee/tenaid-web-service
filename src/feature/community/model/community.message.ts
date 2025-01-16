@@ -81,6 +81,9 @@ export class CommunityMessage {
   @Prop({ default: false })
   deleted?: Boolean
 
+  @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
+  deletedBy?: Types.ObjectId
+
   @Prop()
   size?: number
 

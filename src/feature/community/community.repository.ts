@@ -1707,7 +1707,7 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async deleteMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+  async deleteMessage(user: string, member: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
 
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
@@ -1723,6 +1723,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community)
     }, {
       deleted: true,
+      deletedBy: new Types.ObjectId(member),
       ...this.buildMessage(user, data)
     },
       { new: true, upsert: true })
