@@ -12,8 +12,8 @@ export class CommunityDto {
   name: string
 
   @ApiProperty()
-  @IsNotEmpty()
-  description: string
+  @IsOptional()
+  description?: string
 
   code?: string
 

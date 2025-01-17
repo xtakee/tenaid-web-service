@@ -23,7 +23,7 @@ export class Community {
   searchable?: string
 
   @Prop()
-  description: string
+  description?: string
 
   @Prop({ unique: true, index: true })
   code: string
