@@ -75,7 +75,7 @@ export class CommunityMessage {
   @Prop({ default: false })
   edited?: Boolean
 
-  @Prop({ default: false })
+  @Prop({ default: true })
   retained?: Boolean
 
   @Prop({ default: false })
