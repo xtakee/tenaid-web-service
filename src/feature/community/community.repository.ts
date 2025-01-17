@@ -1556,7 +1556,7 @@ export class CommunityRepository {
       repliedTo: data.repliedTo ? new Types.ObjectId(data.repliedTo) : null,
       author: new Types.ObjectId(data.author),
       account: new Types.ObjectId(data.account ? data.account : user),
-      retained: data.retained ? data.retained : true,
+      retained: data.retained,
       body: data.body,
       path: data.path,
       reactions: data.reactions.map((react) => {

@@ -51,7 +51,7 @@ export class MessageDto {
   description?: string
 
   @IsOptional()
-  retained?: Boolean
+  retained?: Boolean = true
 
   @IsOptional()
   path?: string
