@@ -746,7 +746,10 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
       isAdmin: false,
-      canSendMessage: true,
+      $or: [
+        { canSendMessage: true },
+        { canSendMessage: undefined }
+      ],
       status: ACCOUNT_STATUS.APPROVED
     }
 
