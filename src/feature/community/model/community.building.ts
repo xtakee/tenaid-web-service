@@ -2,8 +2,8 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Community } from "./community"
 import { HydratedDocument, Types } from "mongoose"
 import { Email } from "src/feature/core/model/email.model"
-import { CommunityPath } from "./community.path"
 import { BUILDING_TYPE } from "src/core/enums/building.type"
+import { CommunityStreet } from "./community.street"
 
 export type CommunityBuildingDocument = HydratedDocument<CommunityBuilding>
 
@@ -12,8 +12,8 @@ export class CommunityBuilding {
   @Prop([{ type: Types.ObjectId, ref: Community.name }])
   community: Types.ObjectId
 
-  @Prop([{ type: Types.ObjectId, ref: CommunityPath.name }])
-  path: Types.ObjectId
+  @Prop([{ type: Types.ObjectId, ref: CommunityStreet.name }])
+  street: Types.ObjectId
 
   @Prop()
   contactEmail: Email
@@ -24,11 +24,20 @@ export class CommunityBuilding {
   @Prop()
   contactPerson: string
 
+  @Prop({ default: 0 })
+  apartments: number
+
   @Prop()
   buildingNumber: string
 
   @Prop({ enum: BUILDING_TYPE })
   type?: string
+
+  @Prop({ index: true })
+  searchable?: string
 }
 
-export const CommunityBuildingSchema = SchemaFactory.createForClass(CommunityBuilding)
+const CommunityBuildingSchema = SchemaFactory.createForClass(CommunityBuilding);
+CommunityBuildingSchema.index({ searchable: 'text', code: 'text' })
+
+export { CommunityBuildingSchema }

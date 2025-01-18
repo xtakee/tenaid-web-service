@@ -56,7 +56,7 @@ export class AccountToDtoMapper implements Mapper<Account, AccountResponseDto> {
       phone: from.phone || null,
       photo: from.photo || null,
       dob: from.dob,
-      proofOfId: from.proofOfId || null
+      identity: from.identity || null
     }
   }
 }

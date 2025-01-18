@@ -3,9 +3,9 @@ import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsUrl } from "class-validator"
 import { GENDER } from "src/feature/auth/auth.constants"
 
 export class CommunityAuthorizedUserDto {
-  path?: string
-  point?: string
-  description?: string
+  street?: string
+  building?: string
+  apartment?: string
   isPrimary?: Boolean = true
   account?: string
 

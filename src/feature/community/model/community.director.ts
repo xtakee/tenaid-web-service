@@ -26,6 +26,9 @@ export class CommunityDirector {
   @Prop()
   country: string
 
+  @Prop()
+  idNumber: string
+
   @Prop({ enum: IDENTITY_TYPE })
   identityType?: string
 

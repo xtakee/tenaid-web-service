@@ -3,8 +3,9 @@ import { HydratedDocument, Types } from "mongoose";
 import { Account } from "src/feature/account/model/account.model";
 import { Community } from "./community";
 import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
-import { CommunityPath } from "./community.path";
+import { CommunityStreet } from "./community.street";
 import { MemberAccount } from "./member.account";
+import { CommunityBuilding } from "./community.building";
 
 export type CommunityMemberDocument = HydratedDocument<CommunityMember>
 
@@ -16,11 +17,11 @@ export class CommunityMember {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account?: Types.ObjectId
 
-  @Prop({ ref: CommunityPath.name })
-  path?: Types.ObjectId
+  @Prop({ ref: CommunityStreet.name })
+  street?: Types.ObjectId
 
   @Prop()
-  description?: string
+  apartment?: string
 
   @Prop()
   comment?: string
@@ -49,8 +50,8 @@ export class CommunityMember {
   @Prop({ type: MemberAccount })
   extra: MemberAccount
 
-  @Prop()
-  point?: string
+  @Prop({ type: Types.ObjectId, ref: CommunityBuilding.name })
+  building?: Types.ObjectId
 
   @Prop()
   code: string

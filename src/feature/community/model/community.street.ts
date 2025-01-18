@@ -3,10 +3,10 @@ import { HydratedDocument, Types } from "mongoose";
 import { Community } from "./community";
 import { Account } from "src/feature/account/model/account.model";
 
-export type CommunityPathDocument = HydratedDocument<CommunityPath>;
+export type CommunityPathDocument = HydratedDocument<CommunityStreet>;
 
 @Schema({ timestamps: true })
-export class CommunityPath {
+export class CommunityStreet {
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
 
@@ -23,7 +23,7 @@ export class CommunityPath {
   description: string
 }
 
-const CommunityPathSchema = SchemaFactory.createForClass(CommunityPath);
-CommunityPathSchema.index({ searchable: 'text', code: 'text' })
+const CommunityStreetSchema = SchemaFactory.createForClass(CommunityStreet);
+CommunityStreetSchema.index({ searchable: 'text', code: 'text' })
 
-export { CommunityPathSchema }
+export { CommunityStreetSchema }

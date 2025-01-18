@@ -355,9 +355,9 @@ export class CommunityController {
    * @param community 
    * @returns 
    */
-  @Get('/:community/path')
+  @Get('/:community/street')
   @BasicAuth()
-  @ApiOperation({ summary: 'Get all community paths/streets' })
+  @ApiOperation({ summary: 'Get all community streets' })
   async getAllCommunityPath(@Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
     if (!isMongoId(community)) throw new BadRequestException()
@@ -369,11 +369,11 @@ export class CommunityController {
    * @param path 
    * @returns 
    */
-  @Get(':community/path/:path')
+  @Get(':community/street/:street')
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community path/street' })
-  async getCommunityPath(@Param('path') path: string, @Param('community') community: string): Promise<CommunityPathResponseDto> {
-    return await this.communityService.getCommunityPath(path, community)
+  async getCommunityPath(@Param('street') street: string, @Param('community') community: string): Promise<CommunityPathResponseDto> {
+    return await this.communityService.getCommunityStreet(street, community)
   }
 
   /**
@@ -553,7 +553,26 @@ export class CommunityController {
   async getAllCommunityBuildings(
     @Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityBuildings(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/:community/:street/building')
+  @ApiOperation({ summary: 'Get all community street buildings' })
+  async getAllCommunityStreetBuildings(
+    @Param('community') community: string,
+    @Param('street') street: string,
+    @Query() paginate: PaginationRequestDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(street)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityStreetBuildings(community, street, paginate)
   }
 
   /**

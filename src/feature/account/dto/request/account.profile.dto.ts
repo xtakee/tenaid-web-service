@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsDateString, IsNotEmpty, IsUrl } from "class-validator"
+import { IsDateString, IsEnum, IsNotEmpty, IsUrl } from "class-validator"
+import { IDENTITY_TYPE } from "src/core/enums/identity.type"
 import { IsMinAge } from "src/core/validators/is.min.age"
 
 export class AccountProfileDto {
@@ -21,5 +22,14 @@ export class AccountProfileDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsUrl()
-  proofOfId: string
+  identity: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  idNumber: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsEnum(IDENTITY_TYPE)
+  identityType: string
 }

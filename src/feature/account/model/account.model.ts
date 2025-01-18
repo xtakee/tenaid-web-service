@@ -4,6 +4,7 @@ import { Email } from "../../core/model/email.model";
 import { Address } from "../../core/model/address.model";
 import { Type } from "class-transformer";
 import { ACCOUNT_STATUS, ADD_ON, GENDER } from "src/feature/auth/auth.constants";
+import { IDENTITY_TYPE } from "src/core/enums/identity.type";
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -101,9 +102,6 @@ export class Account {
   @Prop({ enum: ADD_ON })
   primaryAccountType?: string
 
-  @Prop()
-  proofOfId?: string
-
   @Prop([AccountType])
   accountTypes?: AccountType[]
 
@@ -117,6 +115,14 @@ export class Account {
   @Prop()
   token?: string
 
+  @Prop()
+  idNumber?: string
+
+  @Prop({ enum: IDENTITY_TYPE })
+  identityType?: string
+
+  @Prop()
+  identity?: string
 }
 
 const AccountSchema = SchemaFactory.createForClass(Account)

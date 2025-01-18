@@ -23,6 +23,10 @@ export class CreateCommunityDirectorDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  idNumber: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   email: string
 
   @ApiProperty()

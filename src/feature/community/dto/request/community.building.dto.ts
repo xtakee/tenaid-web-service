@@ -10,11 +10,15 @@ export class CommunityBuildingDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
-  path: string
+  street: string
 
   @ApiProperty()
   @IsNotEmpty()
   buildingNumber: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  apartments: number
 
   @ApiProperty()
   @IsNotEmpty()

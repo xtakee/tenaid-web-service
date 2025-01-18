@@ -14,7 +14,7 @@ import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto
 import { CommunityPathRequestDto } from './dto/request/community.path.request.dto';
 import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
 import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper';
-import { CommunityPath } from './model/community.path';
+import { CommunityStreet } from './model/community.street';
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
@@ -87,7 +87,7 @@ export class CommunityService {
       await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
         code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
         isAdmin: true,
-        description: community.address?.address,
+        apartment: community.address?.address,
         status: ACCOUNT_STATUS.PENDING
       })
 
@@ -378,7 +378,7 @@ export class CommunityService {
     const community = await this.communityRepository.getCommunityByUser(user, data.community)
 
     if (community) {
-      const path: CommunityPath = await this.communityRepository.createPath(user, data)
+      const path: CommunityStreet = await this.communityRepository.createPath(user, data)
       return this.pathMapper.map(path)
     }
 
@@ -401,10 +401,10 @@ export class CommunityService {
    * @param path 
    * @returns 
    */
-  async getCommunityPath(path: string, community: string): Promise<CommunityPathResponseDto> {
-    const result = await this.communityRepository.getCommunityPath(path, community)
+  async getCommunityStreet(street: string, community: string): Promise<CommunityPathResponseDto> {
+    const result = await this.communityRepository.getCommunityPath(street, community)
 
-    if (path) return this.pathMapper.map(result)
+    if (result) return this.pathMapper.map(result)
 
     throw new NotFoundException()
   }
@@ -476,9 +476,9 @@ export class CommunityService {
       const code = communityData.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')
 
       if (!account) {
-        body.path = communityMember.path.toString()
-        body.point = communityMember.point
-        body.description = communityMember.description
+        body.street = communityMember.street.toString()
+        body.building = communityMember.building.toString()
+        body.apartment = communityMember.apartment
         body.isPrimary = true
 
         const savedMember = await this.communityRepository.createCommunityMemberAuthorizedUser(community, member, { ...body }, code)
@@ -495,9 +495,9 @@ export class CommunityService {
           phone: account.phone,
           photo: account.photo,
           isPrimary: false,
-          point: communityMember.point,
-          path: communityMember.path.toString(),
-          description: communityMember.description,
+          building: communityMember.building.toString(),
+          street: communityMember.street.toString(),
+          apartment: communityMember.apartment,
           gender: account.gender,
           country: account.country,
           canCreateExit: body.canCreateExit,
@@ -588,7 +588,7 @@ export class CommunityService {
    * @param data 
    */
   async createCommunityBuilding(user: string, community: string, data: CommunityBuildingDto): Promise<any> {
-    const building = await this.communityRepository.getCommunityBuilding(community, data.path, data.buildingNumber)
+    const building = await this.communityRepository.getCommunityBuilding(community, data.street, data.buildingNumber)
     if (building) throw new ForbiddenException()
 
     // check if user is owner
@@ -599,6 +599,16 @@ export class CommunityService {
     }
 
     throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   */
+  async getAllCommunityStreetBuildings(community: string, street: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityStreetBuildings(community, street, paginate)
   }
 
   /**
@@ -696,13 +706,13 @@ export class CommunityService {
     const { member, _ } = await this.getMemberAccountExtras(user)
 
     const request = await this.communityRepository.createCommunityMember(user, member, data.community, {
-      path: data.path,
-      point: data.point,
+      street: data.street,
+      building: data.building,
       proofOfAddress: data.proofOfAddress,
       status: ACCOUNT_STATUS.PENDING,
       isPrimary: data.isPrimary,
       code: '-1',
-      description: data.description
+      apartment: data.apartment
     })
 
     if (request) {

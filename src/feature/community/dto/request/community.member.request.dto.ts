@@ -11,11 +11,11 @@ export class CommunityMemberRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
-  path?: string
+  street?: string
 
   @ApiProperty()
   @IsNotEmpty()
-  point?: string
+  building?: string
 
   @ApiProperty()
   @IsNotEmpty()
@@ -28,5 +28,5 @@ export class CommunityMemberRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  description?: string
+  apartment?: string
 }

@@ -132,7 +132,9 @@ export class AccountRepository implements IAccountRepository {
       dob: data.dob,
       phone: data.phone,
       photo: data.photo,
-      proofOfId: data.proofOfId,
+      identity: data.identity,
+      identityType: data.identityType,
+      idNumber: data.idNumber,
       'kyc.profileCompleted': true
     }, { returnDocument: 'after' }).exec()
   }

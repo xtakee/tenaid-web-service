@@ -15,7 +15,7 @@ export class CommunityJoinRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
-  path: string
+  street: string
 
   @ApiProperty()
   @IsNotEmpty()
@@ -23,9 +23,10 @@ export class CommunityJoinRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  point: string
+  @IsMongoId()
+  building: string
 
   @ApiProperty()
   @IsNotEmpty()
-  description: string
+  apartment: string
 }
