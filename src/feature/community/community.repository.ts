@@ -1226,15 +1226,22 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getCommunityJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    return await this.paginator.paginate(this.communityMemberModel,
-      { community: new Types.ObjectId(community), status: ACCOUNT_STATUS.PENDING },
-      {
-        select: '_id community street code description point extra status createdAt updatedAt',
-        limit: limit,
-        page: page,
-        populate: COMMUNITY_MEMBER_QUERY
-      })
+  async getCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityMemberModel, query, {
+      select: '_id community street code apartment building extra status createdAt updatedAt',
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: COMMUNITY_MEMBER_QUERY
+    })
   }
 
   /**

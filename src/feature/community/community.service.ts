@@ -588,7 +588,7 @@ export class CommunityService {
    */
   async createCommunityBuilding(user: string, community: string, data: CommunityBuildingDto): Promise<any> {
     const building = await this.communityRepository.getCommunityBuilding(community, data.street, data.buildingNumber)
-    
+
     if (building) throw new ForbiddenException()
 
     // check if user is owner
@@ -748,8 +748,8 @@ export class CommunityService {
    * @param limit 
    * @returns 
    */
-  async getCommunintyJoinRequests(community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getCommunityJoinRequests(community, page, limit)
+  async getCommunintyJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityJoinRequests(community, paginate)
   }
 
   /**

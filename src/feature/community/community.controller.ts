@@ -415,7 +415,7 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community join requests' })
   async getCommunityJoinRequests(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunintyJoinRequests(community, paginate.page, paginate.limit)
+    return await this.communityService.getCommunintyJoinRequests(community, paginate)
   }
 
   /**
