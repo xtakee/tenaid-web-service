@@ -335,7 +335,6 @@ export class CommunityRepository {
     const member: CommunityMember = {
       community: new Types.ObjectId(community),
       code: data.code,
-      proofOfAddress: data.proofOfAddress,
       isAdmin: data.isAdmin,
       apartment: data.apartment,
       street: data.street ? new Types.ObjectId(data.street) : null,
@@ -457,10 +456,21 @@ export class CommunityRepository {
    * @param limit 
    * @returns 
    */
-  async getAllCommunityPaths(community: string, page: number, limit: number): Promise<PaginatedResult<CommunityStreet>> {
-    return await this.paginator.paginate(this.communityPathModel,
-      { community: new Types.ObjectId(community) },
-      { page: page, limit: limit }
+  async getAllCommunityStreets(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityStreet>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityPathModel, query,
+      {
+        select: '_id name description updatedAt createdAt',
+        page: paginate.page,
+        limit: paginate.limit,
+        sort: paginate.sort
+      }
     )
   }
 
@@ -560,12 +570,15 @@ export class CommunityRepository {
    * @param street 
    * @param buildingNumber 
    */
-  async getCommunityBuilding(community: string, street: string, buildingNumber: string): Promise<CommunityBuilding> {
+  async getCommunityBuilding(community: string, street: string, buildingNumber: string): Promise<any> {
     return await this.communityBuildingModel.findOne({
       buildingNumber: buildingNumber.toLowerCase().trim(),
       street: new Types.ObjectId(street),
       community: new Types.ObjectId(community)
-    })
+    }).populate({
+      path: 'street',
+      select: '_id name description'
+    }).exec()
   }
 
   /**
@@ -582,7 +595,7 @@ export class CommunityRepository {
       apartments: data.apartments,
       contactPhone: data.contactPerson,
       type: data.type,
-      buildingNumber: data.buildingNumber,
+      buildingNumber: data.buildingNumber.toLowerCase().trim(),
       contactEmail: {
         value: data.contactEmail
       }
@@ -601,7 +614,10 @@ export class CommunityRepository {
     return await this.communityBuildingModel.findOne({
       _id: new Types.ObjectId(building),
       community: new Types.ObjectId(community)
-    }).populate(COMMUNITY_MEMBER_QUERY).exec()
+    }, '_id street buildingNumber contactEmail contactPhone contactPerson apartments type').populate({
+      path: 'street',
+      select: '_id name description'
+    }).exec()
   }
 
   /**
@@ -621,11 +637,14 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityBuildingModel, query, {
-      select: '_id community street contactEmail contactPhone contactPerson buildingNumber ',
+      select: '_id street contactEmail contactPhone contactPerson buildingNumber ',
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: COMMUNITY_MEMBER_QUERY
+      populate: {
+        path: 'street',
+        select: '_id name description'
+      }
     })
   }
 
@@ -640,18 +659,21 @@ export class CommunityRepository {
 
     const query: any = {
       community: new Types.ObjectId(community),
-      path: new Types.ObjectId(street)
+      street: new Types.ObjectId(street)
     }
 
     if (paginate.search)
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityBuildingModel, query, {
-      select: '_id community street contactEmail contactPhone contactPerson buildingNumber ',
+      select: '_id street contactEmail contactPhone contactPerson buildingNumber ',
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: COMMUNITY_MEMBER_QUERY
+      populate: {
+        path: 'street',
+        select: '_id name description'
+      }
     })
   }
 
@@ -887,7 +909,7 @@ export class CommunityRepository {
 
     return await this.paginator.paginate(this.communityModel, query,
       {
-        select: '_id name size description code members type images status isPrimary address account createdAt updatedAt ',
+        select: '_id name size description code members type images status isPrimary address account createdAt updatedAt',
         populate: {
           path: 'account',
           select: '_id firstName lastName email.value email.verified photo phone address'

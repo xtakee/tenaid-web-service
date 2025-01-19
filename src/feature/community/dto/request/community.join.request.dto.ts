@@ -19,10 +19,6 @@ export class CommunityJoinRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  proofOfAddress: string
-
-  @ApiProperty()
-  @IsNotEmpty()
   @IsMongoId()
   building: string
 

@@ -56,9 +56,6 @@ export class CommunityMember {
   @Prop()
   code: string
 
-  @Prop()
-  proofOfAddress?: string
-
   @Prop({ index: true })
   searchable?: string
 

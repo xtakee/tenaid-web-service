@@ -44,6 +44,8 @@ export class AccountResponseDto {
   country?: string
   photo: string
   identity: string
+  identityType: string
+  idNumber: string
   dob?: Date
   flags: DashboardFlagsDto
   kycCompleted?: Boolean

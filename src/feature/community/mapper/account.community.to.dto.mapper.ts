@@ -18,8 +18,13 @@ export class AccountCommunityToDtoMapper implements Mapper<any, AccountCommunity
       isAdmin: from.isAdmin,
       isPrimary: from.isPrimary,
       community: this.communityMapper.map(from.community),
-      path: this.pathMapper.map(from.path),
-      point: from.point,
+      street: this.pathMapper.map(from.street),
+      building: {
+        _id: from.building._id,
+        buildingNumber: from.building.buildingNumber,
+        type: from.building.type
+      },
+      extra: from.extra,
       description: from.description,
       status: from.status,
       code: from.code,

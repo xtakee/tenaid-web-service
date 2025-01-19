@@ -9,10 +9,10 @@ export type CommunityBuildingDocument = HydratedDocument<CommunityBuilding>
 
 @Schema({ timestamps: true })
 export class CommunityBuilding {
-  @Prop([{ type: Types.ObjectId, ref: Community.name }])
+  @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
 
-  @Prop([{ type: Types.ObjectId, ref: CommunityStreet.name }])
+  @Prop({ type: Types.ObjectId, ref: CommunityStreet.name })
   street: Types.ObjectId
 
   @Prop()

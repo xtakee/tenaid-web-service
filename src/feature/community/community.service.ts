@@ -391,8 +391,8 @@ export class CommunityService {
    * @param limit 
    * @returns 
    */
-  async getAllCommunityPaths(community: string, page: number, limit: number): Promise<PaginatedResult<CommunityPathResponseDto>> {
-    return await this.communityRepository.getAllCommunityPaths(community, page, limit)
+  async getAllCommunityPaths(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
+    return await this.communityRepository.getAllCommunityStreets(community, paginate)
   }
 
   /**
@@ -588,6 +588,7 @@ export class CommunityService {
    */
   async createCommunityBuilding(user: string, community: string, data: CommunityBuildingDto): Promise<any> {
     const building = await this.communityRepository.getCommunityBuilding(community, data.street, data.buildingNumber)
+    
     if (building) throw new ForbiddenException()
 
     // check if user is owner
@@ -710,7 +711,6 @@ export class CommunityService {
     const request = await this.communityRepository.createCommunityMember(user, member, data.community, {
       street: data.street,
       building: data.building,
-      proofOfAddress: data.proofOfAddress,
       status: ACCOUNT_STATUS.PENDING,
       isPrimary: data.isPrimary,
       code: '-1',

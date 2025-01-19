@@ -4,8 +4,9 @@ import { CommunityPathResponseDto } from "./community.path.response.dto";
 export class AccountCommunityResponseDto {
   id: string
   community?: CommunityDto
-  path: CommunityPathResponseDto
-  point: string
+  street: CommunityPathResponseDto
+  building: any
+  extra: any
   description?: string
   code: string
   status: string
