@@ -887,6 +887,7 @@ export class CommunityRepository {
 
     return await this.paginator.paginate(this.communityModel, query,
       {
+        select: '_id name size description code members type images status isPrimary address account createdAt updatedAt ',
         populate: {
           path: 'account',
           select: '_id firstName lastName email.value email.verified photo phone address'
