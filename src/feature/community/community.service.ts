@@ -87,7 +87,6 @@ export class CommunityService {
       await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
         code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
         isAdmin: true,
-        apartment: community.address?.address,
         status: ACCOUNT_STATUS.PENDING
       })
 
@@ -701,7 +700,10 @@ export class CommunityService {
     }
 
     const community = await this.communityRepository.getCommunity(data.community)
-    if (!community) throw new NotFoundException();
+    if (!community) throw new NotFoundException()
+
+    const building = await this.communityRepository.getCommunityBuildingById(data.community, data.building)
+    if (!building) throw new NotFoundException()
 
     const { member, _ } = await this.getMemberAccountExtras(user)
 

@@ -15,6 +15,7 @@ export class CommunityMemberRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsMongoId()
   building?: string
 
   @ApiProperty()

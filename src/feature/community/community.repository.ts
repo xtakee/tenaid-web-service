@@ -340,7 +340,7 @@ export class CommunityRepository {
       apartment: data.apartment,
       street: data.street ? new Types.ObjectId(data.street) : null,
       status: data.status,
-      building: new Types.ObjectId(data.building),
+      building: data.building ? new Types.ObjectId(data.building) : null,
       extra: memberInfo,
       isPrimary: data.isPrimary,
       account: new Types.ObjectId(user)
@@ -563,7 +563,7 @@ export class CommunityRepository {
   async getCommunityBuilding(community: string, street: string, buildingNumber: string): Promise<CommunityBuilding> {
     return await this.communityBuildingModel.findOne({
       buildingNumber: buildingNumber.toLowerCase().trim(),
-      path: new Types.ObjectId(street),
+      street: new Types.ObjectId(street),
       community: new Types.ObjectId(community)
     })
   }
