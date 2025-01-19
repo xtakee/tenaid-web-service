@@ -879,8 +879,11 @@ export class CommunityRepository {
    * @param limit 
    * @returns 
    */
-  async getAllCommunities(page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
-    const query = !status ? {} : { status }
+  async getAllCommunities(paginate: PaginationRequestDto, status?: string): Promise<PaginatedResult<any>> {
+    const query: any = !status ? {} : { status }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityModel, query,
       {
@@ -888,8 +891,9 @@ export class CommunityRepository {
           path: 'account',
           select: '_id firstName lastName email.value email.verified photo phone address'
         },
-        page: page,
-        limit: limit
+        sort: paginate.sort,
+        page: paginate.page,
+        limit: paginate.limit
       })
   }
 

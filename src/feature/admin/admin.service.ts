@@ -14,6 +14,7 @@ import { AccountService } from '../account/account.service';
 import { CommunityRepository } from '../community/community.repository';
 import { REQUEST_APPROVED, REQUEST_DENIED } from 'src/core/strings';
 import { NotificationService, MessageType } from '../notification/notification.service';
+import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
 
 const adminPermissions: Permission[] = [
   { authorization: ADMIN_SYSTEM_FEATURES.APPLICATIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
@@ -110,8 +111,8 @@ export class AdminService {
    * @param limit 
    * @returns 
    */
-  async getAllCommunities(page: number, limit: number, status?: string): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllCommunities(page, limit, status)
+  async getAllCommunities(paginate: PaginationRequestDto, status?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunities(paginate, status)
   }
 
   /**

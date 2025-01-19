@@ -343,9 +343,9 @@ export class CommunityController {
    * @param user 
    * @param body 
    */
-  @Post('path')
+  @Post('street')
   @BasicAuth()
-  @ApiOperation({ summary: 'Create community path/street' })
+  @ApiOperation({ summary: 'Create community street' })
   async createCommunityPath(@User() user: string, @Body() body: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
     return await this.communityService.createCommunityPath(user, body)
   }

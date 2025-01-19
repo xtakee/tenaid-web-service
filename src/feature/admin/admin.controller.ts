@@ -107,6 +107,6 @@ export class AdminController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, ADMIN_SYSTEM_FEATURES.COMMUNITIES))
   @ApiQuery({ name: 'status', required: false, type: String })
   async getAllCommunities(@Query() paginate: PaginationRequestDto, @Query('status') status?: string): Promise<PaginatedResult<any>> {
-    return await this.adminService.getAllCommunities(paginate.page, paginate.limit, status)
+    return await this.adminService.getAllCommunities(paginate, status)
   }
 }
