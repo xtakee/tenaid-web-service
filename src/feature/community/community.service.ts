@@ -795,7 +795,7 @@ export class CommunityService {
    * @param data 
    * @returns 
    */
-  async setJoinRequestStatus(user: string, data: CommunityRequestStatusDto): Promise<CommunityMemberResponseDto> {
+  async setJoinRequestStatus(data: CommunityRequestStatusDto): Promise<void> {
     let request: any = null
     let pushTitle = data.status === ACCOUNT_STATUS.APPROVED ? REQUEST_APPROVED : REQUEST_DENIED
     let pushBody = ''
@@ -830,7 +830,7 @@ export class CommunityService {
       else await this.accountRepository.setJoinFlagStatus(request.account, true)
     }
 
-    if (request) return this.memberMapper.map(request)
+    if (request) return
 
     throw new NotFoundException()
   }

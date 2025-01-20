@@ -427,8 +427,8 @@ export class CommunityController {
   @Post('/request/status')
   @BasicAuth()
   @ApiOperation({ summary: 'Approve/Decline community join request' })
-  async setCommunityJoinRequestStatus(@User() user: string, @Body() body: CommunityRequestStatusDto): Promise<CommunityMemberResponseDto> {
-    return await this.communityService.setJoinRequestStatus(user, body)
+  async setCommunityJoinRequestStatus(@Body() body: CommunityRequestStatusDto): Promise<void> {
+    await this.communityService.setJoinRequestStatus(body)
   }
 
   /**
