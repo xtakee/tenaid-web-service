@@ -764,7 +764,7 @@ export class CommunityRepository {
  * @param page 
  * @param limit 
  */
-  async getAllCommunityMembers(user: string, community: string, page: number, limit: number, status?: string, search?: string): Promise<PaginatedResult<any>> {
+  async getAllCommunityMembers(user: string, community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
@@ -776,24 +776,23 @@ export class CommunityRepository {
       $ne: ACCOUNT_STATUS.DENIED
     }
 
-    if (search)
-      query.$text = { $search: search }
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
       select: '_id street apartment building status code extra isAdmin',
-      page: page,
-      limit: limit,
-      populate: [
-        {
-          path: 'street',
-          select: '_id name description',
-          strictPopulate: false,
-        }, {
-          path: 'building',
-          select: '_id buildingNumber type',
-          strictPopulate: false,
-        }
-      ]
+      page: paginate.page,
+      limit: paginate.limit,
+      sort: paginate.sort,
+      populate: [{
+        path: 'street',
+        select: '_id name description',
+        strictPopulate: false,
+      }, {
+        path: 'building',
+        select: '_id buildingNumber type',
+        strictPopulate: false,
+      }]
     })
   }
 
