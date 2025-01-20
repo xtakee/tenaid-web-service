@@ -764,7 +764,7 @@ export class CommunityRepository {
  * @param page 
  * @param limit 
  */
-  async getAllCommunityMembers(user: string, community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+  async getAllCommunityMembers(user: string, community: string, paginate: PaginationRequestDto, status?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
