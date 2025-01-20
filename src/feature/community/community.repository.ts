@@ -1094,7 +1094,7 @@ export class CommunityRepository {
    * @param user 
    * @returns 
    */
-  async getAllAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+  async getAllAccountCommunities(user: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
 
     return await this.paginator.paginate(this.communityMemberModel,
       {
@@ -1107,8 +1107,9 @@ export class CommunityRepository {
       },
       {
         select: COMMUNITY_MEMBER_PRIMARY_QUERY,
-        limit: limit,
-        page: page,
+        limit: paginate.limit,
+        page: paginate.page,
+        sort: paginate.sort,
         populate: MEMBER_COMMUNITIES_QUERY
       })
   }
@@ -1161,7 +1162,6 @@ export class CommunityRepository {
   async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
     const prev = await this.communityMemberModel.updateMany({
       account: new Types.ObjectId(user),
-      community: new Types.ObjectId(community),
       status: ACCOUNT_STATUS.APPROVED
     },
       { $set: { isPrimary: false } }
@@ -1174,7 +1174,7 @@ export class CommunityRepository {
           community: new Types.ObjectId(community)
         },
         { isPrimary: true },
-        { returnDocument: 'after' }
+        { returnDocument: 'after', fields: COMMUNITY_MEMBER_PRIMARY_QUERY }
       ).populate(MEMBER_COMMUNITIES_QUERY).exec()
     }
 

@@ -269,7 +269,7 @@ export class AccountController {
   @BasicAuth()
   @ApiOperation({ summary: 'Get all account communities' })
   async getAccountCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.accountService.getAccountCommunities(user, paginate.page, paginate.limit)
+    return await this.accountService.getAccountCommunities(user, paginate)
   }
 
   /**

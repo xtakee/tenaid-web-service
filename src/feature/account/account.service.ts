@@ -354,8 +354,8 @@ export class AccountService {
  * @param limit 
  * @returns 
  */
-  async getAccountCommunities(user: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllAccountCommunities(user, page, limit)
+  async getAccountCommunities(user: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllAccountCommunities(user, paginate)
   }
 
   /**
