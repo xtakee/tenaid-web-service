@@ -24,6 +24,9 @@ export class CommunityBuilding {
   @Prop()
   contactPerson: string
 
+  @Prop()
+  contactCountry: string
+
   @Prop({ default: 0 })
   apartments: number
 

@@ -592,6 +592,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(data.street),
       contactPerson: data.contactPerson,
+      contactCountry: data.contactCountry,
       apartments: data.apartments,
       contactPhone: data.contactPerson,
       type: data.type,

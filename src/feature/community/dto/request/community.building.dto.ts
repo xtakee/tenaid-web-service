@@ -19,6 +19,11 @@ export class CommunityBuildingDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsString()
+  contactCountry: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   apartments: number
 
   @ApiProperty()
