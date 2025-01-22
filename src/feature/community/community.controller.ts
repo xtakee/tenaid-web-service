@@ -13,7 +13,6 @@ import { CommunityPathResponseDto } from './dto/response/community.path.response
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { PaginatedResult } from 'src/core/helpers/paginator';
-import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 import { DateDto, DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.request.dto';
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';

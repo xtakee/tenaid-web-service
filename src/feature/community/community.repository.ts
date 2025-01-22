@@ -127,13 +127,20 @@ const COMMUNITY_VISITOR_QUERY = [
 const COMMUNITY_MEMBER_QUERY = [
   {
     path: 'street',
-    select: '_id name description'
+    select: '_id name description',
+    strictPopulate: false
   }, {
     path: 'community',
-    select: '_id name description'
+    select: '_id name description',
+    strictPopulate: false
   }, {
     path: 'building',
-    select: '_id buildingNumber type'
+    select: '_id buildingNumber type',
+    strictPopulate: false
+  }, {
+    path: 'linkedTo',
+    select: '_id extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
+    strictPopulate: false
   }
 ]
 
@@ -1242,7 +1249,7 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
-      select: '_id community street code apartment building extra status createdAt updatedAt',
+      select: '_id community street code apartment relationship building extra linkedTo status createdAt updatedAt',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
