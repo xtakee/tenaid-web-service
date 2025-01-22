@@ -1249,7 +1249,7 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
-      select: '_id community street code apartment relationship building extra linkedTo status createdAt updatedAt',
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
