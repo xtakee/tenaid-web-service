@@ -549,6 +549,7 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/building')
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all community buildings' })
   async getAllCommunityBuildings(
     @Param('community') community: string,
@@ -565,6 +566,7 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/:street/building')
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all community street buildings' })
   async getAllCommunityStreetBuildings(
     @Param('community') community: string,
@@ -582,6 +584,7 @@ export class CommunityController {
    * @returns 
    */
   @Get('/:community/director')
+  @BasicAuth()
   @ApiOperation({ summary: 'Get all community directors' })
   async getAllCommunityDirectors(
     @Param('community') community: string,
@@ -598,6 +601,7 @@ export class CommunityController {
    * @returns 
    */
   @Post('/:community/director')
+  @BasicAuth()
   @ApiOperation({ summary: 'Create a community director' })
   async createCommunityDirector(
     @User() user: string,
@@ -616,6 +620,7 @@ export class CommunityController {
    * @returns 
    */
   @Patch('/:community/director/:director')
+  @BasicAuth()
   @ApiOperation({ summary: 'Update a community director' })
   async updateCommunityDirector(
     @User() user: string,
@@ -710,6 +715,7 @@ export class CommunityController {
    */
   @Get('/:community/:invite/activities')
   @ApiOperation({ summary: 'Get all invite activities' })
+  @BasicAuth()
   async getCheckinsActivity(
     @Param('community') community: string,
     @Param('invite') invite: string,
@@ -727,6 +733,7 @@ export class CommunityController {
    */
   @Get('/:community/visitor/check-in-out')
   @ApiOperation({ summary: 'Get all community visitors check in and out' })
+  @BasicAuth()
   async getCommunityCheckinActivity(
     @Param('community') community: string,
     @Query() paginate: PaginationRequestDto
