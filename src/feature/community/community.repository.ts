@@ -767,6 +767,45 @@ export class CommunityRepository {
   }
 
   /**
+* 
+* @param community 
+* @param page 
+* @param limit 
+*/
+  async getAllCommunityMembersForSecurity(user: string, community: string, paginate: PaginationRequestDto, date?: string): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      $or: [
+        { status: ACCOUNT_STATUS.ACCEPTED },
+        { status: ACCOUNT_STATUS.APPROVED }
+      ],
+      isOwner: true
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    if (date)
+      query.updatedAt = { $gt: new Date(date) }
+
+    return await this.paginator.paginate(this.communityMemberModel, query, {
+      select: '_id street apartment building status code extra isAdmin updatedAt createdAt',
+      page: paginate.page,
+      limit: paginate.limit,
+      sort: paginate.sort,
+      populate: [{
+        path: 'street',
+        select: '_id name description',
+        strictPopulate: false,
+      }, {
+        path: 'building',
+        select: '_id buildingNumber type',
+        strictPopulate: false,
+      }]
+    })
+  }
+
+  /**
  * 
  * @param community 
  * @param page 
