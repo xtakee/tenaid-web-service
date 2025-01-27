@@ -554,7 +554,7 @@ export class CommunityRepository {
       _id: new Types.ObjectId(request),
       community: new Types.ObjectId(community),
       status: ACCOUNT_STATUS.PENDING
-    }, '_id community street code description point extra status createdAt updatedAt')
+    }, '_id community street code apartment building extra status createdAt updatedAt')
       .populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
