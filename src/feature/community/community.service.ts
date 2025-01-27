@@ -341,10 +341,7 @@ export class CommunityService {
     community: string,
     page: number,
     limit: number): Promise<PaginatedResult<any>> {
-    const visitors = await this.communityRepository.getCommunityMemberUpcomingVisitors(user, community, page, limit);
-    if (visitors) return visitors;
-
-    throw new NotFoundException()
+    return await this.communityRepository.getCommunityMemberUpcomingVisitors(user, community, page, limit);
   }
 
   /**
@@ -546,16 +543,16 @@ export class CommunityService {
     return await this.communityRepository.getAllCommunityMembers(user, community, paginate, status)
   }
 
-    /**
-   * 
-   * @param community 
-   * @param page 
-   * @param limit 
-   */
-    async getAllCommunityMembersForSecurity(user: string, community: string, paginate: PaginationRequestDto, date?: string): Promise<PaginatedResult<any>> {
-      return await this.communityRepository.getAllCommunityMembersForSecurity(user, community, paginate, date)
-    }
-  
+  /**
+ * 
+ * @param community 
+ * @param page 
+ * @param limit 
+ */
+  async getAllCommunityMembersForSecurity(user: string, community: string, paginate: PaginationRequestDto, date?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityMembersForSecurity(user, community, paginate, date)
+  }
+
 
   /**
    * 

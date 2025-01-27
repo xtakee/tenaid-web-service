@@ -1043,14 +1043,15 @@ export class CommunityRepository {
     page: number,
     limit: number): Promise<PaginatedResult<any>> {
     const now = new Date()
-    const _date = new Date(now.setHours(23, 59, 59, 0));
+    now.setDate(now.getDate() + 1)
+    now.setHours(0, 0, 0, 0)
 
     return await this.paginator.paginate(this.communityInviteModel,
       {
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community),
         exitOnly: false,
-        start: { $gte: _date }
+        start: { $gte: now }
       },
       getPaginatedMemberVisitorsQuery(page, limit))
   }
