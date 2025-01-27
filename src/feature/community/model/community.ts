@@ -25,6 +25,9 @@ export class Community {
   @Prop()
   description?: string
 
+  @Prop()
+  logo?: string
+
   @Prop({ unique: true, index: true })
   code: string
 

@@ -98,7 +98,7 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
 }
 
 const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary building apartment status community'
-const COMMUNITY_SELECT_QUERY = '_id name size description code members type images status isPrimary address'
+const COMMUNITY_SELECT_QUERY = '_id name size description code members type images logo status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'street',
@@ -108,7 +108,7 @@ const MEMBER_COMMUNITIES_QUERY = [{
   select: '_id buildingNumber type'
 }, {
   path: 'community',
-  select: '_id name code members description images type image address createdAt updatedAt'
+  select: '_id name code members description images type logo address createdAt updatedAt'
 }]
 
 const COMMUNITY_VISITOR_QUERY = [
@@ -201,6 +201,7 @@ export class CommunityRepository {
       description: data.description,
       code: data.code,
       type: data.type,
+      logo: data.logo,
       images: data.images,
       address: data.address,
       account: new Types.ObjectId(user)
@@ -278,6 +279,7 @@ export class CommunityRepository {
         name: data.name,
         description: data.description,
         type: data.type,
+        logo: data.logo,
         images: data.images,
         address: data.address,
       }, { returnDocument: 'after' }).exec()
@@ -961,7 +963,7 @@ export class CommunityRepository {
 
     return await this.paginator.paginate(this.communityModel, query,
       {
-        select: '_id name size description code members type images status isPrimary address account createdAt updatedAt',
+        select: '_id name size description code members type logo images status isPrimary address account createdAt updatedAt',
         populate: {
           path: 'account',
           select: '_id firstName lastName email.value email.verified photo phone address'

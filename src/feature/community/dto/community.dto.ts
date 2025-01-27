@@ -27,6 +27,11 @@ export class CommunityDto {
   @IsNumber()
   size: number
 
+  @ApiProperty()
+  @IsOptional()
+  @IsUrl()
+  logo?: string
+
   @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   @IsArray()
