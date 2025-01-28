@@ -28,6 +28,7 @@ import { CommunityBuildingDto } from './dto/request/community.building.dto';
 import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto';
 import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto';
 import { CommunityDirectorDto } from './dto/response/community.director.dto';
+import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
 
 @Controller({
   version: '1',
@@ -146,6 +147,65 @@ export class CommunityController {
     if (!isMongoId(community)) throw new BadRequestException()
     if (!isMongoId(member)) throw new BadRequestException()
     return await this.communityService.createCommunityMemberAuthorizedAccess(user, community, member, body);
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post(':community/registration-document')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Add community registration document' })
+  async createCommunityRegistration(
+    @User() user: string,
+    @Param('community') community: string,
+    @Body() body: CreateCommunityRegistrationDto
+  ): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.createCommunityRegistration(user, community, body);
+  }
+
+  /**
+  * 
+  * @param user 
+  * @param community 
+  * @param body 
+  * @returns 
+  */
+  @Patch(':community/registration-document/:registration')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Update community registration document' })
+  async updateCommunityRegistration(
+    @User() user: string,
+    @Param('community') community: string,
+    @Param('registration') registration: string,
+    @Body() body: CreateCommunityRegistrationDto
+  ): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(registration)) throw new BadRequestException()
+    return await this.communityService.updateCommunityRegistration(user, community, registration, body);
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param registration 
+   * @returns 
+   */
+  @Get(':community/registration-document/:registration')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get community registration document' })
+  async getCommunityRegistration(
+    @Param('community') community: string,
+    @Param('registration') registration: string
+  ): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(registration)) throw new BadRequestException()
+    return await this.communityService.getCommunityRegistration(community, registration);
   }
 
   /**
@@ -473,24 +533,24 @@ export class CommunityController {
     return await this.communityService.getCommunityInviteByCode(community, member, code)
   }
 
-    /**
-   * 
-   * @param community 
-   * @param paginate 
-   * @returns 
-   */
-    @Get(':community/access/members')
-    @BasicAuth()
-    @ApiOperation({ summary: 'Get all community members for access' })
-    @ApiQuery({ name: 'date', required: false, type: String })
-    async getAllCommunityMembersForSecurity(
-      @User() user: string,
-      @Param('community') community: string,
-      @Query() paginate: PaginationRequestDto,
-      @Query() date?: DateDto): Promise<PaginatedResult<any>> {
-      if (!isMongoId(community)) throw new BadRequestException()
-      return await this.communityService.getAllCommunityMembersForSecurity(user, community, paginate, date.date)
-    }
+  /**
+ * 
+ * @param community 
+ * @param paginate 
+ * @returns 
+ */
+  @Get(':community/access/members')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community members for access' })
+  @ApiQuery({ name: 'date', required: false, type: String })
+  async getAllCommunityMembersForSecurity(
+    @User() user: string,
+    @Param('community') community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Query() date?: DateDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityMembersForSecurity(user, community, paginate, date.date)
+  }
 
   /**
    * 

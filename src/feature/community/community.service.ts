@@ -44,6 +44,7 @@ import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.a
 import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto';
 import { CommunityDirectorDto } from './dto/response/community.director.dto';
 import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper';
+import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
 
 @Injectable()
 export class CommunityService {
@@ -448,6 +449,47 @@ export class CommunityService {
     }
 
     throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   * @returns 
+   */
+  async createCommunityRegistration(user: string, community: string, data: CreateCommunityRegistrationDto): Promise<any> {
+    const communityData = await this.communityRepository.getCommunityByUser(user, community)
+    if (communityData) {
+      return this.communityRepository.createCommunityRegistration(user, community, data)
+    }
+
+    throw new ForbiddenException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param registration 
+   * @param data 
+   * @returns 
+   */
+  async updateCommunityRegistration(user: string, community: string, registration: string, data: CreateCommunityRegistrationDto): Promise<any> {
+    return await this.communityRepository.updateCommunityRegistration(user, community, registration, data)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param registration 
+   * @returns 
+   */
+  async getCommunityRegistration(community: string, registration: string): Promise<any> {
+    const doc = await this.communityRepository.getCommunityRegistration(community, registration)
+    if(doc) return doc
+
+    throw new NotFoundException()
   }
 
   /**

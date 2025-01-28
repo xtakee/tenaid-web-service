@@ -38,6 +38,7 @@ import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/comm
 import { CommunityBuilding, CommunityBuildingSchema } from './model/community.building';
 import { CommunityDirector, CommunityDirectorSchema } from './model/community.director';
 import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper';
+import { CommunityRegistration, CommunityRegistrationSchema } from './model/community.registration';
 
 @Module({
   providers: [
@@ -186,6 +187,7 @@ import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto
       },
     }]),
     MongooseModule.forFeature([{ name: CommunityInvite.name, schema: CommunityInviteSchema }]),
+    MongooseModule.forFeature([{ name: CommunityRegistration.name, schema: CommunityRegistrationSchema }]),
     MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
     NotificationModule
   ]

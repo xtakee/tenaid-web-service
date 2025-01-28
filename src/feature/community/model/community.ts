@@ -4,9 +4,23 @@ import { Account } from "src/feature/account/model/account.model";
 import { COMMUNITY_TYPE } from "../community.constants";
 import { Address } from "src/feature/core/model/address.model";
 import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
-import { searchable } from "src/core/util/searchable";
 
-export type CommunityDocument = HydratedDocument<Community>;
+export type CommunityDocument = HydratedDocument<Community>
+
+@Schema()
+export class CommunityKyc {
+  @Prop({ required: true, default: false })
+  excosCompleted?: boolean
+
+  @Prop({ required: true, default: false })
+  basicInfoCompleted?: boolean
+
+  @Prop({ required: true, default: false })
+  documentsCompleted?: boolean
+
+  @Prop({ required: true, default: false })
+  bankAccountCompleted?: boolean
+}
 
 @Schema({ timestamps: true })
 export class Community {
@@ -27,6 +41,9 @@ export class Community {
 
   @Prop()
   logo?: string
+
+  @Prop({ type: CommunityKyc })
+  kyc?: CommunityKyc
 
   @Prop({ unique: true, index: true })
   code: string

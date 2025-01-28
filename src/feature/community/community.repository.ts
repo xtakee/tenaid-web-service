@@ -36,6 +36,8 @@ import { CommunityBuildingDto } from "./dto/request/community.building.dto";
 import { CommunityAuthorizedUserPermissionsDto } from "./dto/request/community.authorized.user.permissions.dto";
 import { CommunityDirector } from "./model/community.director";
 import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto";
+import { CommunityRegistration } from "./model/community.registration";
+import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -98,7 +100,7 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
 }
 
 const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary building apartment status community'
-const COMMUNITY_SELECT_QUERY = '_id name size description code members type images logo status isPrimary address'
+const COMMUNITY_SELECT_QUERY = '_id name size kyc description code members type images logo status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'street',
@@ -182,6 +184,7 @@ export class CommunityRepository {
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
     @InjectModel(CommunityMessage.name) private readonly communityMessageModel: Model<CommunityMessage>,
+    @InjectModel(CommunityRegistration.name) private readonly communityRegistrationModel: Model<CommunityRegistration>,
     @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
     @InjectModel(CommunityEventNode.name) private readonly communityEventNodeModel: Model<CommunityEventNode>,
     @InjectModel(CommunityStreet.name) private readonly communityPathModel: Model<CommunityStreet>
@@ -282,6 +285,7 @@ export class CommunityRepository {
         logo: data.logo,
         images: data.images,
         address: data.address,
+        'kyc.basicInfoCompleted': true
       }, { returnDocument: 'after' }).exec()
   }
 
@@ -2070,11 +2074,62 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityRegistration(user: string, community: string, body: CreateCommunityRegistrationDto): Promise<any> {
+    let doc: CommunityRegistration = {
+      community: new Types.ObjectId(community),
+      registrationDocument: body.registrationDocument,
+      registrationNumber: body.registrationNumber
+    }
+
+    doc = await this.communityRegistrationModel.create(doc)
+    await this.communityModel.findByIdAndUpdate(community, {
+      'kyc.documentsCompleted': true
+    })
+
+    return doc
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param registration 
+   * @param body 
+   */
+  async updateCommunityRegistration(user: string, community: string, registration: string, body: CreateCommunityRegistrationDto): Promise<any> {
+    return await this.communityRegistrationModel.findOneAndUpdate({
+      community: new Types.ObjectId(community),
+      _id: new Types.ObjectId(registration)
+    }, {
+      registrationDocument: body.registrationDocument,
+      registrationNumber: body.registrationNumber
+    }, { returnDocument: 'after' }).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param registration 
+   * @returns 
+   */
+  async getCommunityRegistration(community: string, registration: string): Promise<any> {
+    return await this.communityRegistrationModel.findOne({
+      community: new Types.ObjectId(community),
+      _id: new Types.ObjectId(registration)
+    })
+  }
+
+  /**
+   * 
    * @param community 
    * @param data 
    */
   async createCommunityDirector(community: string, data: CreateCommunityDirectorDto): Promise<CommunityDirector> {
-    const director: CommunityDirector = {
+    let director: CommunityDirector = {
       community: new Types.ObjectId(community),
       firstName: data.firstName,
       lastName: data.lastName,
@@ -2088,7 +2143,13 @@ export class CommunityRepository {
       country: data.country
     }
 
-    return await this.communityDirectorModel.create(director)
+    director = await this.communityDirectorModel.create(director)
+    // udpate community kyc
+    await this.communityModel.findByIdAndUpdate(new Types.ObjectId(community), {
+      'kyc.excosCompleted': true
+    })
+
+    return director
   }
 
   /**
