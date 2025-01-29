@@ -839,19 +839,11 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
-      select: '_id street apartment building status code extra isAdmin',
+      select: '_id street apartment building status canCreateInvite canSendMessage canCreateExit status code extra isAdmin community',
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: [{
-        path: 'street',
-        select: '_id name description',
-        strictPopulate: false,
-      }, {
-        path: 'building',
-        select: '_id buildingNumber type',
-        strictPopulate: false,
-      }]
+      populate: MEMBER_COMMUNITIES_QUERY
     })
   }
 
