@@ -205,6 +205,12 @@ export class CommunityRepository {
       code: data.code,
       type: data.type,
       logo: data.logo,
+      kyc: {
+        excosCompleted: false,
+        documentsCompleted: false,
+        basicInfoCompleted: false,
+        bankAccountCompleted: false
+      },
       images: data.images,
       address: data.address,
       account: new Types.ObjectId(user)
