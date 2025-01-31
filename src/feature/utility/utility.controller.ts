@@ -1,6 +1,6 @@
 import { MongoAbility } from '@casl/ability';
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CLAIM, ADMIN_SYSTEM_FEATURES } from '../auth/auth.constants';
 import { Auth } from '../auth/guards/auth.decorator';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
@@ -10,6 +10,7 @@ import { CreateUtilityProductDto } from './dto/request/create.utility.product.dt
   version: '1',
   path: "utility",
 })
+@ApiTags('Utitilies')
 export class UtilityController {
 
   @Post('product')

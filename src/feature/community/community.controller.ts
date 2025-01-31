@@ -29,6 +29,7 @@ import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.a
 import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto';
 import { CommunityDirectorDto } from './dto/response/community.director.dto';
 import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
+import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
 
 @Controller({
   version: '1',
@@ -488,6 +489,27 @@ export class CommunityController {
   @ApiOperation({ summary: 'Approve/Decline community join request' })
   async setCommunityJoinRequestStatus(@Body() body: CommunityRequestStatusDto): Promise<void> {
     await this.communityService.setJoinRequestStatus(body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param body 
+   * @param community 
+   * @param member 
+   */
+  @Patch('/:community/member/:member/permissions')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Update community member permissions' })
+  async setCommunityMemberPermissions(
+    @User() user: string,
+    @Body() body: UpdateCommunityMemberPermissionsDto,
+    @Param('community') community: string,
+    @Param('member') member: string,
+  ): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(member)) throw new BadRequestException()
+    await this.communityService.updateCommunityMemberPermissions(user, community, member, body)
   }
 
   /**

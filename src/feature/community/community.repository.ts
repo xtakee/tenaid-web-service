@@ -38,6 +38,7 @@ import { CommunityDirector } from "./model/community.director";
 import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto";
 import { CommunityRegistration } from "./model/community.registration";
 import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto";
+import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto";
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -491,6 +492,23 @@ export class CommunityRepository {
         sort: paginate.sort
       }
     )
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param member 
+   * @param body 
+   */
+  async updateCommunityMemberPermissions(user: string, community: string, member: string, body: UpdateCommunityMemberPermissionsDto): Promise<void> {
+    await this.communityMemberModel.findOneAndUpdate({
+      _id: new Types.ObjectId(member),
+      community: new Types.ObjectId(community)
+    }, {
+      isAdmin: body.isAdmin,
+      canSendMessage: body.canSendMessages
+    }).exec()
   }
 
   /**

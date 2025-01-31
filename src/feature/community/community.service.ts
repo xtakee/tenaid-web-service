@@ -45,6 +45,7 @@ import { CreateCommunityDirectorDto } from './dto/request/create.community.direc
 import { CommunityDirectorDto } from './dto/response/community.director.dto';
 import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper';
 import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
+import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
 
 @Injectable()
 export class CommunityService {
@@ -487,7 +488,7 @@ export class CommunityService {
    */
   async getCommunityRegistration(community: string, registration: string): Promise<any> {
     const doc = await this.communityRepository.getCommunityRegistration(community, registration)
-    if(doc) return doc
+    if (doc) return doc
 
     throw new NotFoundException()
   }
@@ -837,6 +838,17 @@ export class CommunityService {
     const data = await this.communityRepository.getCommunityJoinRequest(community, request)
     if (data) return data
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param member 
+   * @param body 
+   */
+  async updateCommunityMemberPermissions(user: string, community: string, member: string, body: UpdateCommunityMemberPermissionsDto): Promise<void> {
+    await this.communityRepository.updateCommunityMemberPermissions(user, community, member, body)
   }
 
   /**
