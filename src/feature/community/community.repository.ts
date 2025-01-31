@@ -2080,6 +2080,7 @@ export class CommunityRepository {
       lastName: data.lastName,
       identityType: data.identityType,
       identity: data.identity,
+      idNumber: data.idNumber,
       email: {
         value: data.email
       },
@@ -2182,7 +2183,7 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityDirectorModel, query, {
-      select: '_id firstName lastName email.value email.verified country phone identityType identity createdAt updatedAt',
+      select: '_id firstName lastName idNumber email.value email.verified country phone identityType identity createdAt updatedAt',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort
