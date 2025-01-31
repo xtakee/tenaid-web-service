@@ -425,6 +425,14 @@ export class CommunityService {
     return await this.communityRepository.getAllCommunityDirectors(community, paginate)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param director 
+   * @param data 
+   * @returns 
+   */
   async updateCommunityDirector(user: string, community: string, director: string, data: CreateCommunityDirectorDto): Promise<CommunityDirectorDto> {
     const communityData = await this.communityRepository.getCommunityByUser(user, community)
     if (communityData) {

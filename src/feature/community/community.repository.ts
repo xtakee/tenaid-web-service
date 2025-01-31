@@ -2181,7 +2181,7 @@ export class CommunityRepository {
     if (paginate.search)
       query.$text = { $search: paginate.search }
 
-    return await this.paginator.paginate(this.communityMessageModel, query, {
+    return await this.paginator.paginate(this.communityDirectorModel, query, {
       select: '_id firstName lastName email.value email.verified country phone identityType identity createdAt updatedAt',
       limit: paginate.limit,
       page: paginate.page,
