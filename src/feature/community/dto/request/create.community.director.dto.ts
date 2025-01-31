@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsEnum, IsUrl } from "class-validator"
+import { IsNotEmpty, IsEnum, IsUrl, IsEmail, IsNumber, IsDecimal } from "class-validator"
 import { IDENTITY_TYPE } from "src/core/enums/identity.type"
+import { isDigit } from "src/core/helpers/code.generator"
 
 export class CreateCommunityDirectorDto {
   @ApiProperty()
@@ -27,10 +28,12 @@ export class CreateCommunityDirectorDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsEmail()
   email: string
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsDecimal()
   phone: string
 
   @ApiProperty()
