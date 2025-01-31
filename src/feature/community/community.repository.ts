@@ -2078,8 +2078,8 @@ export class CommunityRepository {
     }, {
       firstName: data.firstName,
       lastName: data.lastName,
-      idType: data.identityType,
-      validId: data.identity,
+      identityType: data.identityType,
+      identity: data.identity,
       email: {
         value: data.email
       },
