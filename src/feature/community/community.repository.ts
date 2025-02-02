@@ -150,6 +150,11 @@ const COMMUNITY_MEMBER_QUERY = [
 const CommunityMessagePopulateQuery = [
   {
     path: 'author',
+    select: '_id isAdmin extra.firstName extra.lastName extra.photo',
+    strictPopulate: false
+  },
+  {
+    path: 'deletedBy',
     select: '_id isAdmin extra.firstName extra.lastName extra.photo'
   },
   { path: 'community', select: '_id name' },
@@ -2222,7 +2227,7 @@ export class CommunityRepository {
     }, '_id type message').populate(
       {
         path: 'message',
-        select: '_id author account reactions messageId status repliedTo body deleted edited name size extension type description date community category',
+        select: '_id author account reactions deletedBy messageId status repliedTo body deleted edited name size extension type description date community category',
         populate: CommunityMessagePopulateQuery
       }
     ).exec() as any
