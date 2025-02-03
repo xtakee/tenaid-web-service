@@ -38,7 +38,9 @@ import { CommunityDirector } from "./model/community.director";
 import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto";
 import { CommunityRegistration } from "./model/community.registration";
 import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto";
-import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto";
+import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto"
+
+const MIN_DIRECTORS_COUNT = 3
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -2176,10 +2178,18 @@ export class CommunityRepository {
     }
 
     director = await this.communityDirectorModel.create(director)
-    // udpate community kyc
-    await this.communityModel.findByIdAndUpdate(new Types.ObjectId(community), {
-      'kyc.excosCompleted': true
+
+    // get total count
+    const count = await this.communityDirectorModel.countDocuments({
+      community: new Types.ObjectId(community)
     })
+
+    if (count >= MIN_DIRECTORS_COUNT) {
+      // udpate community kyc
+      await this.communityModel.findByIdAndUpdate(new Types.ObjectId(community), {
+        'kyc.excosCompleted': true
+      })
+    }
 
     return director
   }
