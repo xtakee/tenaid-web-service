@@ -1877,7 +1877,7 @@ export class CommunityRepository {
     )
 
     return (await this.communityMessageModel.findOneAndUpdate({
-      account: new Types.ObjectId(user),
+      author: new Types.ObjectId(data.author),
       _id: new Types.ObjectId(data.remoteId),
       community: new Types.ObjectId(data.community)
     }, {
