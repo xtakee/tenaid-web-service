@@ -1754,6 +1754,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community)
     }, {
       ...this.buildMessage(user, data),
+      _id: new Types.ObjectId(data.remoteId),
       status: MessageStatus.SENT,
       edited: true
     }, { new: true, upsert: true })
@@ -1849,6 +1850,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community)
     }, {
       ...this.buildMessage(user, data),
+      _id: new Types.ObjectId(data.remoteId),
       status: data.status === MessageStatus.DELIVERED ? MessageStatus.SENT : data.status,
       retained: data.status === MessageStatus.DELIVERED ? true : false
     }, { new: true, upsert: true })
@@ -1866,10 +1868,12 @@ export class CommunityRepository {
 
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
-      data.community, user,
+      data.community,
+      user,
       data.remoteId,
       EventCacheType.DELETE_MESSAGE,
-      targets, targetNodes
+      targets,
+      targetNodes
     )
 
     return (await this.communityMessageModel.findOneAndUpdate({
@@ -1878,6 +1882,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(data.community)
     }, {
       deleted: true,
+      _id: new Types.ObjectId(data.remoteId),
       deletedBy: new Types.ObjectId(member),
       ...this.buildMessage(user, data)
     },
