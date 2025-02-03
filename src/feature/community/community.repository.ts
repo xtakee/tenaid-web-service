@@ -1703,6 +1703,12 @@ export class CommunityRepository {
     return await this.getCommunityMessage(message.community, (communityMessage as any)._id.toString())
   }
 
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
   private buildMessage(user: string, data: MessageDto) {
     return {
       _id: new Types.ObjectId(data.remoteId),
@@ -2038,8 +2044,7 @@ export class CommunityRepository {
 
     await this.communityMessageCacheModel.deleteMany({
       message: new Types.ObjectId(message),
-      community: new Types.ObjectId(community),
-      author: new Types.ObjectId(user)
+      community: new Types.ObjectId(community)
     })
   }
 
