@@ -1766,12 +1766,20 @@ export class CommunityRepository {
    * @returns 
    */
   async updateMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+
+    // delete any message cache
+    await this.communityMessageCacheModel.deleteMany({
+      message: new Types.ObjectId(data.remoteId)
+    })
+
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
-      data.community, user,
+      data.community,
+      user,
       data.remoteId,
       EventCacheType.UPDATE_MESSAGE,
-      targets, targetNodes
+      targets,
+      targetNodes
     )
 
     return (await this.communityMessageModel.findOneAndUpdate({
