@@ -110,6 +110,23 @@ export class AccountController {
   }
 
   /**
+  * 
+  * @param user 
+  * @param community 
+  * @param body 
+  * @returns 
+  */
+  @Post('/:community/kyc/acknowledge')
+  @ApiOperation({ summary: 'Acknowledge account community kyc' })
+  @BasicAuth()
+  async acknowledgeAccountCommunityKyc(
+    @User() user: string,
+    @Param('community') community: string): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    await this.accountService.acknowledgeAccountCommunityKyc(user, community)
+  }
+
+  /**
    * 
    * @param body 
    * @param id 
@@ -246,11 +263,11 @@ export class AccountController {
   async changePassword(@RootUser() user: string, @Body() body: ChangePasswordDto): Promise<void> {
     return await this.accountService.changePassword(user, body.password)
   }
-/**
- * 
- * @param user 
- * @returns 
- */
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
   @Get('community/managed')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all account managed communities' })

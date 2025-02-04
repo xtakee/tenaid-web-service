@@ -348,6 +348,23 @@ export class AccountService {
   }
 
   /**
+   * 
+   * @param user 
+   * @param community 
+   */
+  async acknowledgeAccountCommunityKyc(user: string, community: string): Promise<void> {
+    const account = await this.accountRepository.getOneById(user)
+
+    if (account && account.kyc.profileCompleted) {
+      const communityData = await this.communityRepository.acknowledgeCommunityKyc(user, community)
+
+      if (communityData) return
+    }
+
+    throw new ForbiddenException()
+  }
+
+  /**
  * 
  * @param user 
  * @param page 

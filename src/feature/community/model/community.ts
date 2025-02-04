@@ -66,6 +66,9 @@ export class Community {
   @Prop({ type: Boolean, default: false })
   isPrimary?: Boolean
 
+  @Prop({ type: Boolean, default: false })
+  kycAcknowledged?: Boolean
+
   @Prop({ type: Address })
   address: Address
 }

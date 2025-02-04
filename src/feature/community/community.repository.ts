@@ -476,6 +476,24 @@ export class CommunityRepository {
   async getCommunity(community: string): Promise<Community> {
     return await this.communityModel.findById(community)
   }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async acknowledgeCommunityKyc(user: string, community: string): Promise<Community> {
+    return await this.communityModel.findOneAndUpdate({
+      _id: new Types.ObjectId(community),
+      account: new Types.ObjectId(user),
+      'kyc.basicInfoCompleted': true,
+      'kyc.documentsCompleted': true,
+      'kyc.excosCompleted': true
+    }, {
+      kycAcknowledged: true
+    }, { returnDocument: 'after' }).exec()
+  }
   /**
    * 
    * @param community 
