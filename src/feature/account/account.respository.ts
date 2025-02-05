@@ -505,7 +505,7 @@ export class AccountRepository implements IAccountRepository {
    * @param email 
    */
   async getAccountByEmail(email: string): Promise<any> {
-    
+
   }
 
   /**
@@ -607,8 +607,11 @@ export class AccountRepository implements IAccountRepository {
    * 
    * @param user 
    */
-  async deleteDeviceToken(user: string): Promise<void> {
-    await this.deviceTokenModel.deleteOne({ account: new Types.ObjectId(user) })
+  async deleteDeviceToken(user: string, device: string): Promise<void> {
+    await this.deviceTokenModel.deleteOne({
+      account: new Types.ObjectId(user),
+      device: device
+    })
   }
 
 }

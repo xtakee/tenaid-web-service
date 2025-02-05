@@ -11,6 +11,7 @@ import { isMongoId } from 'class-validator';
 import { BasicAuth } from './guards/auth.decorator';
 import { AccountPointAuthRequestDto } from './dto/request/access.point.auth.request.dto';
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
+import { AccountLogoutRequestDto } from './dto/request/account.logout.request.dto';
 
 @Controller({
   version: '1',
@@ -63,8 +64,8 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Logout of a registered account' })
-  async logout(@User() id: string): Promise<void> {
-    return await this.authService.logout(id)
+  async logout(@User() id: string, @Body() body: AccountLogoutRequestDto): Promise<void> {
+    return await this.authService.logout(id, body.platform)
   }
 
   /**

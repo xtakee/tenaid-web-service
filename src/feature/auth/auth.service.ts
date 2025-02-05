@@ -137,9 +137,10 @@ export class AuthService {
    * @param user 
    * @returns void
    */
-  async logout(user: string): Promise<void> {
-    await this.authRepository.invalidateAuthToken(user)
-    await this.accountRepository.deleteDeviceToken(user)
+  async logout(user: string, platform: string): Promise<void> {
+    await this.authRepository.invalidateAuthToken(`${user}-${platform}`)
+    await this.accountRepository.deleteDeviceToken(user, platform)
+    await this.communityRepository.removeAccountCommunityEventNode(user, platform)
   }
 
   /**

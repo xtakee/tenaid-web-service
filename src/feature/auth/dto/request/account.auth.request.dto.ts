@@ -20,4 +20,8 @@ export class AccountAuthRequestDto {
   @IsNotEmpty()
   @IsEnum(Platform)
   platform: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  device: string
 }
