@@ -102,7 +102,6 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
   }
 }
 
-const COMMUNITY_MEMBER_AUTHORIZED_QUERY = '_id code street extra isAdmin relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary building apartment status community'
 const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite canSendMessage isPrimary building apartment status community'
 const COMMUNITY_SELECT_QUERY = '_id name size kyc description code members type images logo status isPrimary address'
 
@@ -115,6 +114,10 @@ const MEMBER_COMMUNITIES_QUERY = [{
 }, {
   path: 'community',
   select: '_id name code members description images type logo address createdAt updatedAt'
+}, {
+  path: 'linkedTo',
+  select: '_id extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
+  strictPopulate: false
 }]
 
 const COMMUNITY_VISITOR_QUERY = [
@@ -2265,7 +2268,7 @@ export class CommunityRepository {
       linkedTo: new Types.ObjectId(member),
       community: new Types.ObjectId(community),
     }, COMMUNITY_MEMBER_PRIMARY_QUERY)
-      .populate(COMMUNITY_MEMBER_AUTHORIZED_QUERY)
+      .populate(MEMBER_COMMUNITIES_QUERY)
   }
 
   /**
