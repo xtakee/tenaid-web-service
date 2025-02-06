@@ -73,7 +73,13 @@ export class AuthService {
    * @returns AccountAuthResponseDto
    */
   private async getAuthorizationResponse(account: Account, platform: string): Promise<AccountAuthResponseDto> {
+
     const dto = this.accountToDtoMapper.map(account)
+    const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
+
+    if (primaryManagedCommunity) {
+      dto.communityKycAcknowledged = dto.kycCompleted && primaryManagedCommunity.kycAcknowledged
+    }
 
     const permissions = await this.getUserManageAccountPermissions((account as any)._id)
 
