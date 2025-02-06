@@ -20,6 +20,7 @@ import { HealthModule } from './feature/health/health.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JobsModule } from './jobs/jobs.module';
 import { UtilityModule } from './feature/utility/utility.module';
+import { BillingModule } from './feature/billing/billing.module';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { UtilityModule } from './feature/utility/utility.module';
     HealthModule,
     ScheduleModule.forRoot(),
     JobsModule,
-    UtilityModule
+    UtilityModule,
+    BillingModule
   ],
   providers: []
 })

@@ -1739,7 +1739,7 @@ export class CommunityRepository {
   async removeAccountCommunityEventNode(user: string, platform: string): Promise<void> {
     await this.communityEventNodeModel.deleteOne({
       account: new Types.ObjectId(user),
-      device: platform
+      platform: platform
     })
   }
 
