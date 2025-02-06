@@ -78,7 +78,7 @@ export class AuthService {
     const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
 
     if (primaryManagedCommunity) {
-      dto.communityKycAcknowledged = dto.kycCompleted && primaryManagedCommunity.kycAcknowledged
+      dto.communityKycAcknowledged = account.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
     }
 
     const permissions = await this.getUserManageAccountPermissions((account as any)._id)
