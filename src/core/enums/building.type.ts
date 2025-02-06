@@ -7,3 +7,8 @@ export enum BUILDING_TYPE {
   PENTHOUSE = 'penthouse',
   VILLA = 'villa',
 }
+
+export enum BUILDING_CATEGORY {
+  RESIDENTIAL = 'residential',
+  BUSINESS = 'business',
+}

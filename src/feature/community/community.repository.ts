@@ -172,6 +172,8 @@ const CommunityMessagePopulateQuery = [
   }
 ]
 
+const COMMUNITY_BUILDING_QUERY = '_id street contactEmail contactPhone contactPerson buildingNumber apartments category name description'
+
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
     select: '_id author messageId status repliedTo body deleted edited name size extension type description date community category',
@@ -659,6 +661,9 @@ export class CommunityRepository {
       contactPerson: data.contactPerson,
       contactCountry: data.contactCountry,
       apartments: data.apartments,
+      name: data.name,
+      category: data.category,
+      description: data.description,
       contactPhone: data.contactPerson,
       type: data.type,
       buildingNumber: data.buildingNumber.toLowerCase().trim(),
@@ -680,7 +685,7 @@ export class CommunityRepository {
     return await this.communityBuildingModel.findOne({
       _id: new Types.ObjectId(building),
       community: new Types.ObjectId(community)
-    }, '_id street buildingNumber contactEmail contactPhone contactPerson apartments type').populate({
+    }, COMMUNITY_BUILDING_QUERY).populate({
       path: 'street',
       select: '_id name description'
     }).exec()
@@ -703,7 +708,7 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityBuildingModel, query, {
-      select: '_id street contactEmail contactPhone contactPerson buildingNumber ',
+      select: COMMUNITY_BUILDING_QUERY,
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
