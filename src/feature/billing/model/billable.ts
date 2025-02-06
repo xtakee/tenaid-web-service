@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { BillClass } from "src/core/enums/bill.class";
 import { BillFrequency } from "src/core/enums/bill.frequency";
+import { BillStatus } from "src/core/enums/bill.status";
 import { BillType } from "src/core/enums/bill.type";
 import { Community } from "src/feature/community/model/community";
 
@@ -12,7 +13,7 @@ export class Billable {
 
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
-  
+
   @Prop()
   name: string
 
@@ -21,6 +22,9 @@ export class Billable {
 
   @Prop()
   country: string
+
+  @Prop({ default: BillStatus.ACTIVE })
+  status: string
 
   @Prop({ default: 0 })
   amount: number

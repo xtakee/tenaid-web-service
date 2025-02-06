@@ -238,7 +238,14 @@ export class AccountService {
    */
   async getOwnAccount(user: string): Promise<AccountResponseDto> {
     const account = await this.accountRepository.getOneById(user)
-    if (account) return this.mapper.map(account)
+    const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity(user)
+    if (account) {
+      const accountDto = this.mapper.map(account)
+      if (primaryManagedCommunity)
+        accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
+
+      return accountDto
+    }
 
     throw new NotFoundException()
   }

@@ -1244,6 +1244,17 @@ export class CommunityRepository {
     })
   }
 
+/**
+ * 
+ * @param user 
+ * @returns 
+ */
+  async getAccountPrimaryManagedCommunity(user: string,): Promise<Community> {
+    return await this.communityModel.findOne({
+      account: new Types.ObjectId(user)
+    })
+  }
+
   /**
    * 
    * @param email 

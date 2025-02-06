@@ -49,6 +49,7 @@ export class AccountResponseDto {
   dob?: Date
   flags: DashboardFlagsDto
   kycCompleted?: Boolean
+  communityKycAcknowledged?: Boolean
   primaryAccountType?: string
   accountTypes?: AccType[]
   proofOfId?: string
