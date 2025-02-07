@@ -8,9 +8,11 @@ export class CommunityBuildingDto {
   _id?: string
 
   @IsOptional()
+  @ApiProperty()
   name?: string
 
   @IsOptional()
+  @ApiProperty()
   description?: string
 
   @ApiProperty()
@@ -20,17 +22,15 @@ export class CommunityBuildingDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
   buildingNumber: string
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
   contactCountry: string
 
+  @IsOptional()
   @ApiProperty()
-  @IsNotEmpty()
-  apartments: number
+  apartments?: number = 0
 
   @ApiProperty()
   @IsNotEmpty()
