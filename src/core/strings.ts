@@ -14,6 +14,7 @@ export const INVALID_INVITE_VALIDITY_PERIOD_DAY: string = "You must enter a vali
 export const INVALID_COMMUNITY_PATH: string = "You have entered an invalid community path"
 export const INVALID_DATE_FORMAT: string = "Invalid date format"
 export const DUPLICATE_ACCESS_POINT_ERROR: string = "An access point with this name exists. Provide a unique name"
+export const DUPLICATE_HOUSE_NUMBER_ERROR = "Duplicate buildig/house number"
 
 // Push notification strings
 export const REQUEST_APPROVED: string = "Request Approved!"

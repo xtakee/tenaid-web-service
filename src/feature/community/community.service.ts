@@ -7,7 +7,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
+import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, DUPLICATE_HOUSE_NUMBER_ERROR, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
@@ -648,7 +648,7 @@ export class CommunityService {
   async createCommunityBuilding(user: string, community: string, data: CommunityBuildingDto): Promise<any> {
     const building = await this.communityRepository.getCommunityBuilding(community, data.street, data.buildingNumber)
 
-    if (building) throw new ForbiddenException()
+    if (building) throw new BadRequestException(DUPLICATE_HOUSE_NUMBER_ERROR)
 
     // check if user is owner
     const _community = await this.communityRepository.getCommunityByUser(user, community)
