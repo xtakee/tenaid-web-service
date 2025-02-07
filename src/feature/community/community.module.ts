@@ -173,13 +173,13 @@ import { CommunityRegistration, CommunityRegistrationSchema } from './model/comm
         const schema = CommunityBuildingSchema;
         schema.pre('save', async function () {
           if (this.isModified('buildingNumber') || this.isNew) {
-            this.searchable = searchable(this.buildingNumber)
+            this.searchable = searchable(`${this.buildingNumber} ${this.name}`)
           }
         });
 
         schema.pre('findOneAndUpdate', async function (next) {
-          if ((this.getUpdate() as any).buildingNumber) {
-            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).buildingNumber)
+          if ((this.getUpdate() as any).buildingNumber || (this.getUpdate() as any).name) {
+            (this.getUpdate() as any).searchable = searchable(`${(this.getUpdate() as any).buildingNumber} ${(this.getUpdate() as any).name}`)
           }
           next()
         });
