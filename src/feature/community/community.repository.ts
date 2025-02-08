@@ -172,7 +172,7 @@ const CommunityMessagePopulateQuery = [
   }
 ]
 
-const COMMUNITY_BUILDING_QUERY = '_id community street contactEmail contactPhone contactPerson buildingNumber apartments category name description'
+const COMMUNITY_BUILDING_QUERY = '_id community street type contactEmail contactPhone contactPerson buildingNumber apartments category name description'
 
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
@@ -737,7 +737,7 @@ export class CommunityRepository {
       query.$text = { $search: paginate.search }
 
     return await this.paginator.paginate(this.communityBuildingModel, query, {
-      select: '_id street contactEmail contactPhone contactPerson buildingNumber ',
+      select: COMMUNITY_BUILDING_QUERY,
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
