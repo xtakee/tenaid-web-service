@@ -172,7 +172,7 @@ const CommunityMessagePopulateQuery = [
   }
 ]
 
-const COMMUNITY_BUILDING_QUERY = '_id street contactEmail contactPhone contactPerson buildingNumber apartments category name description'
+const COMMUNITY_BUILDING_QUERY = '_id community street contactEmail contactPhone contactPerson buildingNumber apartments category name description'
 
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
