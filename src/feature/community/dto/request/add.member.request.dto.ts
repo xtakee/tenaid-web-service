@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsMongoId, IsNotEmpty } from "class-validator";
+import { IsDateString, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsUrl } from "class-validator";
 import { GENDER } from "src/feature/auth/auth.constants";
 
 export class AddMemberRequestDto {
@@ -38,6 +38,16 @@ export class AddMemberRequestDto {
   @IsNotEmpty()
   @IsMongoId()
   building: string
+
+  @ApiProperty()
+  @IsOptional()
+  @IsUrl()
+  photo?: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString()
+  dob: string
 
   @ApiProperty()
   @IsNotEmpty()

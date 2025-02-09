@@ -2330,6 +2330,8 @@ export class CommunityRepository {
         firstName: data.firstName,
         lastName: data.lastName,
         gender: data.gender,
+        dob: new Date(data.dob),
+        photo: data.photo,
         email: {
           value: data.emailAddress.trim().toLowerCase()
         },
