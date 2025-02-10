@@ -30,6 +30,12 @@ export class CommunityCheckins {
 
   @Prop({ enum: CheckType })
   type: string
+
+  @Prop({ index: true })
+  searchable?: string
 }
 
-export const CommunityCheckinsSchema = SchemaFactory.createForClass(CommunityCheckins)
+const CommunityCheckinsSchema = SchemaFactory.createForClass(CommunityCheckins)
+CommunityCheckinsSchema.index({ searchable: 'text', code: 'text' })
+
+export { CommunityCheckinsSchema }

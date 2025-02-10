@@ -96,7 +96,7 @@ export class CommunityController {
     @Query() date: DateRangeDto,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberVisitorsByDate(user, community, date.start, date.end, paginate.page, paginate.limit);
+    return await this.communityService.getCommunityMemberVisitorsByDate(user, community, date.start, date.end, paginate);
   }
 
   /**
@@ -223,7 +223,7 @@ export class CommunityController {
     @Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberUpcomingVisitors(user, community, paginate.page, paginate.limit);
+    return await this.communityService.getCommunityMemberUpcomingVisitors(user, community, paginate);
   }
 
   /**
@@ -242,7 +242,7 @@ export class CommunityController {
     @Query('status') status: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate.page, paginate.limit);
+    return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
   }
 
   /**
@@ -381,7 +381,7 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community member invites/visitors' })
   async getCommunityMemberVisitors(@Param('community') community: string, @User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return this.communityService.getCommunityMemberVisitors(user, community, paginate.page, paginate.limit)
+    return this.communityService.getCommunityMemberVisitors(user, community, paginate)
   }
 
   /**
@@ -840,7 +840,7 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto
   ): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityCheckinActivity(community, paginate.page, paginate.limit)
+    return await this.communityService.getCommunityCheckinActivity(community, paginate)
   }
 
   /**

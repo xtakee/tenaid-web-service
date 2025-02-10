@@ -53,11 +53,12 @@ const MEMBER_VISITOR_QUERY = {
   }
 }
 
-function getPaginatedMemberVisitorsQuery(page: number, limit: number) {
+function getPaginatedMemberVisitorsQuery(paginate: PaginationRequestDto) {
   return {
     select: '_id name code exitOnly photo start end status reason street',
-    limit: limit,
-    page: page,
+    limit: paginate.limit,
+    page: paginate.page,
+    sort: paginate.sort,
     populate: {
       path: 'street',
       select: '_id name description',
@@ -991,14 +992,17 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getCommunityMemberVisitors(user: string, community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
+  async getCommunityMemberVisitors(user: string, community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    let query: any = {
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(community),
+    }
 
-    return await this.paginator.paginate(this.communityInviteModel,
-      {
-        account: new Types.ObjectId(user),
-        community: new Types.ObjectId(community),
-      },
-      getPaginatedMemberVisitorsQuery(page, limit))
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityInviteModel, query,
+      getPaginatedMemberVisitorsQuery(paginate))
   }
 
   /**
@@ -1041,8 +1045,7 @@ export class CommunityRepository {
     user: string,
     community: string,
     status: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
 
     return await this.paginator.paginate(this.communityInviteModel,
       {
@@ -1050,7 +1053,7 @@ export class CommunityRepository {
         community: new Types.ObjectId(community),
         status: status
       },
-      getPaginatedMemberVisitorsQuery(page, limit))
+      getPaginatedMemberVisitorsQuery(paginate))
   }
 
   /**
@@ -1068,20 +1071,23 @@ export class CommunityRepository {
     community: string,
     start: string,
     end: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const startDate = new Date(start)
     const endDate = new Date(end)
 
-    return await this.paginator.paginate(this.communityInviteModel,
-      {
-        account: new Types.ObjectId(user),
-        community: new Types.ObjectId(community),
-        $or: [
-          { start: { $gte: startDate, $lte: endDate } },
-          { start: { $lt: startDate }, end: { $gte: endDate } }]
-      },
-      getPaginatedMemberVisitorsQuery(page, limit))
+    let query: any = {
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(community),
+      $or: [
+        { start: { $gte: startDate, $lte: endDate } },
+        { start: { $lt: startDate }, end: { $gte: endDate } }]
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityInviteModel, query,
+      getPaginatedMemberVisitorsQuery(paginate))
   }
 
   /**
@@ -1095,20 +1101,23 @@ export class CommunityRepository {
   async getCommunityMemberUpcomingVisitors(
     user: string,
     community: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const now = new Date()
     now.setDate(now.getDate() + 1)
     now.setHours(0, 0, 0, 0)
 
-    return await this.paginator.paginate(this.communityInviteModel,
-      {
-        account: new Types.ObjectId(user),
-        community: new Types.ObjectId(community),
-        exitOnly: false,
-        start: { $gte: now }
-      },
-      getPaginatedMemberVisitorsQuery(page, limit))
+    let query: any = {
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(community),
+      exitOnly: false,
+      start: { $gte: now }
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityInviteModel, query,
+      getPaginatedMemberVisitorsQuery(paginate))
   }
 
   /**
@@ -1133,15 +1142,18 @@ export class CommunityRepository {
    */
   async getCommunityCheckinActivity(
     community: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
 
-    return await this.paginator.paginate(this.communityCheckInsModel,
-      { community: new Types.ObjectId(community), invite: { $ne: null } },
+    let query: any = { community: new Types.ObjectId(community), invite: { $ne: null } }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityCheckInsModel, query,
       {
         select: '_id code date type accessPoint invite',
-        limit: limit,
-        page: page,
+        limit: paginate.limit,
+        page: paginate.page,
         sort: { createdAt: 1 },
         populate: [
           {
@@ -1244,11 +1256,11 @@ export class CommunityRepository {
     })
   }
 
-/**
- * 
- * @param user 
- * @returns 
- */
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
   async getAccountPrimaryManagedCommunity(user: string,): Promise<Community> {
     return await this.communityModel.findOne({
       account: new Types.ObjectId(user)

@@ -60,6 +60,12 @@ export class CommunityInvite {
 
   @Prop()
   revokeReason?: string
+
+  @Prop({ index: true })
+  searchable?: string
 }
 
-export const CommunityInviteSchema = SchemaFactory.createForClass(CommunityInvite);
+const CommunityInviteSchema = SchemaFactory.createForClass(CommunityInvite)
+CommunityInviteSchema.index({ searchable: 'text', code: 'text' })
+
+export { CommunityInviteSchema }

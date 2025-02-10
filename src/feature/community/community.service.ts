@@ -294,8 +294,8 @@ export class CommunityService {
    * @param limit 
    * @returns 
    */
-  async getCommunityMemberVisitors(user: string, community: string, page: number, limit: number): Promise<PaginatedResult<any>> {
-    const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community, page, limit)
+  async getCommunityMemberVisitors(user: string, community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community, paginate)
     if (visitors) return visitors
 
     throw new NotFoundException()
@@ -316,9 +316,8 @@ export class CommunityService {
     community: string,
     start: string,
     end: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
-    const visitors = await this.communityRepository.getCommunityMemberVisitorsByDate(user, community, start, end, page, limit);
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitorsByDate(user, community, start, end, paginate);
     if (visitors) return visitors;
 
     throw new NotFoundException()
@@ -326,9 +325,8 @@ export class CommunityService {
 
   async getCommunityCheckinActivity(
     community: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getCommunityCheckinActivity(community, page, limit)
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityCheckinActivity(community, paginate)
   }
   /**
    * 
@@ -341,9 +339,8 @@ export class CommunityService {
   async getCommunityMemberUpcomingVisitors(
     user: string,
     community: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getCommunityMemberUpcomingVisitors(user, community, page, limit);
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityMemberUpcomingVisitors(user, community, paginate);
   }
 
   /**
@@ -359,9 +356,8 @@ export class CommunityService {
     user: string,
     community: string,
     status: string,
-    page: number,
-    limit: number): Promise<PaginatedResult<any>> {
-    const visitors = await this.communityRepository.getCommunityMemberVisitorsByStatus(user, community, status, page, limit);
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const visitors = await this.communityRepository.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
     if (visitors) return visitors;
 
     throw new NotFoundException()
