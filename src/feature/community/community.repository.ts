@@ -2329,8 +2329,6 @@ export class CommunityRepository {
    * @param account 
    */
   async addCommunityMember(community: string, data: AddMemberRequestDto, code: string, account?: string): Promise<CommunityMember> {
-    const isAdmin = (data.isAdmin === undefined || data.isAdmin === null) ? false : data.isAdmin
-    const canSendMessage = (data.canSendMessages === undefined || data.canSendMessages === null) ? true : data.canSendMessages
 
     const member: CommunityMember = {
       community: new Types.ObjectId(community),
@@ -2339,13 +2337,13 @@ export class CommunityRepository {
       apartment: data.apartment,
       building: new Types.ObjectId(data.building),
       isPrimary: account ? false : true,
-      canSendMessage: canSendMessage,
+      canSendMessage: data.canSendMessages,
       code: code,
       status: ACCOUNT_STATUS.INVITED,
       extra: {
         firstName: data.firstName,
         lastName: data.lastName,
-        isAdmin: isAdmin,
+        isAdmin: data.isAdmin,
         gender: data.gender,
         dob: new Date(data.dob),
         photo: data.photo,

@@ -45,14 +45,12 @@ export class AddMemberRequestDto {
   photo?: string
 
   @ApiProperty()
-  @IsOptional()
   @IsBoolean()
-  canSendMessages?: Boolean
+  canSendMessages: Boolean
 
   @ApiProperty()
-  @IsOptional()
   @IsBoolean()
-  isAdmin?: Boolean
+  isAdmin: Boolean
 
   @ApiProperty()
   @IsNotEmpty()
