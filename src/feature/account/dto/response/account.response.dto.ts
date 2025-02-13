@@ -50,6 +50,11 @@ export class AccountResponseDto {
   flags: DashboardFlagsDto
   kycCompleted?: Boolean
   communityKycAcknowledged?: Boolean
+  communitySetup?: {} = {
+    street: false,
+    building: false,
+    member: false
+  }
   primaryAccountType?: string
   accountTypes?: AccType[]
   proofOfId?: string

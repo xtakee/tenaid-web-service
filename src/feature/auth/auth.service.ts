@@ -79,6 +79,11 @@ export class AuthService {
 
     if (primaryManagedCommunity) {
       dto.communityKycAcknowledged = account.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
+      dto.communitySetup = {
+        street: primaryManagedCommunity.communitySetup?.street === true,
+        building: primaryManagedCommunity.communitySetup?.building === true,
+        member: primaryManagedCommunity.communitySetup?.member === true
+      }
     }
 
     const permissions = await this.getUserManageAccountPermissions((account as any)._id)

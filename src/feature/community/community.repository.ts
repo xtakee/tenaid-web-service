@@ -350,12 +350,18 @@ export class CommunityRepository {
    * @returns 
    */
   async createPath(user: string, data: CommunityPathRequestDto): Promise<CommunityStreet> {
-    return await this.communityPathModel.create({
+    const street = await this.communityPathModel.create({
       community: new Types.ObjectId(data.community),
       account: new Types.ObjectId(user),
       name: data.name,
       description: data.description
     })
+
+    await this.communityModel.findByIdAndUpdate(data.community, {
+      'communitySetup.street': true
+    }).exec()
+
+    return street
   }
 
   /**
@@ -672,6 +678,10 @@ export class CommunityRepository {
         value: data.contactEmail
       }
     }
+
+    await this.communityModel.findByIdAndUpdate(community, {
+      'communitySetup.building': true
+    }).exec()
 
     return await this.communityBuildingModel.create(building)
   }
@@ -2354,6 +2364,10 @@ export class CommunityRepository {
         country: data.country
       }
     }
+
+    await this.communityModel.findByIdAndUpdate(community, {
+      'communitySetup.member': true
+    }).exec()
 
     return await this.communityMemberModel.create(member)
   }

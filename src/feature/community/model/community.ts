@@ -22,6 +22,18 @@ export class CommunityKyc {
   bankAccountCompleted?: boolean
 }
 
+@Schema()
+export class CommunitySetup {
+  @Prop({ required: true, default: false })
+  street?: boolean
+
+  @Prop({ required: true, default: false })
+  building?: boolean
+
+  @Prop({ required: true, default: false })
+  member?: boolean
+}
+
 @Schema({ timestamps: true })
 export class Community {
   @Prop({ type: Types.ObjectId, ref: Account.name })
@@ -53,6 +65,9 @@ export class Community {
 
   @Prop({ enum: COMMUNITY_TYPE })
   type: string
+
+  @Prop({ type: CommunitySetup })
+  communitySetup?: CommunitySetup
 
   @Prop()
   images?: string[]

@@ -241,8 +241,14 @@ export class AccountService {
     const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity(user)
     if (account) {
       const accountDto = this.mapper.map(account)
-      if (primaryManagedCommunity)
+      if (primaryManagedCommunity) {
         accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
+        accountDto.communitySetup = {
+          street: primaryManagedCommunity.communitySetup?.street === true,
+          building: primaryManagedCommunity.communitySetup?.building === true,
+          member: primaryManagedCommunity.communitySetup?.member === true
+        }
+      }
 
       return accountDto
     }
