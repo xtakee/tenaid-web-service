@@ -112,7 +112,7 @@ export class GoogleService {
    * @returns 
    */
   async pushOne(device: string, data: PushBody, silent: Boolean = false): Promise<Result> {
-    const payload = silent === true ? {
+    const payload = silent === false ? {
       message: {
         token: device,
         'notification': {
