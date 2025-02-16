@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsMongoId, IsOptional, IsEnum, IsDateString, IsArray } from "class-validator"
 import { MessageType } from "src/feature/community/model/community.message"
+import { EncryptionData } from "src/feature/e2ee/dto/encryption.data"
 
 export class ReactionDto {
   @IsNotEmpty()
@@ -48,9 +49,6 @@ export class MessageDto {
   body: string
 
   @IsOptional()
-  description?: string
-
-  @IsOptional()
   retained?: Boolean = true
 
   @IsOptional()
@@ -75,9 +73,6 @@ export class MessageDto {
   size?: number
 
   @IsOptional()
-  name?: string
-
-  @IsOptional()
   status?: string
 
   @IsOptional()
@@ -88,6 +83,8 @@ export class MessageDto {
 
   @IsOptional()
   reaction?: ReactionDto
+
+  encryption?: EncryptionData
 }
 
 export class MessageTypingDto {

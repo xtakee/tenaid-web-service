@@ -14,7 +14,8 @@ export enum ACCOUNT_STATUS {
 
 export enum DEVICE_TYPE {
   ANDROID = 'android',
-  IOS = 'ios'
+  IOS = 'ios',
+  WEB = 'web'
 }
 
 export const PASSWORD_MIN_LENGTH = 8

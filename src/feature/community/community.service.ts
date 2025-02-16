@@ -21,7 +21,6 @@ import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.m
 import { PaginatedEmptyResult, PaginatedResult } from 'src/core/helpers/paginator';
 import { INVITE_STATUS, MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
-import { CommunityMemberResponseDto } from './dto/response/community.member.response.dto';
 import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 import { AccountRepository } from '../account/account.respository';
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
@@ -46,6 +45,7 @@ import { CommunityDirectorDto } from './dto/response/community.director.dto';
 import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper';
 import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
 import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
+import { AuthHelper } from 'src/core/helpers/auth.helper';
 
 @Injectable()
 export class CommunityService {
@@ -61,6 +61,7 @@ export class CommunityService {
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
+    private readonly authHelper: AuthHelper,
     private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
@@ -80,7 +81,9 @@ export class CommunityService {
       data.isPrimary = !account.hasCommunity
     } else throw new BadRequestException()
 
-    const community = await this.communityRepository.createCommunity(user, data)
+    // generate community message encryption key
+    const encKey = this.authHelper.randomKey()
+    const community = await this.communityRepository.createCommunity(user, encKey, data)
     if (community) {
 
       const { member, _ } = await this.getMemberAccountExtras(user)

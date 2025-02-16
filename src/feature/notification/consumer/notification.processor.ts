@@ -30,7 +30,7 @@ export class NotificationProcessor extends WorkerHost {
 
       case 'push-notification-multiple': {
         const { devices, data } = job.data
-        await this.googleService.pushMultipleDevice(devices, data)
+        await this.googleService.pushMultipleDevice(devices, data, true)
         return
       }
     }

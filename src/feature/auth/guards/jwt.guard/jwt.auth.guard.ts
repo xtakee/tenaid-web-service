@@ -1,9 +1,9 @@
 
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthRepository } from '../../auth.repository';
-import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { JwtService } from '@nestjs/jwt';
-import { JwtConstants } from '../../jwt.constants';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
+import { AuthRepository } from '../../auth.repository'
+import { AuthHelper } from 'src/core/helpers/auth.helper'
+import { JwtService } from '@nestjs/jwt'
+import { JwtConstants } from '../../jwt.constants'
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -29,14 +29,14 @@ export class JwtAuthGuard implements CanActivate {
       request['user'] = payload;
 
     } catch (error) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException()
     }
 
     return true
   }
 
   private extractTokenFromHeader(request: any): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const [type, token] = request.headers.authorization?.split(' ') ?? []
+    return type === 'Bearer' ? token : undefined
   }
 }

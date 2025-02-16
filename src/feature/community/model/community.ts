@@ -34,6 +34,18 @@ export class CommunitySetup {
   member?: boolean
 }
 
+@Schema()
+export class E2eeData {
+  @Prop()
+  enc?: string
+
+  @Prop()
+  iv?: string
+
+  @Prop()
+  tag?: string
+}
+
 @Schema({ timestamps: true })
 export class Community {
   @Prop({ type: Types.ObjectId, ref: Account.name })
@@ -77,6 +89,9 @@ export class Community {
 
   @Prop()
   comment?: string
+
+  @Prop({ type: E2eeData })
+  encryption?: E2eeData
 
   @Prop({ type: Boolean, default: false })
   isPrimary?: Boolean

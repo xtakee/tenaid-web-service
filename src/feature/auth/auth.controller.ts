@@ -2,8 +2,8 @@ import { BadRequestException, Body, Controller, Param, Post, UseGuards } from '@
 import { AuthService } from './auth.service';
 import { AccountAuthRequestDto } from 'src/feature/auth/dto/request/account.auth.request.dto';
 import { AccountAuthResponseDto } from 'src/feature/auth/dto/response/account.auth.response.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { User } from 'src/core/decorators/current.user';
+import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { User } from 'src/core/decorators/user';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt.guard/jwt.auth.guard';
 import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response';
@@ -12,6 +12,7 @@ import { BasicAuth } from './guards/auth.decorator';
 import { AccountPointAuthRequestDto } from './dto/request/access.point.auth.request.dto';
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
 import { AccountLogoutRequestDto } from './dto/request/account.logout.request.dto';
+import { PublicKey } from 'src/core/decorators/public.key';
 
 @Controller({
   version: '1',
@@ -28,8 +29,9 @@ export class AuthController {
    */
   @Post('login')
   @ApiOperation({ summary: 'Login to a registered account' })
-  async login(@Body() data: AccountAuthRequestDto): Promise<AccountAuthResponseDto> {
-    return await this.authService.login(data.username, data.password, data.platform)
+  @ApiHeader({ name: 'enc-public-key', required: true })
+  async login(@Body() data: AccountAuthRequestDto, @PublicKey() key: string): Promise<AccountAuthResponseDto> {
+    return await this.authService.login(data.username, data.password, key, data.platform)
   }
 
   /**

@@ -1,5 +1,5 @@
 import { Prop, Schema } from "@nestjs/mongoose";
-import { CLAIM, SYSTEM_FEATURES } from "../auth.constants";
+import { CLAIM } from "../auth.constants";
 
 @Schema({ timestamps: true })
 export class Permission {

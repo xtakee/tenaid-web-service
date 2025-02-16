@@ -1,7 +1,6 @@
 import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
-import { Email, User } from 'src/core/decorators/current.user';
 import { CommunityService } from './community.service';
 import { BasicAuth } from '../auth/guards/auth.decorator';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
@@ -30,6 +29,8 @@ import { CreateCommunityDirectorDto } from './dto/request/create.community.direc
 import { CommunityDirectorDto } from './dto/response/community.director.dto';
 import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
 import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
+import { User } from 'src/core/decorators/user';
+import { Email } from 'src/core/decorators/email';
 
 @Controller({
   version: '1',

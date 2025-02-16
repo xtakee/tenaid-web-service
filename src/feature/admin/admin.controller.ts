@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { User } from 'src/core/decorators/current.user';
+import { User } from 'src/core/decorators/user';
 import { ReviewAddOnRequestDto } from 'src/feature/admin/dto/request/review.add.on.request.dto';
 import { Auth } from '../auth/guards/auth.decorator';
 import { MongoAbility } from '@casl/ability';

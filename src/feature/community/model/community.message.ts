@@ -31,6 +31,15 @@ export class MessageReaction {
   users: Types.ObjectId[]
 }
 
+@Schema()
+export class E2eeData {
+  @Prop()
+  iv?: string
+
+  @Prop()
+  tag?: string
+}
+
 @Schema({ timestamps: true })
 export class CommunityMessage {
   @Prop({ type: Types.ObjectId, ref: Community.name })
@@ -60,17 +69,14 @@ export class CommunityMessage {
   @Prop()
   path?: string
 
+  @Prop({ type: E2eeData })
+  encryption?: E2eeData
+
   @Prop({ enum: MessageType })
   type: string
 
   @Prop({ enum: MessageStatus, default: MessageStatus.SENT })
   status?: string
-
-  @Prop()
-  description?: string
-
-  @Prop()
-  name?: string
 
   @Prop({ default: false })
   edited?: Boolean

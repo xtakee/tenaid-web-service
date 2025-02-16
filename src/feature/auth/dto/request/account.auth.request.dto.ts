@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsEmail, IsEnum, IsNotEmpty } from "class-validator"
+import { IsPrimeBase64 } from "src/core/validators/is.prime.base64"
 
 enum Platform {
   WEB = 'web',

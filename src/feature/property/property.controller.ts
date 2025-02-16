@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PropertyComplexResponeDto } from 'src/feature/property/dto/response/property.complex.response.dto';
 import { PropertyService } from './property.service';
-import { User } from 'src/core/decorators/current.user';
+import { User } from 'src/core/decorators/user';
 import { CreatePropertyComplexDto } from 'src/feature/property/dto/request/create.property.complex.dto';
 import { isMongoId } from 'class-validator';
 import { MongoAbility } from '@casl/ability';

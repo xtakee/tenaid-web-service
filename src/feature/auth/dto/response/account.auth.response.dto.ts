@@ -7,4 +7,7 @@ export class AccountAuthResponseDto {
 
   @ApiProperty()
   authorization: string
+
+  @ApiProperty()
+  key?: string
 }

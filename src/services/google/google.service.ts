@@ -107,17 +107,37 @@ export class GoogleService {
    * @param title 
    * @param data 
    * @param body 
+   * @param silent 
    * @param deviceToken 
    * @returns 
    */
-  async pushOne(device: string, data: PushBody): Promise<Result> {
-    const payload = {
+  async pushOne(device: string, data: PushBody, silent: Boolean = false): Promise<Result> {
+    const payload = silent === true ? {
       message: {
         token: device,
         'notification': {
           'body': data.description,
           'title': data.title
         },
+        data: data,
+        android: {
+          priority: 'high'
+        },
+        apns: {
+          headers: {
+            'apns-priority': '5',
+            'apns-push-type': 'background'
+          },
+          payload: {
+            'aps': {
+              contentAvailable: true
+            }
+          }
+        }
+      }
+    } : {
+      message: {
+        token: device,
         data: data,
         android: {
           priority: 'high'
@@ -145,11 +165,11 @@ export class GoogleService {
    * @param data 
    * @returns 
    */
-  async pushMultipleDevice(devices: string[], data: PushBody): Promise<Result[]> {
+  async pushMultipleDevice(devices: string[], data: PushBody, silent: Boolean = false): Promise<Result[]> {
     if (devices.length < 1) return
     const responses: Result[] = []
     for (const token of devices) {
-      const response = await this.pushOne(token, data)
+      const response = await this.pushOne(token, data, silent)
       responses.push(response)
     }
 

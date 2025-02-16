@@ -103,7 +103,7 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
 }
 
 const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
-const COMMUNITY_SELECT_QUERY = '_id name size kyc description kycAcknowledged code members type images logo status isPrimary address'
+const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description kycAcknowledged code members type images logo status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'street',
@@ -113,7 +113,7 @@ const MEMBER_COMMUNITIES_QUERY = [{
   select: '_id buildingNumber type'
 }, {
   path: 'community',
-  select: '_id name code members description kycAcknowledged images type logo address createdAt updatedAt'
+  select: '_id name code members description kycAcknowledged images type logo address createdAt updatedAt encryption'
 }, {
   path: 'linkedTo',
   select: '_id extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
@@ -177,7 +177,7 @@ const COMMUNITY_BUILDING_QUERY = '_id community street type contactEmail contact
 
 function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
   return {
-    select: '_id author messageId status repliedTo body deleted edited name size extension type description date community category',
+    select: '_id author messageId encryption status repliedTo body deleted edited name size extension type description date community category',
     page: page,
     limit: limit,
     sort: { date: sort === SortDirection.ASC ? 1 : -1 },
@@ -210,7 +210,7 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async createCommunity(user: string, data: CommunityDto): Promise<Community> {
+  async createCommunity(user: string, key: string, data: CommunityDto): Promise<Community> {
     const community: Community = {
       name: data.name,
       size: data.size,
@@ -219,6 +219,7 @@ export class CommunityRepository {
       code: data.code,
       type: data.type,
       logo: data.logo,
+      encryption: { enc: key },
       kyc: {
         excosCompleted: false,
         documentsCompleted: false,
@@ -1699,7 +1700,7 @@ export class CommunityRepository {
         _id: new Types.ObjectId(message),
         community: new Types.ObjectId(community)
       },
-      '_id author messageId account street status repliedTo body deleted edited type description name size extension date community category')
+      '_id author messageId encryption account street status repliedTo body deleted edited type description name size extension date community category')
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }
 
@@ -1740,11 +1741,10 @@ export class CommunityRepository {
       community: new Types.ObjectId(message.community),
       author: new Types.ObjectId(message.author),
       type: message.type,
-      description: message.description,
       body: message.body,
       path: message.path,
       size: message.size,
-      name: message.name,
+      encryption: message.encryption,
       category: message.category ? new Types.ObjectId(message.category) : null,
       extension: message.extension,
       repliedTo: message.repliedTo ? new Types.ObjectId(message.repliedTo) : null,
@@ -1783,6 +1783,7 @@ export class CommunityRepository {
    * @returns 
    */
   private buildMessage(user: string, data: MessageDto) {
+    console.log(data)
     return {
       _id: new Types.ObjectId(data.remoteId),
       messageId: data.messageId,
@@ -1790,6 +1791,7 @@ export class CommunityRepository {
       author: new Types.ObjectId(data.author),
       account: new Types.ObjectId(data.account ? data.account : user),
       retained: data.retained,
+      encryption: data.encryption,
       body: data.body,
       path: data.path,
       reactions: data.reactions.map((react) => {
@@ -1804,8 +1806,6 @@ export class CommunityRepository {
       category: data.category ? new Types.ObjectId(data.category) : null,
       community: new Types.ObjectId(data.community),
       type: data.type,
-      description: data.description,
-      name: data.name,
       size: data.size,
       date: data.date,
       extension: data.extension,

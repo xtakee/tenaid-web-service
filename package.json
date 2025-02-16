@@ -46,6 +46,7 @@
     "dayjs": "^1.11.13",
     "dayjs-plugin-utc": "^0.1.2",
     "dotenv": "^16.4.5",
+    "elliptic": "^6.6.1",
     "express-basic-auth": "^1.2.1",
     "g": "^2.0.1",
     "google-auth-library": "^9.14.0",

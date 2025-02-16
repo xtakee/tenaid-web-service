@@ -22,6 +22,7 @@ import { Paginator } from 'src/core/helpers/paginator';
 import { DeviceToken, DeviceTokenSchema } from './model/device.token';
 import { searchable } from 'src/core/util/searchable';
 import { CommunityModule } from '../community/community.module';
+import { E2eeModule } from '../e2ee/e2ee.module';
 
 @Global()
 @Module({
@@ -78,7 +79,8 @@ import { CommunityModule } from '../community/community.module';
     MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
     MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }]),
     MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }]),
-    CommunityModule
+    CommunityModule,
+    E2eeModule
   ],
   providers: [
     AccountService,

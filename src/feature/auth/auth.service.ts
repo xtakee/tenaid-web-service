@@ -17,6 +17,7 @@ import { CommunityRepository } from '../community/community.repository';
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
 import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
 import { Community } from '../community/model/community';
+import { E2eeService } from '../e2ee/e2ee.service';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
   constructor(
     private readonly accountRepository: AccountRepository,
     private readonly authRepository: AuthRepository,
+    private readonly e2eeService: E2eeService,
     private readonly accountToDtoMapper: AccountToDtoMapper,
     private readonly adminRepository: AdminRepository,
     private readonly adminAccountMapper: AccountAdminToDtoMapper,
@@ -72,7 +74,7 @@ export class AuthService {
    * @param account 
    * @returns AccountAuthResponseDto
    */
-  private async getAuthorizationResponse(account: Account, platform: string): Promise<AccountAuthResponseDto> {
+  private async getAuthorizationResponse(account: Account, publicKey: string, platform: string): Promise<AccountAuthResponseDto> {
 
     const dto = this.accountToDtoMapper.map(account)
     const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
@@ -88,7 +90,14 @@ export class AuthService {
 
     const permissions = await this.getUserManageAccountPermissions((account as any)._id)
 
-    const payload = { sub: (account as any)._id, sub_0: (account as any)._id, permissions: permissions, email: account.email.value };
+    const payload = {
+      sub: (account as any)._id,
+      sub_0: (account as any)._id,
+      permissions: permissions,
+      email: account.email.value,
+      platform: platform
+    }
+
     const token = this.jwtService.sign(payload)
 
     const platformKey = `${(account as any)._id.toString()}-${platform}`
@@ -96,9 +105,15 @@ export class AuthService {
     const authorization = this.authHelper.encrypt(platformKey)
     this.authRepository.saveAuthToken(platformKey, token)
 
+    const encKey = await this.e2eeService.generateKeys((account as any)._id.toString(), {
+      platform: platform,
+      publicKey: publicKey
+    })
+
     return {
       account: dto,
-      authorization: authorization
+      authorization: authorization,
+      key: encKey
     }
   }
 
@@ -108,18 +123,18 @@ export class AuthService {
    * @param password 
    * @returns AccountAuthResponseDto
    */
-  async login(username: string, password: string, platform: string): Promise<AccountAuthResponseDto> {
+  async login(username: string, password: string, publicKey: string, platform: string): Promise<AccountAuthResponseDto> {
     const account: Account = await this.accountRepository.getOneByEmail(username.trim().toLowerCase())
 
     if (account) {
-      const isMatch = await this.authHelper.isMatch(password, account.password);
+      const isMatch = await this.authHelper.isMatch(password, account.password)
 
       if (isMatch) {
-        return await this.getAuthorizationResponse(account, platform)
+        return await this.getAuthorizationResponse(account, publicKey, platform)
       }
     }
 
-    throw new BadRequestException(INVALID_LOGIN_ERROR);
+    throw new BadRequestException(INVALID_LOGIN_ERROR)
   }
 
   /**

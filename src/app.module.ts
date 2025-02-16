@@ -21,6 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { JobsModule } from './jobs/jobs.module';
 import { UtilityModule } from './feature/utility/utility.module';
 import { BillingModule } from './feature/billing/billing.module';
+import { E2eeModule } from './feature/e2ee/e2ee.module';
 
 @Module({
   imports: [
@@ -53,7 +54,8 @@ import { BillingModule } from './feature/billing/billing.module';
     ScheduleModule.forRoot(),
     JobsModule,
     UtilityModule,
-    BillingModule
+    BillingModule,
+    E2eeModule
   ],
   providers: []
 })

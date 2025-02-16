@@ -15,7 +15,7 @@ import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.ban
 import { Permission } from "../auth/model/permission";
 import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings";
 import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
-import { AuthHelper } from "src/core/helpers/auth.helper";
+import { AuthHelper, EasGcmData } from "src/core/helpers/auth.helper";
 import { Types } from "mongoose";
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
 import { CommunityRepository } from "../community/community.repository";
@@ -23,6 +23,7 @@ import { PaginatedResult } from "src/core/helpers/paginator";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
+import { E2eeRepository } from "../e2ee/e2ee.repository";
 
 @Injectable()
 export class AccountService {
@@ -31,6 +32,7 @@ export class AccountService {
     private readonly accountRepository: AccountRepository,
     private readonly mapper: AccountToDtoMapper,
     private readonly authHelper: AuthHelper,
+    private readonly e2eeRepository: E2eeRepository,
     private readonly communityRepository: CommunityRepository,
     private readonly bankRepository: BankRepository,
     private readonly bankMapper: BankAccountToDtoMapper
@@ -378,25 +380,96 @@ export class AccountService {
   }
 
   /**
- * 
- * @param user 
- * @param page 
- * @param limit 
- * @returns 
- */
-  async getAccountCommunities(user: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllAccountCommunities(user, paginate)
+   * 
+   * @param user 
+   * @param platfom 
+   * @param docs 
+   * @returns 
+   */
+  private async processAccountCommunityEncryption(user: string, platfom: string, result: any): Promise<any> {
+
+    if (result.docs.length < 1) return result
+
+    // get user shared key
+    const encKeys = await this.e2eeRepository.getAccountKeys(user, platfom)
+    if (!encKeys || !encKeys.sharedKey) return result
+
+    result.docs = result.docs.map((account) => {
+      const encKey = account.community.encryption?.enc
+      if (encKey) {
+        // encrypt community group key
+        const keys: EasGcmData = this.authHelper.advanceEncrypt(encKey, encKeys.sharedKey)
+
+        account.community.encryption = {
+          enc: keys.enc,
+          iv: keys.iv,
+          tag: keys.tag
+        }
+      }
+
+      return account
+    })
+
+    return result
   }
 
   /**
- * 
- * @param user 
- * @param page 
- * @param limit 
- * @returns 
- */
-  async getAccountManagedCommunities(user: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAccountManagedCommunities(user, paginate)
+   * 
+   * @param user 
+   * @param platfom 
+   * @param result 
+   * @returns 
+   */
+  private async processCommunityEncryption(user: string, platfom: string, result: any): Promise<any> {
+
+    if (result.docs.length < 1) return result
+
+    // get user shared key
+    const encKeys = await this.e2eeRepository.getAccountKeys(user, platfom)
+    if (!encKeys || !encKeys.sharedKey) return result
+
+    result.docs = result.docs.map((community) => {
+      const encKey = community.encryption?.enc
+      if (encKey) {
+        // encrypt community group key
+        const keys: EasGcmData = this.authHelper.advanceEncrypt(encKey, encKeys.sharedKey)
+
+        community.encryption = {
+          enc: keys.enc,
+          iv: keys.iv,
+          tag: keys.tag
+        }
+      }
+
+      return community
+    })
+
+    return result
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param platfom 
+   * @param paginate 
+   * @returns 
+   */
+  async getAccountCommunities(user: string, platfom: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const result = await this.communityRepository.getAllAccountCommunities(user, paginate)
+    return await this.processAccountCommunityEncryption(user, platfom, result)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param platfom 
+   * @param paginate 
+   * @returns 
+   */
+  async getAccountManagedCommunities(user: string, platfom: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const result = await this.communityRepository.getAccountManagedCommunities(user, paginate)
+
+    return await this.processCommunityEncryption(user, platfom, result)
   }
 
   /**

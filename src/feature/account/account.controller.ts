@@ -8,7 +8,6 @@ import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.ac
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
 import { AddOnRequestDto } from "src/feature/account/dto/request/add.on.request.dto";
-import { Email, RootUser, User } from "src/core/decorators/current.user";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
 import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth, BasicAuth } from "../auth/guards/auth.decorator";
@@ -24,6 +23,10 @@ import { PaginatedResult } from "src/core/helpers/paginator";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
+import { User } from "src/core/decorators/user";
+import { RootUser } from "src/core/decorators/root.user";
+import { Email } from "src/core/decorators/email";
+import { Platform } from "src/core/decorators/platfom";
 
 @Controller({
   version: '1',
@@ -271,8 +274,8 @@ export class AccountController {
   @Get('community/managed')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all account managed communities' })
-  async getAccountManagedCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.accountService.getAccountManagedCommunities(user, paginate)
+  async getAccountManagedCommunities(@User() user: string, @Platform() platform: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountManagedCommunities(user, platform, paginate)
   }
 
   /**
@@ -285,8 +288,8 @@ export class AccountController {
   @Get('community/')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all account communities' })
-  async getAccountCommunities(@User() user: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.accountService.getAccountCommunities(user, paginate)
+  async getAccountCommunities(@User() user: string, @Platform() platform: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.accountService.getAccountCommunities(user, platform, paginate)
   }
 
   /**
