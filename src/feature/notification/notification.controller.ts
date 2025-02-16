@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiProperty, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
-import { NotificationService } from './notification.service';
+import { Body, Controller, Post } from '@nestjs/common'
+import { ApiProperty, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { IsNotEmpty } from 'class-validator'
+import { NotificationService } from './notification.service'
+import { EncryptionData } from '../e2ee/dto/encryption.data'
 
 export class PushBody {
   title: string
@@ -9,6 +10,7 @@ export class PushBody {
   description: string
   community: string
   link: string
+  encryption?: EncryptionData
   contentId?: string
 }
 

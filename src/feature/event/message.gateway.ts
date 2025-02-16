@@ -347,6 +347,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         devices: tokens,
         data: {
           community: community,
+          encryption: message.encryption,
           link: 'home/message',
           type: 'message',
           title: sender,
