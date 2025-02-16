@@ -10,7 +10,7 @@ export class PushBody {
   description: string
   community: string
   link: string
-  encryption?: EncryptionData
+  encryption?: string
   contentId?: string
 }
 
