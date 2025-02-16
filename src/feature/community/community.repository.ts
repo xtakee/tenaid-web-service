@@ -2326,7 +2326,7 @@ export class CommunityRepository {
     }, '_id type message').populate(
       {
         path: 'message',
-        select: '_id author account reactions deletedBy messageId status repliedTo body deleted edited name size extension type description date community category',
+        select: '_id author encryption account reactions deletedBy messageId status repliedTo body deleted edited name size extension type description date community category',
         populate: CommunityMessagePopulateQuery
       }
     ).exec() as any
