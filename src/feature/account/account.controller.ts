@@ -5,7 +5,7 @@ import { AccountUpdateDto } from "src/feature/account/dto/request/account.update
 import { AccountResponseDto, Role } from "src/feature/account/dto/response/account.response.dto";
 import { AddBankAccountDto } from "src/feature/account/dto/request/add.bank.account.dto";
 import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
 import { AddOnRequestDto } from "src/feature/account/dto/request/add.on.request.dto";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
@@ -20,7 +20,7 @@ import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.pa
 import { ChangePasswordDto } from "src/feature/account/dto/request/change.password.dto";
 import { AddressDto } from "src/feature/core/dto/address.dto";
 import { PaginatedResult } from "src/core/helpers/paginator";
-import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
+import { DateDto, PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { User } from "src/core/decorators/user";
@@ -276,6 +276,17 @@ export class AccountController {
   @ApiOperation({ summary: 'Get all account managed communities' })
   async getAccountManagedCommunities(@User() user: string, @Platform() platform: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.accountService.getAccountManagedCommunities(user, platform, paginate)
+  }
+
+  @Get('/last-message/unread')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get latest unread account message' })
+  @ApiQuery({ name: 'date', required: false, type: String })
+  async getCommunityLatestUnreadMessage(
+    @User() user: string,
+    @Query() date?: DateDto,
+  ): Promise<any> {
+    return await this.accountService.getCommunityLatestUnreadMessage(user, date.date)
   }
 
   /**

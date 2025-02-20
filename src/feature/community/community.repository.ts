@@ -1326,6 +1326,19 @@ export class CommunityRepository {
   /**
    * 
    * @param user 
+   * @returns 
+   */
+  async getAccountPrimaryCommunity(user: string): Promise<any> {
+    return await this.communityMemberModel.findOneAndUpdate(
+      { account: new Types.ObjectId(user) },
+      { isPrimary: true },
+      { returnDocument: 'after', fields: COMMUNITY_MEMBER_PRIMARY_QUERY }
+    ).populate(MEMBER_COMMUNITIES_QUERY).exec()
+  }
+
+  /**
+   * 
+   * @param user 
    * @param community 
    * @returns 
    */
@@ -1646,6 +1659,9 @@ export class CommunityRepository {
    * @returns 
    */
   async updateCommunityEventNodeConnection(communities: string[], account: string, token: string, device: string, platform: string): Promise<CommunityEventNode> {
+    
+    //const {token} = await this.devi 
+    
     return await this.communityEventNodeModel.findOneAndUpdate({
       account: new Types.ObjectId(account),
       platform: platform
@@ -1951,7 +1967,8 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async deleteMessage(user: string, member: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+  async deleteMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+    const accountCommunity = await this.getAccountPrimaryCommunity(user)
 
     // create cache message for offline and delivery status
     await this.createCommunityMessageCache(
@@ -1970,7 +1987,7 @@ export class CommunityRepository {
     }, {
       deleted: true,
       _id: new Types.ObjectId(data.remoteId),
-      deletedBy: new Types.ObjectId(member),
+      deletedBy: accountCommunity._id,
       ...this.buildMessage(user, data)
     },
       { new: true, upsert: true })
@@ -1991,6 +2008,36 @@ export class CommunityRepository {
 
     return await this.paginator.paginate(this.communityMessageModel,
       query, getCommunityMessagesQuery(page, limit, sort))
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityLatestUnreadMessage(user: string, date?: string): Promise<any> {
+    const communities = await this.getAllAccountActiveCommunities(user)
+
+    const query: any = {
+      community: { $in: communities.map((account) => (account as any).community) },
+      targets: {
+        $ne: {
+          target: new Types.ObjectId(user),
+        }
+      }
+    }
+
+    if (date) query.createdAt = { $gt: new Date(date) }
+
+    return await this.communityMessageCacheModel.findOne(query, '_id type message createdAt updatedAt').populate(
+      {
+        path: 'message',
+        select: '_id author encryption account reactions deletedBy messageId status repliedTo body deleted edited name size extension type description date community category',
+        populate: CommunityMessagePopulateQuery
+      }
+    ).exec() as any
   }
 
   /**

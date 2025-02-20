@@ -414,6 +414,20 @@ export class AccountService {
   }
 
   /**
+ * 
+ * @param user 
+ * @param community 
+ * @param date 
+ * @returns 
+ */
+  async getCommunityLatestUnreadMessage(user: string, date?: string): Promise<any> {
+    const message = await this.communityRepository.getCommunityLatestUnreadMessage(user, date)
+    if (message) return message;
+
+    throw new NotFoundException()
+  }
+
+  /**
    * 
    * @param user 
    * @param platfom 

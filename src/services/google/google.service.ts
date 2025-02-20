@@ -112,12 +112,12 @@ export class GoogleService {
    * @returns 
    */
   async pushOne(device: string, data: PushBody, silent: Boolean = false): Promise<Result> {
-    const payload = silent === false ? {
+    const payload = !silent ? {
       message: {
         token: device,
-        'notification': {
-          'body': data.description,
-          'title': data.title
+        notification: {
+          body: data.description,
+          title: data.title
         },
         data: data,
         android: {
@@ -129,7 +129,7 @@ export class GoogleService {
             'apns-push-type': 'background'
           },
           payload: {
-            'aps': {
+            aps: {
               contentAvailable: true
             }
           }

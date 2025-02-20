@@ -9,6 +9,7 @@ import { NotificationService } from "../notification/notification.service"
 import { MessageAckDto } from "./dto/message.ack.dto"
 import { MessageStatus } from "../community/model/community.message"
 import { CacheMessageDto } from "./dto/cache.message.dto"
+import { AccountRepository } from "../account/account.respository"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -38,7 +39,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   constructor(
     private readonly authGuard: WsJwtAuthGuard,
     private readonly communityRepository: CommunityRepository,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly accountRepository: AccountRepository
   ) { }
 
   @WebSocketServer()
@@ -56,9 +58,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     // client authentication
     const account: string = client.data.user.sub
     const device: string = client.handshake.headers.device as string
-    const community: string = client.handshake.headers.community as string
+    const { community } = await this.communityRepository.getAccountPrimaryCommunity(account)
 
-    const data = await this.getTypingEventData(community, account, false)
+    const data = await this.getTypingEventData(community._id.toString(), account, false)
     this.server.to(community).emit(EVENT_NAME_TYPING, data)
 
     if (account)
@@ -69,9 +71,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   async handleConnection(client: Socket, ...args: any[]) {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-
       const account: string = client.data.user.sub
-      const token: string = client.handshake.headers.token as string
       const device: string = client.handshake.headers.device as string
       const platform: string = client.handshake.headers.platform as string
 
@@ -89,6 +89,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const offlinePrivateRoom = `${account}-${EVENT_NAME_OFFLINE}`
       // join user private offline room
       client.join(offlinePrivateRoom)
+
+      const { token } = await this.accountRepository.getDevicePushToken(account)
 
       // udpate client nodes
       await this.updateClientConnection({
@@ -129,13 +131,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
-      const member: string = client.handshake.headers.member as string
 
       // get total expected audience
       const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
       const targetNodes: number = await this.communityRepository.getTotalCommunityEffectiveEventNodes(community)
 
-      const response = await this.communityRepository.deleteMessage(account, member, message, totalNodes, targetNodes)
+      const response = await this.communityRepository.deleteMessage(account, message, totalNodes, targetNodes)
       this.server.to(community).emit(EVENT_NAME_DELETE, response)
     }
 
