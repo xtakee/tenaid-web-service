@@ -1616,6 +1616,17 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @returns 
+   */
+  async setAppOpenedSinceLastPush(user: string): Promise<CommunityEventNode[]> {
+    return await this.communityEventNodeModel.findOneAndUpdate({
+      account: new Types.ObjectId(user)
+    }, { appOpenedSinceLastPush: true })
+  }
+
+  /**
+   * 
    * @param community 
    * @returns 
    */
@@ -1659,9 +1670,9 @@ export class CommunityRepository {
    * @returns 
    */
   async updateCommunityEventNodeConnection(communities: string[], account: string, token: string, device: string, platform: string): Promise<CommunityEventNode> {
-    
+
     //const {token} = await this.devi 
-    
+
     return await this.communityEventNodeModel.findOneAndUpdate({
       account: new Types.ObjectId(account),
       platform: platform
@@ -1702,6 +1713,17 @@ export class CommunityRepository {
       account: { $ne: new Types.ObjectId(account) },
       status: 'offline'
     }, 'token');
+  }
+
+  /**
+   * 
+   * @param accounts 
+   */
+  async clearAppOpenSinceLastPush(accounts: Types.ObjectId[]): Promise<void> {
+    await this.communityEventNodeModel.updateMany(
+      { account: { $in: accounts } }, // Match accounts in the list
+      { $set: { appOpenedSinceLastPush: false } } // Update status field
+    )
   }
 
   /**
@@ -2034,7 +2056,7 @@ export class CommunityRepository {
     return await this.communityMessageCacheModel.findOne(query, '_id type message createdAt updatedAt').populate(
       {
         path: 'message',
-        select: '_id author encryption account reactions deletedBy messageId status repliedTo body deleted edited name size extension type description date community category',
+        select: '_id author encryption account reactions deletedBy messageId status repliedTo body deleted edited name createdAt updatedAt size extension type description date community category',
         populate: CommunityMessagePopulateQuery
       }
     ).exec() as any

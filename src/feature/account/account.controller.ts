@@ -278,6 +278,12 @@ export class AccountController {
     return await this.accountService.getAccountManagedCommunities(user, platform, paginate)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param date 
+   * @returns 
+   */
   @Get('/last-message/unread')
   @BasicAuth()
   @ApiOperation({ summary: 'Get latest unread account message' })
@@ -287,6 +293,17 @@ export class AccountController {
     @Query() date?: DateDto,
   ): Promise<any> {
     return await this.accountService.getCommunityLatestUnreadMessage(user, date.date)
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  @Post('/opened_since_last_push')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Set App Opened Since Last Push Notification' })
+  async setAppOpenedSinceLastPush(@User() user: string): Promise<void> {
+    await this.accountService.setAppOpenedSinceLastPush(user)
   }
 
   /**
@@ -315,6 +332,12 @@ export class AccountController {
     return await this.accountService.getAccountPendingCommunityInvites(email)
   }
 
+  /**
+   * 
+   * @param user 
+   * @param body 
+   * @returns 
+   */
   @Post('push-token')
   @BasicAuth()
   @ApiOperation({ summary: 'Update account device push token' })

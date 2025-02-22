@@ -7,6 +7,7 @@ import { EncryptionData } from '../e2ee/dto/encryption.data'
 export class PushBody {
   title: string
   type: string
+  content?: string
   description: string
   community: string
   link: string

@@ -39,6 +39,12 @@ import { CommunityBuilding, CommunityBuildingSchema } from './model/community.bu
 import { CommunityDirector, CommunityDirectorSchema } from './model/community.director'
 import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper'
 import { CommunityRegistration, CommunityRegistrationSchema } from './model/community.registration'
+import { BullModule } from '@nestjs/bullmq'
+import { CommunityQueueProcessor } from './queue/community.queue.processor'
+
+const queue = BullModule.registerQueue({
+  name: 'community_message_queue',
+})
 
 @Module({
   providers: [
@@ -63,6 +69,7 @@ import { CommunityRegistration, CommunityRegistrationSchema } from './model/comm
     CommunityAccountToDtoMapper,
     CommunityInviteToDtoMapper,
     CommunityMemberToDtoMapper,
+    CommunityQueueProcessor,
     AddressToDtoMapper],
   controllers: [CommunityController],
   exports: [CommunityRepository, CommunityService, CommunityToDtoMapper],
@@ -207,7 +214,8 @@ import { CommunityRegistration, CommunityRegistrationSchema } from './model/comm
     }]),
     MongooseModule.forFeature([{ name: CommunityRegistration.name, schema: CommunityRegistrationSchema }]),
     MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
-    NotificationModule
+    NotificationModule,
+    queue
   ]
 })
 

@@ -22,39 +22,39 @@ export class NotificationService {
   constructor(@InjectQueue('notification') private readonly queue: Queue) { }
 
   private batchArray<T>(array: string[]): string[][] {
-    const batches: string[][] = [];
+    const batches: string[][] = []
     for (let i = 0; i < array.length; i += BATCH_SIZE) {
-      batches.push(array.slice(i, i + BATCH_SIZE));
+      batches.push(array.slice(i, i + BATCH_SIZE))
     }
-    return batches;
+    return batches
   }
 
   /**
    * 
    * @param data 
    */
-  async pushToDevice(data: PushDto): Promise<void> {
-    await this.queue.add('push-notification-single', data);
+  async pushToDevice(data: PushDto, silent: Boolean = false): Promise<void> {
+    await this.queue.add('push-notification-single', data)
   }
 
   /**
    * 
    * @param data 
    */
-  async pushToManyDevices(data: PushMultipleDto): Promise<void> {
+  async pushToManyDevices(data: PushMultipleDto, silent: Boolean = false): Promise<void> {
     if (data.devices.length <= BATCH_SIZE) {
 
       await this.queue.add('push-notification-multiple', {
-        devices: data.devices, data: data.data
+        devices: data.devices, data: data.data, silent: silent
       });
-      
+
     } else {
       // we want to batch the pushes to all devices
       const batches = this.batchArray(data.devices)
       for (const devices of batches) {
         await this.queue.add('push-notification-multiple', {
-          devices: devices, data: data.data
-        });
+          devices: devices, data: data.data, silent: silent
+        })
       }
 
     }
@@ -65,7 +65,7 @@ export class NotificationService {
    * @param data 
    */
   async pushToTopic(data: PushTopicDto): Promise<void> {
-    await this.queue.add('push-notification-global', data);
+    await this.queue.add('push-notification-global', data)
   }
 
 }

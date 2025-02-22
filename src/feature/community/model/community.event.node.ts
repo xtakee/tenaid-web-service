@@ -16,6 +16,9 @@ export class CommunityEventNode {
   @Prop()
   token?: string
 
+  @Prop({ default: true })
+  appOpenedSinceLastPush?: Boolean
+
   @Prop()
   device: string
 

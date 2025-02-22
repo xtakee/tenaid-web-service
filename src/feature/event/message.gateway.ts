@@ -10,6 +10,7 @@ import { MessageAckDto } from "./dto/message.ack.dto"
 import { MessageStatus } from "../community/model/community.message"
 import { CacheMessageDto } from "./dto/cache.message.dto"
 import { AccountRepository } from "../account/account.respository"
+import { CommunityEventNode } from "../community/model/community.event.node"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -318,6 +319,47 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     return message
   }
 
+  /**
+   * 
+   * @param type 
+   * @returns 
+   */
+  private getMessageBody(type: string) {
+    switch (type) {
+      case 'image': return 'An image has been shared with you'
+      case 'video': return 'A video has been shared with you'
+      case 'file': return 'A file has been shared with you'
+    }
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param sender 
+   * @param message 
+   * @param messageId 
+   * @param tokens 
+   * @param silent 
+   */
+  private async sendOfflineMessages(community: string, sender: string, message: MessageDto, messageId: string, tokens: any[], silent: Boolean): Promise<void> {
+    const push: PushMultipleDto = {
+      devices: tokens,
+      data: {
+        community: community,
+        encryption: JSON.stringify(message.encryption),
+        content: message.type === 'text' ? message.body : this.getMessageBody(message.type),
+        link: 'home/message',
+        type: 'message',
+        title: sender,
+        description: 'You have a new message!',
+        contentId: messageId
+      }
+    }
+
+    // send to all offline devices
+    await this.notificationService.pushToManyDevices(push, silent)
+  }
+
   // handle new message
   @SubscribeMessage(EVENT_NAME)
   async handleMessage(
@@ -336,29 +378,31 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const response: MessageResonseDto = await this.communityRepository.createMessage(account, message, totalNodes, targetNodes)
 
       this.server.to(community).emit(EVENT_NAME, response)
+      const sender = response.author.isAdmin ? 'Admin' : `${response.author.extra.firstName} ${response.author.extra.lastName}`
 
       // get all onffline devices and send push notifications
       const offlineDevices = await this.communityRepository.getOfflineCommunityEventNodesTokens(community, account)
-      const tokens = offlineDevices.map((device) => (device as any).token)
 
-      const sender = response.author.isAdmin ? response.community.name : `${response.author.extra.firstName} ${response.author.extra.lastName}`
-      const body = response.type == 'text' ? response.body : 'A file has been shared with you'
+      // get all offline devices who have opened the app after a wake push
+      const wakeUpNotifications: CommunityEventNode[] = offlineDevices.map((node: CommunityEventNode) => node.appOpenedSinceLastPush === true)
 
-      const push: PushMultipleDto = {
-        devices: tokens,
-        data: {
-          community: community,
-          encryption: JSON.stringify(message.encryption),
-          link: 'home/message',
-          type: 'message',
-          title: sender,
-          description: body,
-          contentId: (response as any).messageId
-        }
+      if (wakeUpNotifications.length > 0) {
+        // clear app opened since last push
+        await this.communityRepository.clearAppOpenSinceLastPush(wakeUpNotifications.map((node) => node.account))
       }
 
-      // send to all offline devices
-      await this.notificationService.pushToManyDevices(push)
+      // get all onffline devices and send silent push notifications who has not opened the app after a wake push
+      const silentNotifications: CommunityEventNode[] = offlineDevices.map((node: CommunityEventNode) => node.appOpenedSinceLastPush === false)
+
+      let tokens = wakeUpNotifications.map((device: CommunityEventNode) => (device as any).token)
+
+      // send wake notifications to users who have not recieved a wake previuosly
+      await this.sendOfflineMessages(community, sender, message, (response as any).messageId, tokens, false)
+
+      tokens = silentNotifications.map((device: CommunityEventNode) => (device as any).token)
+
+      // send silent notifications to users who has recieved a wake previuosly
+      await this.sendOfflineMessages(community, sender, message, (response as any).messageId, tokens, true)
     }
 
     return message;

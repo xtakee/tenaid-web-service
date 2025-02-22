@@ -422,9 +422,18 @@ export class AccountService {
  */
   async getCommunityLatestUnreadMessage(user: string, date?: string): Promise<any> {
     const message = await this.communityRepository.getCommunityLatestUnreadMessage(user, date)
-    if (message) return message;
+
+    if (message) return message
 
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  async setAppOpenedSinceLastPush(user: string): Promise<void> {
+    await this.communityRepository.setAppOpenedSinceLastPush(user)
   }
 
   /**

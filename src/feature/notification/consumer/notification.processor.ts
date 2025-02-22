@@ -18,19 +18,19 @@ export class NotificationProcessor extends WorkerHost {
   async process(job: Job<any, any, string>): Promise<any> {
     switch (job.name) {
       case 'push-notification-single': {
-        const { device, data } = job.data
+        const { device, data, silent } = job.data
         await this.googleService.pushOne(device, data)
         return
       }
       case 'push-notification-global': {
-        const { topic, data } = job.data
+        const { topic, data, silent } = job.data
         await this.googleService.pushTopic(topic, data)
         return
       }
 
       case 'push-notification-multiple': {
-        const { devices, data } = job.data
-        await this.googleService.pushMultipleDevice(devices, data, true)
+        const { devices, data, silent } = job.data
+        await this.googleService.pushMultipleDevice(devices, data, silent)
         return
       }
     }
