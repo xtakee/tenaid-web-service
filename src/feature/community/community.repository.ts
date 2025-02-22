@@ -1712,7 +1712,7 @@ export class CommunityRepository {
       communities: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(account) },
       status: 'offline'
-    }, 'token');
+    }, 'token appOpenedSinceLastPush account');
   }
 
   /**

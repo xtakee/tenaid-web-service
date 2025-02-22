@@ -351,7 +351,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         link: 'home/message',
         type: 'message',
         title: sender,
-        description: 'You have a new message!',
+        description: 'You have a new message! Tap to read.',
         contentId: messageId
       }
     }
@@ -381,10 +381,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const sender = response.author.isAdmin ? 'Admin' : `${response.author.extra.firstName} ${response.author.extra.lastName}`
 
       // get all onffline devices and send push notifications
-      const offlineDevices = await this.communityRepository.getOfflineCommunityEventNodesTokens(community, account)
+      const offlineDevices: CommunityEventNode[] = await this.communityRepository.getOfflineCommunityEventNodesTokens(community, account)
 
       // get all offline devices who have opened the app after a wake push
-      const wakeUpNotifications: CommunityEventNode[] = offlineDevices.map((node: CommunityEventNode) => node.appOpenedSinceLastPush === true)
+      const wakeUpNotifications: CommunityEventNode[] = offlineDevices.filter((node: CommunityEventNode) => node.appOpenedSinceLastPush === true)
 
       if (wakeUpNotifications.length > 0) {
         // clear app opened since last push
@@ -392,7 +392,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       }
 
       // get all onffline devices and send silent push notifications who has not opened the app after a wake push
-      const silentNotifications: CommunityEventNode[] = offlineDevices.map((node: CommunityEventNode) => node.appOpenedSinceLastPush === false)
+      const silentNotifications: CommunityEventNode[] = offlineDevices.filter((node: CommunityEventNode) => node.appOpenedSinceLastPush === false)
 
       let tokens = wakeUpNotifications.map((device: CommunityEventNode) => (device as any).token)
 
