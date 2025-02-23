@@ -2044,11 +2044,9 @@ export class CommunityRepository {
 
     const query: any = {
       community: { $in: communities.map((account) => (account as any).community) },
-      targets: {
-        $ne: {
-          target: new Types.ObjectId(user),
-        }
-      }
+      author: { $ne: new Types.ObjectId(user) },
+      type: EventCacheType.NEW_MESSAGE,
+      'targets.target': { $ne: new Types.ObjectId(user) }
     }
 
     if (date) query.createdAt = { $gt: new Date(date) }
