@@ -245,6 +245,9 @@ export class AccountService {
       const accountDto = this.mapper.map(account)
       if (primaryManagedCommunity) {
         accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
+        // add account primary community
+        accountDto.primaryCommunityId = (primaryManagedCommunity as any)._id
+
         accountDto.communitySetup = {
           street: primaryManagedCommunity.communitySetup?.street === true,
           building: primaryManagedCommunity.communitySetup?.building === true,

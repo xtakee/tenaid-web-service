@@ -81,6 +81,9 @@ export class AuthService {
 
     if (primaryManagedCommunity) {
       dto.communityKycAcknowledged = account.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
+
+      // add account primary community
+      dto.primaryCommunityId = (primaryManagedCommunity as any)._id
       dto.communitySetup = {
         street: primaryManagedCommunity.communitySetup?.street === true,
         building: primaryManagedCommunity.communitySetup?.building === true,
