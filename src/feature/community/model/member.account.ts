@@ -2,7 +2,6 @@ import { Prop, Schema } from "@nestjs/mongoose"
 import { GENDER } from "src/feature/auth/auth.constants"
 import { Email } from "src/feature/core/model/email.model"
 
-@Schema({ timestamps: true })
 export class MemberAccount {
   @Prop()
   firstName: string

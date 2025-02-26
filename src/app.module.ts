@@ -22,6 +22,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { UtilityModule } from './feature/utility/utility.module';
 import { BillingModule } from './feature/billing/billing.module';
 import { E2eeModule } from './feature/e2ee/e2ee.module';
+import { MessageModule } from './feature/message/message.module';
 
 @Module({
   imports: [
@@ -55,7 +56,8 @@ import { E2eeModule } from './feature/e2ee/e2ee.module';
     JobsModule,
     UtilityModule,
     BillingModule,
-    E2eeModule
+    E2eeModule,
+    MessageModule
   ],
   providers: []
 })

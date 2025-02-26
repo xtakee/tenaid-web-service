@@ -16,6 +16,7 @@ export enum MessageType {
 
 export enum MessageStatus {
   SENT = 'sent',
+  SEEN = 'seen',
   DELIVERED = 'delivered'
 }
 
@@ -100,4 +101,4 @@ export class CommunityMessage {
   date: Date
 }
 
-export const CommunityMessageSchema = SchemaFactory.createForClass(CommunityMessage);
+export const CommunityMessageSchema = SchemaFactory.createForClass(CommunityMessage)
