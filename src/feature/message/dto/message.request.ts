@@ -1,29 +1,10 @@
-import { IsNotEmpty, IsMongoId, IsOptional, IsEnum, IsDateString, IsArray } from "class-validator"
-import { MessageType } from "src/feature/community/model/community.message"
+import { IsNotEmpty, IsMongoId, IsArray, IsDateString, IsOptional, IsEnum } from "class-validator"
 import { EncryptionData } from "src/feature/e2ee/dto/encryption.data"
+import { MessageType } from "../util/message.type"
+import { ReactionDto } from "./message.reaction.dto"
 
-export class ReactionDto {
-  @IsNotEmpty()
-  reaction: string
 
-  @IsNotEmpty()
-  @IsMongoId()
-  user: string
-}
-
-export class MessageReaction {
-  @IsNotEmpty()
-  reaction: string
-
-  @IsNotEmpty()
-  count: number
-
-  @IsArray()
-  @IsMongoId({ each: true })
-  users: string[]
-}
-
-export class MessageDto {
+export class MessageRequestDto {
   @IsNotEmpty()
   @IsMongoId()
   messageId: string
@@ -45,8 +26,13 @@ export class MessageDto {
   author: string
 
   @IsNotEmpty()
-  @IsMongoId()
   body: string
+
+  @IsMongoId()
+  deletedBy?: string
+
+  @IsMongoId()
+  room: string
 
   @IsOptional()
   retained?: Boolean = true
@@ -56,6 +42,12 @@ export class MessageDto {
 
   @IsOptional()
   category?: string
+
+  @IsOptional()
+  visibility?: string
+
+  @IsOptional()
+  building?: string
 
   @IsNotEmpty()
   @IsEnum(MessageType)
@@ -86,13 +78,3 @@ export class MessageDto {
 
   encryption?: EncryptionData
 }
-
-export class MessageTypingDto {
-  @IsNotEmpty()
-  typing: Boolean
-
-  @IsNotEmpty()
-  @IsMongoId()
-  community: string
-}
-

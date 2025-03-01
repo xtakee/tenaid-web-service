@@ -9,19 +9,23 @@ import { MessageGateway } from './message.gateway';
 import { NotificationModule } from '../notification/notification.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Message, MessageSchema } from './model/message';
-import { MessageCategory, MessageCategorySchema } from './model/message.category';
+import { MessageCategory, MessageCategorySchema } from '../community/model/message.category';
 import { MessageNode, MessageNodeSchema } from './model/message.node';
 import { MessageCache, MessageCacheSchema } from './model/message.cache';
+import { MessageRepository } from './message.repository';
+import { CommunityModule } from '../community/community.module';
 
 @Module({
-  providers: [MessageService, MessageGateway, WsJwtAuthGuard, AuthHelper, EventService, Paginator],
+  providers: [MessageService, MessageGateway, MessageRepository, WsJwtAuthGuard, AuthHelper, EventService, Paginator],
   controllers: [MessageController],
-  imports: [NotificationModule, 
+  imports: [NotificationModule,
+    CommunityModule,
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
     MongooseModule.forFeature([{ name: MessageCategory.name, schema: MessageCategorySchema }]),
     MongooseModule.forFeature([{ name: MessageNode.name, schema: MessageNodeSchema }]),
     MongooseModule.forFeature([{ name: MessageCache.name, schema: MessageCacheSchema }]),
-  ]
+  ],
+  exports: [MessageRepository]
 })
 
 export class MessageModule { }

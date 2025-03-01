@@ -24,6 +24,7 @@ import { CommunityRepository } from '../community/community.repository';
 import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper';
 import { CommunityModule } from '../community/community.module';
 import { E2eeModule } from '../e2ee/e2ee.module';
+import { MessageModule } from '../message/message.module';
 
 @Global()
 @Module({
@@ -53,7 +54,8 @@ import { E2eeModule } from '../e2ee/e2ee.module';
     MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
     MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
     CommunityModule,
-    E2eeModule
+    E2eeModule,
+    MessageModule
   ]
 })
 export class AuthModule { }

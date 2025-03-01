@@ -1,44 +1,37 @@
-import { Injectable } from "@nestjs/common";
-import { Community } from "./model/community";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
-import { CommunityStreet } from "./model/community.street";
-import { CommunityDto } from "src/feature/community/dto/community.dto";
-import { CommunityMember } from "./model/community.member";
-import { CommunityMemberRequestDto } from "src/feature/community/dto/request/community.member.request.dto";
-import { CommunityInvite } from "./model/community.invite";
-import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto";
-import { ACCOUNT_STATUS } from "../auth/auth.constants";
-import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto";
-import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto";
-import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
-import { MemberAccount } from "./model/member.account";
-import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto";
-import { CommunityAccessPoint } from "./model/community.access.point";
-import { CheckInOutVisitorRequestDto } from "./dto/request/check.in.out.visitor.request.dto";
-import { CheckType } from "../core/dto/check.type";
-import { CommunityCheckins } from "./model/community.checkins";
-import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto";
-import { CommunityEventNode } from "./model/community.event.node";
-import { MessageDto, ReactionDto } from "../event/dto/message.dto";
-import { CommunityMessage, MessageStatus } from "./model/community.message";
-import { MessageResonseDto } from "./dto/response/message.response.dto";
-import { PaginationRequestDto, SortDirection } from "../core/dto/pagination.request.dto";
-import { CommunityMessageCache, EventCacheType } from "./model/community.message.cache";
-import { MessageAckDto } from "../event/dto/message.ack.dto";
-import { CacheMessageDto } from "../event/dto/cache.message.dto";
-import { AddMemberRequestDto } from "./dto/request/add.member.request.dto";
-import { MessageCategoryDto } from "./dto/request/message.category.dto";
-import { CommunityMessageGroup } from "./model/community.message.group";
-import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto";
-import { CommunityBuilding } from "./model/community.building";
-import { CommunityBuildingDto } from "./dto/request/community.building.dto";
-import { CommunityAuthorizedUserPermissionsDto } from "./dto/request/community.authorized.user.permissions.dto";
-import { CommunityDirector } from "./model/community.director";
-import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto";
-import { CommunityRegistration } from "./model/community.registration";
-import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto";
+import { Injectable } from "@nestjs/common"
+import { Community } from "./model/community"
+import { InjectModel } from "@nestjs/mongoose"
+import { Model, Types } from "mongoose"
+import { CommunityStreet } from "./model/community.street"
+import { CommunityDto } from "src/feature/community/dto/community.dto"
+import { CommunityMember } from "./model/community.member"
+import { CommunityMemberRequestDto } from "src/feature/community/dto/request/community.member.request.dto"
+import { CommunityInvite } from "./model/community.invite"
+import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto"
+import { ACCOUNT_STATUS } from "../auth/auth.constants"
+import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto"
+import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto"
+import { PaginatedResult, Paginator } from "src/core/helpers/paginator"
+import { MemberAccount } from "./model/member.account"
+import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto"
+import { CommunityAccessPoint } from "./model/community.access.point"
+import { CheckInOutVisitorRequestDto } from "./dto/request/check.in.out.visitor.request.dto"
+import { CheckType } from "../core/dto/check.type"
+import { CommunityCheckins } from "./model/community.checkins"
+import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto"
+import { PaginationRequestDto, SortDirection } from "../core/dto/pagination.request.dto"
+import { AddMemberRequestDto } from "./dto/request/add.member.request.dto"
+import { MessageCategoryDto } from "./dto/request/message.category.dto"
+import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto"
+import { CommunityBuilding } from "./model/community.building"
+import { CommunityBuildingDto } from "./dto/request/community.building.dto"
+import { CommunityAuthorizedUserPermissionsDto } from "./dto/request/community.authorized.user.permissions.dto"
+import { CommunityDirector } from "./model/community.director"
+import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto"
+import { CommunityRegistration } from "./model/community.registration"
+import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto"
 import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto"
+import { MessageCategory } from "./model/message.category"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -190,18 +183,15 @@ export class CommunityRepository {
   constructor(
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
-    @InjectModel(CommunityMessageCache.name) private readonly communityMessageCacheModel: Model<CommunityMessageCache>,
-    @InjectModel(CommunityMessageGroup.name) private readonly communityMessageGroupModel: Model<CommunityMessageGroup>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
-    @InjectModel(CommunityMessage.name) private readonly communityMessageModel: Model<CommunityMessage>,
     @InjectModel(CommunityRegistration.name) private readonly communityRegistrationModel: Model<CommunityRegistration>,
     @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
-    @InjectModel(CommunityEventNode.name) private readonly communityEventNodeModel: Model<CommunityEventNode>,
-    @InjectModel(CommunityStreet.name) private readonly communityPathModel: Model<CommunityStreet>
+    @InjectModel(CommunityStreet.name) private readonly communityPathModel: Model<CommunityStreet>,
+    @InjectModel(MessageCategory.name) private readonly messageCategoryModel: Model<MessageCategory>
   ) { }
 
   /**
@@ -248,7 +238,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }
 
-    return await this.communityAccessPointModel.create(accessPoint);
+    return await this.communityAccessPointModel.create(accessPoint)
   }
 
   /**
@@ -263,7 +253,7 @@ export class CommunityRepository {
     }).populate({
       path: 'community',
       select: '_id name description code images types address'
-    }).exec();
+    }).exec()
   }
 
   /**
@@ -273,7 +263,7 @@ export class CommunityRepository {
    */
   async getCommunityAccessPoints(community: string): Promise<CommunityAccessPoint[]> {
     return await this.communityAccessPointModel.find(
-      { community: new Types.ObjectId(community) });
+      { community: new Types.ObjectId(community) })
   }
 
   /**
@@ -286,7 +276,7 @@ export class CommunityRepository {
       {
         name: { $regex: name, $options: 'i' },
         community: new Types.ObjectId(community)
-      });
+      })
   }
 
   /**
@@ -1603,461 +1593,22 @@ export class CommunityRepository {
 
   /**
    * 
-   * @param community 
-   * @param status 
-   * @returns 
-   */
-  async getCommunityEventNodesByStatus(community: string, status: string): Promise<CommunityEventNode[]> {
-    return await this.communityEventNodeModel.find({
-      community: new Types.ObjectId(community),
-      status: status
-    });
-  }
-
-  /**
-   * 
    * @param user 
    * @returns 
    */
-  async setAppOpenedSinceLastPush(user: string): Promise<CommunityEventNode[]> {
-    return await this.communityEventNodeModel.findOneAndUpdate({
-      account: new Types.ObjectId(user)
-    }, { appOpenedSinceLastPush: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getCommunityEventNodes(community: string): Promise<CommunityEventNode[]> {
-    return await this.communityEventNodeModel.find({
-      community: new Types.ObjectId(community)
-    });
-  }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getTotalCommunityEventNodes(community: string): Promise<number> {
-    return await this.communityEventNodeModel.countDocuments({
-      communities: new Types.ObjectId(community)
-    });
-  }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getTotalCommunityEffectiveEventNodes(community: string): Promise<number> {
-    const result = await this.communityEventNodeModel.aggregate([
-      { $match: { communities: new Types.ObjectId(community) } },
-      { $group: { _id: '$account' } },
-      { $count: 'sum' },
-    ])
-
-    return result ? result[0].sum : 0
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param account 
-   * @param member 
-   * @returns 
-   */
-  async updateCommunityEventNodeConnection(communities: string[], account: string, token: string, device: string, platform: string): Promise<CommunityEventNode> {
-
-    //const {token} = await this.devi 
-
-    return await this.communityEventNodeModel.findOneAndUpdate({
-      account: new Types.ObjectId(account),
-      platform: platform
-    }, {
-      status: 'online',
-      communities: communities.map(id => new Types.ObjectId(id)),
-      account: new Types.ObjectId(account),
-      token: token,
-      platform: platform,
-      device: device
-    }, { new: true, upsert: true }).exec()
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param account 
-   * @param member 
-   * @param device 
-   * @returns 
-   */
-  async updateCommunityEventNodeDisConnection(account: string, device: string): Promise<CommunityEventNode> {
-    return await this.communityEventNodeModel.findOneAndUpdate({
-      account: new Types.ObjectId(account),
-      device: device
-    }, {
-      status: 'offline'
-    }, { returnDocument: 'after' }).exec()
-  }
-
-  /**
-   * 
-   * @param account 
-   */
-  async getOfflineCommunityEventNodesTokens(community: string, account: string): Promise<any> {
-    return await this.communityEventNodeModel.find({
-      communities: new Types.ObjectId(community),
-      account: { $ne: new Types.ObjectId(account) },
-      status: 'offline'
-    }, 'token appOpenedSinceLastPush account');
-  }
-
-  /**
-   * 
-   * @param accounts 
-   */
-  async clearAppOpenSinceLastPush(accounts: Types.ObjectId[]): Promise<void> {
-    await this.communityEventNodeModel.updateMany(
-      { account: { $in: accounts } }, // Match accounts in the list
-      { $set: { appOpenedSinceLastPush: false } } // Update status field
-    )
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param message 
-   * @returns 
-   */
-  async getCommunityMessage(community: string, message: string): Promise<MessageResonseDto> {
-    return (await this.communityMessageModel.findOne(
-      {
-        _id: new Types.ObjectId(message),
-        community: new Types.ObjectId(community)
-      },
-      '_id author messageId encryption account street status repliedTo body deleted edited type description name size extension date community category')
-      .populate(CommunityMessagePopulateQuery).exec() as any)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param user 
-   * @param message 
-   * @param type 
-   * @param targets 
-   */
-  async createCommunityMessageCache(community: string, user: string, message: string, type: string, totalNodes: number, targetNodes: number): Promise<void> {
-    // create cache message for offline and delivery status
-    await this.communityMessageCacheModel.findOneAndUpdate({
-      message: new Types.ObjectId(message),
-      community: new Types.ObjectId(community),
-      type: type,
-    }, {
-      message: new Types.ObjectId(message),
-      community: new Types.ObjectId(community),
-      author: new Types.ObjectId(user),
-      reached: 0,
-      totalNodes: totalNodes,
-      targetNodes: targetNodes,
-      targets: [],
-      type: type,
-    }, { new: true, upsert: true }).exec()
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param message 
-   */
-  async createMessage(user: string, message: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
-    let communityMessage: CommunityMessage = {
-      account: new Types.ObjectId(user),
-      community: new Types.ObjectId(message.community),
-      author: new Types.ObjectId(message.author),
-      type: message.type,
-      body: message.body,
-      path: message.path,
-      size: message.size,
-      encryption: message.encryption,
-      category: message.category ? new Types.ObjectId(message.category) : null,
-      extension: message.extension,
-      repliedTo: message.repliedTo ? new Types.ObjectId(message.repliedTo) : null,
-      messageId: message.messageId,
-      date: new Date(message.date)
-    }
-
-    communityMessage = await this.communityMessageModel.create(communityMessage)
-
-    // create cache message for offline and delivery status
-    await this.createCommunityMessageCache(
-      message.community, user,
-      (communityMessage as any)._id.toString(),
-      EventCacheType.NEW_MESSAGE,
-      targets, targetNodes)
-
-    return await this.getCommunityMessage(message.community, (communityMessage as any)._id.toString())
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param platform 
-   */
-  async removeAccountCommunityEventNode(user: string, platform: string): Promise<void> {
-    await this.communityEventNodeModel.deleteOne({
-      account: new Types.ObjectId(user),
-      platform: platform
-    })
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param data 
-   * @returns 
-   */
-  private buildMessage(user: string, data: MessageDto) {
-    console.log(data)
-    return {
-      _id: new Types.ObjectId(data.remoteId),
-      messageId: data.messageId,
-      repliedTo: data.repliedTo ? new Types.ObjectId(data.repliedTo) : null,
-      author: new Types.ObjectId(data.author),
-      account: new Types.ObjectId(data.account ? data.account : user),
-      retained: data.retained,
-      encryption: data.encryption,
-      body: data.body,
-      path: data.path,
-      reactions: data.reactions.map((react) => {
-        return {
-          reaction: react.reaction,
-          count: react.count,
-          users: react.users.map((usr: string) => {
-            return new Types.ObjectId(usr)
-          })
-        }
-      }),
-      category: data.category ? new Types.ObjectId(data.category) : null,
-      community: new Types.ObjectId(data.community),
-      type: data.type,
-      size: data.size,
-      date: data.date,
-      extension: data.extension,
-    }
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param data 
-   * @returns 
-   */
-  async updateMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
-
-    // delete any message cache
-    await this.communityMessageCacheModel.deleteMany({
-      message: new Types.ObjectId(data.remoteId)
-    })
-
-    // create cache message for offline and delivery status
-    await this.createCommunityMessageCache(
-      data.community,
-      user,
-      data.remoteId,
-      EventCacheType.UPDATE_MESSAGE,
-      targets,
-      targetNodes
-    )
-
-    return (await this.communityMessageModel.findOneAndUpdate({
-      account: new Types.ObjectId(user),
-      _id: new Types.ObjectId(data.remoteId),
-      community: new Types.ObjectId(data.community)
-    }, {
-      ...this.buildMessage(user, data),
-      _id: new Types.ObjectId(data.remoteId),
-      status: MessageStatus.SENT,
-      edited: true
-    }, { new: true, upsert: true })
-      .populate(CommunityMessagePopulateQuery).exec() as any)
-  }
-
-  /**
-   * 
-   * @param reactions 
-   * @param reaction 
-   * @returns 
-   */
-  removeOrAddMessageReaction(reactions: any[], reaction: ReactionDto): any {
-    const reactionType = reaction.reaction
-    const user = reaction.user
-    const existingReaction = reactions.find((react) => react.reaction === reactionType)
-
-    if (existingReaction) {
-      // Check if the user already reacted with this type
-      const userIndex = existingReaction.users.findIndex(
-        (u: Types.ObjectId) => u.toString() === user.toString()
-      )
-
-      if (userIndex !== -1) {
-        // If user already reacted, decrement count and remove the user
-        existingReaction.count--
-        existingReaction.users.splice(userIndex, 1)
-      } else {
-        existingReaction.count++
-        existingReaction.users.push(new Types.ObjectId(user))
-      }
-
-      const reactionIndex = reactions.findIndex((react) => react.reaction === reactionType)
-      // If count becomes zero, remove the reaction entry entirely
-      if (existingReaction.count === 0) {
-        reactions.splice(reactionIndex, 1);
-      } else {
-        reactions[reactionIndex] = existingReaction
-      }
-
-    } else {
-      // If reaction type doesn't exist, create a new entry
-      reactions.push({
-        reaction: reactionType,
-        count: 1,
-        users: [new Types.ObjectId(user)],
-      })
-    }
-
-    return reactions
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param data 
-   * @param targets 
-   * @returns 
-   */
-  async updateMessageReaction(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
-    const message = await this.communityMessageModel.findOne({
-      _id: new Types.ObjectId(data.remoteId),
-      community: new Types.ObjectId(data.community)
-    })
-
-    let messageReactions = []
-
-    if (message) {
-      messageReactions = this.removeOrAddMessageReaction(message.reactions, data.reaction)
-    } else {
-      messageReactions = this.removeOrAddMessageReaction(data.reactions.map((reaction) => {
-        return {
-          reaction: reaction.reaction,
-          count: reaction.count,
-          users: reaction.users.map((user: string) => new Types.ObjectId(user))
-        }
-      }), data.reaction)
-    }
-
-    data.reactions = messageReactions
-
-    // create cache message for offline and delivery status
-    await this.createCommunityMessageCache(
-      data.community,
-      user,
-      data.remoteId,
-      EventCacheType.REACT_MESSAGE,
-      targets, targetNodes
-    )
-
-    return (await this.communityMessageModel.findOneAndUpdate({
-      _id: new Types.ObjectId(data.remoteId),
-      community: new Types.ObjectId(data.community)
-    }, {
-      ...this.buildMessage(user, data),
-      _id: new Types.ObjectId(data.remoteId),
-      status: data.status === MessageStatus.DELIVERED ? MessageStatus.SENT : data.status,
-      retained: data.status === MessageStatus.DELIVERED ? true : false
-    }, { new: true, upsert: true })
-      .populate(CommunityMessagePopulateQuery).exec() as any)
-  }
-
-
-  /**
-   * 
-   * @param user 
-   * @param data 
-   * @returns 
-   */
-  async deleteMessage(user: string, data: MessageDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
-    const accountCommunity = await this.getAccountPrimaryCommunity(user)
-
-    // create cache message for offline and delivery status
-    await this.createCommunityMessageCache(
-      data.community,
-      user,
-      data.remoteId,
-      EventCacheType.DELETE_MESSAGE,
-      targets,
-      targetNodes
-    )
-
-    return (await this.communityMessageModel.findOneAndUpdate({
-      author: new Types.ObjectId(data.author),
-      _id: new Types.ObjectId(data.remoteId),
-      community: new Types.ObjectId(data.community)
-    }, {
-      deleted: true,
-      _id: new Types.ObjectId(data.remoteId),
-      deletedBy: accountCommunity._id,
-      ...this.buildMessage(user, data)
-    },
-      { new: true, upsert: true })
-      .populate(CommunityMessagePopulateQuery).exec() as any)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param page 
-   * @param limit 
-   * @param date 
-   * @returns 
-   */
-  async getCommunityMessages(community: string, page: number, limit: number, sort: string, date?: string): Promise<PaginatedResult<any>> {
-    const query: any = { community: new Types.ObjectId(community) }
-    if (date) query.date = { $gt: new Date(date) }
-
-    return await this.paginator.paginate(this.communityMessageModel,
-      query, getCommunityMessagesQuery(page, limit, sort))
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @param date 
-   * @returns 
-   */
-  async getCommunityLatestUnreadMessage(user: string, date?: string): Promise<any> {
+  async getAllAccountCommunityRooms(user: string): Promise<string[]> {
     const communities = await this.getAllAccountActiveCommunities(user)
+    const rooms: string[] = []
 
-    const query: any = {
-      community: { $in: communities.map((account) => (account as any).community) },
-      author: { $ne: new Types.ObjectId(user) },
-      type: EventCacheType.NEW_MESSAGE,
-      'targets.target': { $ne: new Types.ObjectId(user) }
+    for (const accountCommunity of communities) {
+      rooms.push((accountCommunity as any).community.toString())
+      rooms.push((accountCommunity as any)._id.toString())
+      rooms.push(accountCommunity.building.toString())
     }
 
-    if (date) query.createdAt = { $gt: new Date(date) }
+    rooms.push(user)
 
-    return await this.communityMessageCacheModel.findOne(query, '_id type message createdAt updatedAt').populate(
-      {
-        path: 'message',
-        select: '_id author encryption account reactions deletedBy messageId status repliedTo body deleted edited name createdAt updatedAt size extension type description date community category',
-        populate: CommunityMessagePopulateQuery
-      }
-    ).exec() as any
+    return rooms
   }
 
   /**
@@ -2069,149 +1620,22 @@ export class CommunityRepository {
    * @param sort 
    * @returns 
    */
-  async getCommunityPreviousMessages(community: string, page: number, limit: number, date: string, sort?: string): Promise<PaginatedResult<any>> {
-    const query: any = { community: new Types.ObjectId(community), date: { $lte: new Date(date) } }
+  // async getCommunityPreviousMessages(community: string, page: number, limit: number, date: string, sort?: string): Promise<PaginatedResult<any>> {
+  //   const query: any = { community: new Types.ObjectId(community), date: { $lte: new Date(date) } }
 
-    return await this.paginator.paginate(this.communityMessageModel,
-      query, getCommunityMessagesQuery(page, limit, sort))
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param message 
-   * @param status 
-   * @returns 
-   */
-  async setCommunityMessageStatus(community: string, message: string, status: string): Promise<MessageResonseDto> {
-    return (await this.communityMessageModel.findOneAndUpdate({
-      _id: new Types.ObjectId(message),
-      community: new Types.ObjectId(community)
-    }, {
-      status: status
-    }, { returnDocument: 'after' })
-      .populate(CommunityMessagePopulateQuery).exec() as any)
-  }
+  //   return await this.paginator.paginate(this.communityMessageModel,
+  //     query, getCommunityMessagesQuery(page, limit, sort))
+  // }
 
   /**
    * 
    * @param user 
    * @returns 
    */
-  async getAllAccountActiveCommunities(user: string): Promise<Community[]> {
+  async getAllAccountActiveCommunities(user: string): Promise<CommunityMember[]> {
     return await this.communityMemberModel.find({
       account: new Types.ObjectId(user),
       status: ACCOUNT_STATUS.APPROVED
-    })
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @param message 
-   * @returns 
-   */
-  async acknowledgeCommunityMessage(user: string, data: MessageAckDto, platform: string): Promise<any> {
-    return await this.communityMessageCacheModel.findOneAndUpdate({
-      community: new Types.ObjectId(data.community),
-      message: new Types.ObjectId(data.message),
-      targets: {
-        $ne: {
-          target: new Types.ObjectId(user),
-          platform: platform
-        }
-      }
-    }, {
-      $addToSet: {
-        targets: {
-          target: new Types.ObjectId(user),
-          platform: platform
-        }
-      },
-      $inc: { reached: 1 }
-    }, { new: true }).populate({
-      path: 'message',
-      select: '_id status'
-    }
-    ).exec()
-  }
-
-  /**
- * 
- * @param community 
- * @param message 
- * @returns 
- */
-  async getTotalCommunityMessageUniqueAck(community: string, message: string): Promise<number> {
-    const result = await this.communityMessageCacheModel.aggregate([
-      {
-        $match: {
-          community: new Types.ObjectId(community),
-          message: new Types.ObjectId(message)
-        }
-      },
-      { $unwind: '$targets' },
-      { $group: { _id: '$targets.target', count: { $sum: 1 } } },
-      { $count: 'sum' },
-    ])
-
-    return result[0].sum
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param data 
-   * @returns 
-   */
-  async removeCommunityMessageAck(user: string, data: MessageAckDto, platform: string): Promise<CommunityMessageCache> {
-    return await this.communityMessageCacheModel.findOneAndUpdate({
-      community: new Types.ObjectId(data.community),
-      message: new Types.ObjectId(data.message)
-    }, {
-      $pull: {
-        targets: {
-          target: new Types.ObjectId(user),
-          platform: platform
-        }
-      },
-    }, { new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param message 
-   */
-  async cleanUpCommunityMessage(user: string, community: string, message: string): Promise<void> {
-    await this.communityMessageModel.deleteOne({
-      _id: new Types.ObjectId(message),
-      community: new Types.ObjectId(community)
-    })
-
-    await this.communityMessageCacheModel.deleteMany({
-      message: new Types.ObjectId(message),
-      community: new Types.ObjectId(community)
-    })
-  }
-
-  /**
-   * 
-   * @param days 
-   */
-  async cleanUpCommunityStaleMessages(days: number = 7): Promise<void> {
-    const minLivePeriod = new Date()
-    minLivePeriod.setDate(minLivePeriod.getDate() - days)
-
-    // remove messages later than minLivePeriod
-    await this.communityMessageModel.deleteOne({
-      createdAt: { $lt: minLivePeriod }
-    })
-
-    // remove message caches later than minLivePeriod
-    await this.communityMessageCacheModel.deleteOne({
-      createdAt: { $lt: minLivePeriod }
     })
   }
 
@@ -2377,30 +1801,6 @@ export class CommunityRepository {
 
   /**
    * 
-   * @param user 
-   * @param community 
-   * @returns 
-   */
-  async getAllCachedCommunityMessages(user: string, communities: Types.ObjectId[], platform: string): Promise<CacheMessageDto[]> {
-    return await this.communityMessageCacheModel.find({
-      community: { $in: communities },
-      targets: {
-        $ne: {
-          target: new Types.ObjectId(user),
-          platform: platform
-        }
-      }
-    }, '_id type message').populate(
-      {
-        path: 'message',
-        select: '_id author encryption account reactions deletedBy messageId status repliedTo body deleted edited name size extension type description date community category',
-        populate: CommunityMessagePopulateQuery
-      }
-    ).exec() as any
-  }
-
-  /**
-   * 
    * @param community 
    * @param data 
    * @param account 
@@ -2470,6 +1870,45 @@ export class CommunityRepository {
   }
 
   /**
+ * 
+ * @param community 
+ * @param data 
+ */
+  async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<MessageCategory> {
+    const messageGroup: MessageCategory = {
+      community: new Types.ObjectId(community),
+      name: data.name.toLowerCase().replaceAll(' ', ''),
+      description: data.description,
+      readOnly: data.isReadOnly
+    }
+
+    return await this.messageCategoryModel.create(messageGroup)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param category 
+   */
+  async getCommunityMessageCategory(community: string, category: string): Promise<MessageCategory> {
+    return this.messageCategoryModel.findOne({
+      community: new Types.ObjectId(community),
+      name: category
+    })
+  }
+
+  /**
+* 
+* @param community 
+* @returns 
+*/
+  async getCommunityMessageCategories(community: string): Promise<MessageCategory[]> {
+    return this.messageCategoryModel.find({
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
    * 
    * @param user 
    * @param email 
@@ -2483,42 +1922,4 @@ export class CommunityRepository {
       { returnDocument: 'after' }).exec()
   }
 
-  /**
-   * 
-   * @param community 
-   * @param data 
-   */
-  async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<CommunityMessageGroup> {
-    const messageGroup: CommunityMessageGroup = {
-      community: new Types.ObjectId(community),
-      name: data.name.toLowerCase().replaceAll(' ', ''),
-      description: data.description,
-      readOnly: data.isReadOnly
-    }
-
-    return await this.communityMessageGroupModel.create(messageGroup)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param category 
-   */
-  async getCommunityMessageCategory(community: string, category: string): Promise<CommunityMessageGroup> {
-    return this.communityMessageGroupModel.findOne({
-      community: new Types.ObjectId(community),
-      name: category
-    })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getCommunityMessageCategories(community: string): Promise<CommunityMessageGroup[]> {
-    return this.communityMessageGroupModel.find({
-      community: new Types.ObjectId(community)
-    })
-  }
 }

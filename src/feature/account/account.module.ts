@@ -23,6 +23,7 @@ import { DeviceToken, DeviceTokenSchema } from './model/device.token';
 import { searchable } from 'src/core/util/searchable';
 import { CommunityModule } from '../community/community.module';
 import { E2eeModule } from '../e2ee/e2ee.module';
+import { MessageModule } from '../message/message.module';
 
 @Global()
 @Module({
@@ -80,7 +81,8 @@ import { E2eeModule } from '../e2ee/e2ee.module';
     MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }]),
     MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }]),
     CommunityModule,
-    E2eeModule
+    E2eeModule,
+    MessageModule
   ],
   providers: [
     AccountService,

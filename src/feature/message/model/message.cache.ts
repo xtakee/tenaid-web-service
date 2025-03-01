@@ -14,6 +14,9 @@ export class MessageCache {
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId })
+  room: Types.ObjectId
+
   @Prop({ type: Types.ObjectId, ref: Message.name })
   message: Types.ObjectId
 

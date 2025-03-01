@@ -18,6 +18,7 @@ import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.res
 import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
 import { Community } from '../community/model/community';
 import { E2eeService } from '../e2ee/e2ee.service';
+import { MessageRepository } from '../message/message.repository';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +33,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly authHelper: AuthHelper,
+    private readonly messageRepository: MessageRepository,
     private readonly communityRepository: CommunityRepository
   ) { }
 
@@ -169,7 +171,7 @@ export class AuthService {
   async logout(user: string, platform: string): Promise<void> {
     await this.authRepository.invalidateAuthToken(`${user}-${platform}`)
     await this.accountRepository.deleteDeviceToken(user, platform)
-    await this.communityRepository.removeAccountCommunityEventNode(user, platform)
+    await this.messageRepository.removeAccountMessageNode(user, platform)
   }
 
   /**

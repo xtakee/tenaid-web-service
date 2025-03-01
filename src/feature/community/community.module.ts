@@ -28,19 +28,18 @@ import { CommunityAccessPointToDtoMapper } from './mapper/community.access.point
 import { NotificationService } from '../notification/notification.service'
 import { WsJwtAuthGuard } from '../auth/guards/jwt.guard/ws.jwt.auth.guard'
 import { CommunityCheckins, CommunityCheckinsSchema } from './model/community.checkins'
-import { CommunityEventNode, CommunityEventNodeSchema } from './model/community.event.node'
-import { CommunityMessage, CommunityMessageSchema } from './model/community.message'
-import { CommunityMessageCache, CommunityMessageCacheSchema } from './model/community.message.cache'
 import { EventGateway } from '../event/event.gateway'
 import { searchable } from 'src/core/util/searchable'
 import { NotificationModule } from '../notification/notification.module'
-import { CommunityMessageGroup, CommunityMessageGroupSchema } from './model/community.message.group'
 import { CommunityBuilding, CommunityBuildingSchema } from './model/community.building'
 import { CommunityDirector, CommunityDirectorSchema } from './model/community.director'
 import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto.mapper'
 import { CommunityRegistration, CommunityRegistrationSchema } from './model/community.registration'
 import { BullModule } from '@nestjs/bullmq'
 import { CommunityQueueProcessor } from './queue/community.queue.processor'
+import { MessageModule } from '../message/message.module'
+import { MessageRepository } from '../message/message.repository'
+import { MessageCategory, MessageCategorySchema } from './model/message.category'
 
 const queue = BullModule.registerQueue({
   name: 'community_message_queue',
@@ -74,7 +73,6 @@ const queue = BullModule.registerQueue({
   controllers: [CommunityController],
   exports: [CommunityRepository, CommunityService, CommunityToDtoMapper],
   imports: [
-    MongooseModule.forFeature([{ name: CommunityMessageCache.name, schema: CommunityMessageCacheSchema }]),
     MongooseModule.forFeatureAsync([{
       name: Community.name, useFactory: async () => {
         const schema = CommunitySchema
@@ -113,10 +111,8 @@ const queue = BullModule.registerQueue({
         return schema
       },
     }]),
-    MongooseModule.forFeature([{ name: CommunityMessage.name, schema: CommunityMessageSchema }]),
-    MongooseModule.forFeature([{ name: CommunityMessageGroup.name, schema: CommunityMessageGroupSchema }]),
-    MongooseModule.forFeature([{ name: CommunityEventNode.name, schema: CommunityEventNodeSchema }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
+    MongooseModule.forFeature([{ name: MessageCategory.name, schema: MessageCategorySchema }]),
     MongooseModule.forFeatureAsync([{
       name: CommunityMember.name,
       useFactory: async () => {

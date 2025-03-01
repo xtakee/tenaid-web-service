@@ -1,4 +1,4 @@
-import { IsMongoId, IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsMongoId } from "class-validator"
 
 export class MessageAckDto {
   @IsNotEmpty()
@@ -8,4 +8,8 @@ export class MessageAckDto {
   @IsNotEmpty()
   @IsMongoId()
   community: string
+
+  @IsNotEmpty()
+  @IsMongoId()
+  room: string
 }

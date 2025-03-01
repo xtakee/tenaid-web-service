@@ -24,6 +24,7 @@ import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { E2eeRepository } from "../e2ee/e2ee.repository";
+import { MessageRepository } from "../message/message.repository";
 
 @Injectable()
 export class AccountService {
@@ -34,6 +35,7 @@ export class AccountService {
     private readonly authHelper: AuthHelper,
     private readonly e2eeRepository: E2eeRepository,
     private readonly communityRepository: CommunityRepository,
+    private readonly messageRepository: MessageRepository,
     private readonly bankRepository: BankRepository,
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
@@ -424,7 +426,8 @@ export class AccountService {
  * @returns 
  */
   async getCommunityLatestUnreadMessage(user: string, date?: string): Promise<any> {
-    const message = await this.communityRepository.getCommunityLatestUnreadMessage(user, date)
+    const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(user)
+    const message = await this.messageRepository.getAllRoomsLatestUnreadMessages(user, rooms, date)
 
     if (message) return message
 
@@ -436,7 +439,7 @@ export class AccountService {
    * @param user 
    */
   async setAppOpenedSinceLastPush(user: string): Promise<void> {
-    await this.communityRepository.setAppOpenedSinceLastPush(user)
+    await this.messageRepository.setAppOpenedSinceLastPush(user)
   }
 
   /**

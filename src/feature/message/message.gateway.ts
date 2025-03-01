@@ -2,15 +2,18 @@ import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketSe
 import { Server, Socket } from "socket.io"
 import { WsJwtAuthGuard } from "../auth/guards/jwt.guard/ws.jwt.auth.guard"
 import { CommunityRepository } from "../community/community.repository"
-import { MessageDto, MessageTypingDto } from "../event/dto/message.dto"
 import { PushMultipleDto } from "../notification/notification.controller"
 import { MessageResonseDto } from "../community/dto/response/message.response.dto"
 import { NotificationService } from "../notification/notification.service"
-import { MessageAckDto } from "../event/dto/message.ack.dto"
-import { MessageStatus } from "../community/model/community.message"
-import { CacheMessageDto } from "../event/dto/cache.message.dto"
 import { AccountRepository } from "../account/account.respository"
-import { CommunityEventNode } from "../community/model/community.event.node"
+import { MessageRepository } from "./message.repository"
+import { Types } from "mongoose"
+import { MessageRequestDto } from "./dto/message.request"
+import { MessageAckDto } from "./dto/message.ack.dto"
+import { MessageTypingDto } from "./dto/message.typing.dto"
+import { MessageCacheDto } from "./dto/message.cache"
+import { MessageStatus } from "./util/message.status"
+import { MessageNode } from "./model/message.node"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -25,9 +28,8 @@ const EVENT_NAME_REACTION = 'community-message-reaction'
 
 class NodeData {
   account: string
-  communities: string[]
+  rooms: string[]
   token?: string
-  device: string
   platform: string
 }
 
@@ -39,6 +41,7 @@ class NodeData {
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authGuard: WsJwtAuthGuard,
+    private readonly messageRepository: MessageRepository,
     private readonly communityRepository: CommunityRepository,
     private readonly notificationService: NotificationService,
     private readonly accountRepository: AccountRepository
@@ -49,23 +52,23 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   private async updateClientConnection(node: NodeData): Promise<void> {
     // client authentication
-    const { account, communities, device, token, platform } = node
+    const { account, rooms, token, platform } = node
 
-    this.communityRepository.updateCommunityEventNodeConnection(communities, account, token, device, platform)
+    this.messageRepository.updateMessageNodesConnection(rooms, account, token, platform)
   }
 
   // process disconnected
   private async updateClientDisConnection(client: Socket): Promise<void> {
     // client authentication
     const account: string = client.data.user.sub
-    const device: string = client.handshake.headers.device as string
+    const platfom: string = client.handshake.headers.platform as string
     const { community } = await this.communityRepository.getAccountPrimaryCommunity(account)
 
     const data = await this.getTypingEventData(community._id.toString(), account, false)
     this.server.to(community).emit(EVENT_NAME_TYPING, data)
 
     if (account)
-      this.communityRepository.updateCommunityEventNodeDisConnection(account, device)
+      this.messageRepository.updateMessageNodesDisConnection(account, platfom)
   }
 
   // handle client connected
@@ -73,45 +76,34 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
       const account: string = client.data.user.sub
-      const device: string = client.handshake.headers.device as string
       const platform: string = client.handshake.headers.platform as string
 
-      const communities = await this.communityRepository.getAllAccountActiveCommunities(account)
-      const communityIds: string[] = []
+      const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
       // join all active community rooms
-      for (const community of communities) {
-        const communityId = (community as any).community.toString()
-
-        client.join(communityId)
-        communityIds.push(communityId)
-      }
-
-      const offlinePrivateRoom = `${account}-${EVENT_NAME_OFFLINE}`
-      // join user private offline room
-      client.join(offlinePrivateRoom)
+      for (const room of rooms) client.join(room)
 
       const { token } = await this.accountRepository.getDevicePushToken(account)
 
       // udpate client nodes
       await this.updateClientConnection({
-        communities: communityIds,
-        device: device,
+        rooms: rooms,
         token: token,
         account: account,
         platform: platform
       })
 
       // get all unread messages/events
-      const cachedMessages: CacheMessageDto[] =
-        await this.communityRepository.getAllCachedCommunityMessages(account, communities.map(id => (id as any).community), platform)
+      const cachedMessages: MessageCacheDto[] =
+        await this.messageRepository.getAllCachedMessages(account, rooms.map(room => new Types.ObjectId(room)), platform)
 
       // check for stale/offline events
       if (cachedMessages.length > 0)
         for (const cache of cachedMessages) {
           //send to only connected client
-          if (cache.message !== null)
-            this.server.to(offlinePrivateRoom).emit(cache.type, cache.message)
+          if (cache.message !== null) {
+            this.server.to(account).emit(cache.type, cache.message)
+          }
         }
 
     } else client.disconnect()
@@ -126,19 +118,19 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage(EVENT_NAME_DELETE)
   async handleMessageDelete(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: MessageDto
+    @MessageBody() message: MessageRequestDto
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-      const community = message.community
+      const room = message.room
       const account: string = client.data.user.sub
 
       // get total expected audience
-      const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
-      const targetNodes: number = await this.communityRepository.getTotalCommunityEffectiveEventNodes(community)
+      const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
+      const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response = await this.communityRepository.deleteMessage(account, message, totalNodes, targetNodes)
-      this.server.to(community).emit(EVENT_NAME_DELETE, response)
+      const response = await this.messageRepository.deleteMessage(account, message, totalNodes, targetNodes)
+      this.server.to(room).emit(EVENT_NAME_DELETE, response)
     }
 
     return message
@@ -156,11 +148,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const account: string = client.data.user.sub
       const platform: string = client.handshake.headers.platform as string
 
-      const ackMessage = await this.communityRepository.acknowledgeCommunityMessage(account, message, platform)
+      const ackMessage = await this.messageRepository.acknowledgeMessage(account, message, platform)
 
       if (ackMessage && ackMessage.reached >= ackMessage.totalNodes) {
         // remove message from server
-        await this.communityRepository.cleanUpCommunityMessage(account, community, message.message)
+        await this.messageRepository.cleanUpMessage(account, community, message.message)
       }
     }
 
@@ -178,15 +170,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const account: string = client.data.user.sub
 
-      const communities = await this.communityRepository.getAllAccountActiveCommunities(account)
-      // join all active community rooms
-      for (const community of communities) {
-        const communityId = (community as any).community.toString()
-        client.join(communityId)
-      }
+      const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
-      // join account private room
-      client.join(`${account}-${EVENT_NAME_OFFLINE}`)
+      // join all active community rooms
+      for (const room of rooms) client.join(room)
     }
 
     return message
@@ -205,18 +192,18 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const account: string = client.data.user.sub
       const platform: string = client.handshake.headers.platform as string
 
-      const ackMessage = await this.communityRepository.acknowledgeCommunityMessage(account, message, platform)
+      const ackMessage = await this.messageRepository.acknowledgeMessage(account, message, platform)
 
       if (ackMessage) {
         // get message author
         const author = ackMessage.author.toString()
-        const uniqueAckCount = await this.communityRepository.getTotalCommunityMessageUniqueAck(community, message.message)
+        const uniqueAckCount = await this.messageRepository.getTotalMessageUniqueAck(community, message.message)
         // check if message delivered to all clients
 
         if (uniqueAckCount >= ackMessage.targetNodes && ackMessage.message.status !== MessageStatus.DELIVERED) {
           // remove author from ack list so delivery status is sent when connected
-          await this.communityRepository.removeCommunityMessageAck(author, message, platform)
-          const deliveredMessage = await this.communityRepository.setCommunityMessageStatus(community, message.message, MessageStatus.DELIVERED)
+          await this.messageRepository.removeMessageAck(author, message, platform)
+          const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.DELIVERED)
 
           // send delivery status to author
           this.server.emit(`${author}-${EVENT_NAME_DELIVERY}`, deliveredMessage)
@@ -224,7 +211,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
         if (ackMessage.reached >= ackMessage.totalNodes && ackMessage.message.status === MessageStatus.DELIVERED) {
           // remove message from server
-          await this.communityRepository.cleanUpCommunityMessage(account, community, message.message)
+          await this.messageRepository.cleanUpMessage(account, community, message.message)
         }
       }
     }
@@ -233,7 +220,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   // process and send typing events to user
-  private async getTypingEventData(community: string, account: string, typing: Boolean): Promise<any> {
+  private async getTypingEventData(community: string, account: string, typing: Boolean, room?: string,): Promise<any> {
     const member = await this.communityRepository.getCommunityMemberChatInfo(account, community)
     if (!member) return
 
@@ -243,6 +230,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       firstName: member.extra.firstName,
       lastName: member.extra.lastName,
       community: member.community,
+      room: room,
       photo: member.extra.photo,
       isAdmin: member.isAdmin
     }
@@ -259,10 +247,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       try {
         const community = message.community
+        const room = message.room
         const account: string = client.data.user.sub
 
         // send typing event to users
-        const data = await this.getTypingEventData(community, account, message.typing)
+        const data = await this.getTypingEventData(community, account, message.typing, room)
         client.to(community).emit(EVENT_NAME_TYPING, data)
       } catch (error) {
 
@@ -276,20 +265,20 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage(EVENT_NAME_UPDATE)
   async handleMessageUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: MessageDto
+    @MessageBody() message: MessageRequestDto
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
 
     if (authenticated) {
-      const community = message.community
+      const room = message.room
       const account: string = client.data.user.sub
 
       // get total expected audience
-      const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
-      const targetNodes: number = await this.communityRepository.getTotalCommunityEffectiveEventNodes(community)
+      const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
+      const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response = await this.communityRepository.updateMessage(account, message, totalNodes, targetNodes)
-      this.server.to(community).emit(EVENT_NAME_UPDATE, response)
+      const response = await this.messageRepository.updateMessage(account, message, totalNodes, targetNodes)
+      this.server.to(room).emit(EVENT_NAME_UPDATE, response)
     }
 
     return message
@@ -299,21 +288,21 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage(EVENT_NAME_REACTION)
   async handleMessageReaction(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: MessageDto
+    @MessageBody() message: MessageRequestDto
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
 
     if (authenticated) {
-      const community = message.community
+      const room = message.room
       const account: string = client.data.user.sub
 
       // get total expected audience
-      const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
-      const targetNodes: number = await this.communityRepository.getTotalCommunityEffectiveEventNodes(community)
+      const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
+      const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response = await this.communityRepository.updateMessageReaction(account, message, totalNodes, targetNodes)
+      const response = await this.messageRepository.updateMessageReaction(account, message, totalNodes, targetNodes)
 
-      this.server.to(community).emit(EVENT_NAME_REACTION, response)
+      this.server.to(room).emit(EVENT_NAME_REACTION, response)
     }
 
     return message
@@ -341,7 +330,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
    * @param tokens 
    * @param silent 
    */
-  private async sendOfflineMessages(community: string, sender: string, message: MessageDto, messageId: string, tokens: any[], silent: Boolean): Promise<void> {
+  private async sendOfflineMessages(community: string, room: string, sender: string, message: MessageRequestDto, messageId: string, tokens: any[], silent: Boolean): Promise<void> {
     const push: PushMultipleDto = {
       devices: tokens,
       data: {
@@ -349,6 +338,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         encryption: JSON.stringify(message.encryption),
         content: message.type === 'text' ? message.body : this.getMessageBody(message.type),
         link: 'home/message',
+        target: room,
         type: 'message',
         title: sender,
         description: 'You have a new message! Tap to read.',
@@ -364,47 +354,49 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage(EVENT_NAME)
   async handleMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: MessageDto
-  ): Promise<MessageDto> {
+    @MessageBody() message: MessageRequestDto
+  ): Promise<MessageRequestDto> {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-      const community = message.community
+      const room = message.room
+      const platform: string = client.handshake.headers.platform as string
       const account: string = client.data.user.sub
 
       // get total expected audience
-      const totalNodes: number = await this.communityRepository.getTotalCommunityEventNodes(community)
-      const targetNodes: number = await this.communityRepository.getTotalCommunityEffectiveEventNodes(community)
+      const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
+      const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response: MessageResonseDto = await this.communityRepository.createMessage(account, message, totalNodes, targetNodes)
+      const response: MessageResonseDto = await this.messageRepository.createMessage(account, message, totalNodes, targetNodes)
 
-      this.server.to(community).emit(EVENT_NAME, response)
+      this.server.to(room).emit(EVENT_NAME, response)
       const sender = response.author.isAdmin ? 'Admin' : `${response.author.extra.firstName} ${response.author.extra.lastName}`
 
       // get all onffline devices and send push notifications
-      const offlineDevices: CommunityEventNode[] = await this.communityRepository.getOfflineCommunityEventNodesTokens(community, account)
+      const offlineDevices: MessageNode[] = await this.messageRepository.getOfflineMessageNodesTokens(room, account)
 
       // get all offline devices who have opened the app after a wake push
-      const wakeUpNotifications: CommunityEventNode[] = offlineDevices.filter((node: CommunityEventNode) => node.appOpenedSinceLastPush === true)
+      const wakeUpNotifications: MessageNode[] = offlineDevices.filter((node: MessageNode) => node.appOpenedSinceLastPush === true)
 
       if (wakeUpNotifications.length > 0) {
         // clear app opened since last push
-        await this.communityRepository.clearAppOpenSinceLastPush(wakeUpNotifications.map((node) => node.account))
+        await this.messageRepository.clearAppOpenSinceLastPush(wakeUpNotifications.map((node) => node.account), platform)
       }
 
       // get all onffline devices and send silent push notifications who has not opened the app after a wake push
-      const silentNotifications: CommunityEventNode[] = offlineDevices.filter((node: CommunityEventNode) => node.appOpenedSinceLastPush === false)
+      const silentNotifications: MessageNode[] = offlineDevices.filter((node: MessageNode) => node.appOpenedSinceLastPush === false)
 
-      let tokens = wakeUpNotifications.map((device: CommunityEventNode) => (device as any).token)
+      let tokens = wakeUpNotifications.map((device: MessageNode) => (device as any).token)
 
       // send wake notifications to users who have not recieved a wake previuosly
-      await this.sendOfflineMessages(community, sender, message, (response as any).messageId, tokens, false)
+      await this.sendOfflineMessages(message.community, room, sender, message, response.messageId, tokens, false)
 
-      tokens = silentNotifications.map((device: CommunityEventNode) => (device as any).token)
+      tokens = silentNotifications.map((device: MessageNode) => (device as any).token)
 
       // send silent notifications to users who has recieved a wake previuosly
-      await this.sendOfflineMessages(community, sender, message, (response as any).messageId, tokens, true)
+      await this.sendOfflineMessages(message.community, room, sender, message, response.messageId, tokens, true)
     }
 
     return message;
   }
+
 }

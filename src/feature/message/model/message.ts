@@ -3,13 +3,11 @@ import { HydratedDocument, Types } from "mongoose"
 import { Account } from "src/feature/account/model/account.model"
 import { Community, E2eeData } from "src/feature/community/model/community"
 import { CommunityMember } from "src/feature/community/model/community.member"
-import { CommunityMessage } from "src/feature/community/model/community.message"
 import { MessageStatus } from "../util/message.status"
 import { MessageType } from "../util/message.type"
 import { MessageReaction } from "./message.reaction"
-import { MessageCategory } from "./message.category"
+import { MessageCategory } from "../../community/model/message.category"
 import { MessageVisibility } from "../util/message.visibility"
-import { CommunityBuilding } from "src/feature/community/model/community.building"
 
 export type MessageDocument = HydratedDocument<Message>
 
@@ -18,14 +16,11 @@ export class Message {
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
 
-  @Prop({ type: Types.ObjectId, ref: CommunityBuilding.name })
-  building?: Types.ObjectId
+  @Prop({ type: Types.ObjectId })
+  room?: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
   author: Types.ObjectId
-
-  @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
-  recipient?: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: MessageCategory.name })
   category?: Types.ObjectId
@@ -42,7 +37,7 @@ export class Message {
   @Prop([{ type: MessageReaction }])
   reactions?: MessageReaction[]
 
-  @Prop({ type: Types.ObjectId, ref: CommunityMessage.name })
+  @Prop({ type: Types.ObjectId, ref: Message.name })
   repliedTo?: Types.ObjectId
 
   @Prop()

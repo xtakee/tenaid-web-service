@@ -246,7 +246,7 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
   }
 
-  /**
+    /**
    * 
    * @param user 
    * @param community 
@@ -254,32 +254,31 @@ export class CommunityController {
    * @param paginate 
    * @returns 
    */
-  @Post(':community/message/category')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Create a community message category' })
-  async createCommunityMessageCategory(@User() user: string,
-    @Param('community') community: string,
-    @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
-    if (!isMongoId(community)) throw new BadRequestException()
-
-    return await this.communityService.createCommunityMessageCategory(user, community, data)
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @returns 
-   */
-  @Get(':community/message/category')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all community message categories' })
-  async getCommunityMessageCategory(
-    @User() user: string,
-    @Param('community') community: string): Promise<MessageCategoryDto[]> {
-    if (!isMongoId(community)) throw new BadRequestException()
-    return this.communityService.getCommunityMessageCategories(community)
-  }
+    @Post(':community/message/category')
+    @BasicAuth()
+    @ApiOperation({ summary: 'Create a community message category' })
+    async createCommunityMessageCategory(@User() user: string,
+      @Param('community') community: string,
+      @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
+      if (!isMongoId(community)) throw new BadRequestException()
+  
+      return await this.communityService.createCommunityMessageCategory(user, community, data)
+    }
+  
+    /**
+     * 
+     * @param user 
+     * @param community 
+     * @returns 
+     */
+    @Get(':community/message/category')
+    @BasicAuth()
+    @ApiOperation({ summary: 'Get all community message categories' })
+    async getCommunityMessageCategory(
+      @Param('community') community: string): Promise<MessageCategoryDto[]> {
+      if (!isMongoId(community)) throw new BadRequestException()
+      return this.communityService.getCommunityMessageCategories(community)
+    }
 
   /**
    * 
@@ -910,45 +909,6 @@ export class CommunityController {
   @ApiOperation({ summary: 'Add a community member' })
   async addCommunityMember(@User() user: string, @Param('community') community: string, @Body() data: AddMemberRequestDto): Promise<void> {
     return this.communityService.addCommunityMember(community, user, data)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param paginate 
-   * @param date 
-   * @returns 
-   */
-  @Get(':community/messages')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all community messages' })
-  @ApiQuery({ name: 'date', required: false, type: String })
-  async getCommunityMessages(
-    @Param('community') community: string,
-    @Query() paginate: PaginationRequestDto,
-    @Query() date?: DateDto,
-  ): Promise<PaginatedResult<any>> {
-    if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMessages(community, paginate.page, paginate.limit, paginate.sort, date.date)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param paginate 
-   * @param date 
-   * @returns 
-   */
-  @Get(':community/messages-backup')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all community previous messages' })
-  async getCommunityPreviousMessages(
-    @Param('community') community: string,
-    @Query() paginate: PaginationRequestDto,
-    @Query() date: DateDto,
-  ): Promise<PaginatedResult<any>> {
-    if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityPreviousMessages(community, paginate.page, paginate.limit, date.date, paginate.sort)
   }
 
 }

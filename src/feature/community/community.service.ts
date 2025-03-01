@@ -21,7 +21,6 @@ import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.m
 import { PaginatedEmptyResult, PaginatedResult } from 'src/core/helpers/paginator';
 import { INVITE_STATUS, MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
-import { CommunityMemberResponseToDtoMapper } from './mapper/community.member.response.to.dto.mapper';
 import { AccountRepository } from '../account/account.respository';
 import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
 import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
@@ -34,8 +33,6 @@ import { CheckType } from '../core/dto/check.type';
 import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
 import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
 import { EventGateway, EventType } from '../event/event.gateway';
-import { MessageCategoryDto } from './dto/request/message.category.dto';
-import { CommunityMember } from './model/community.member';
 import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
 import { CommunityBuildingDto } from './dto/request/community.building.dto';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
@@ -46,6 +43,9 @@ import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto
 import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
 import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
+import { MessageRepository } from '../message/message.repository';
+import { MessageCategoryDto } from './dto/request/message.category.dto';
+import { CommunityMember } from './model/community.member';
 
 @Injectable()
 export class CommunityService {
@@ -62,7 +62,6 @@ export class CommunityService {
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
     private readonly authHelper: AuthHelper,
-    private readonly memberMapper: CommunityMemberResponseToDtoMapper,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
 
@@ -107,6 +106,48 @@ export class CommunityService {
     }
 
     throw new BadRequestException()
+  }
+
+  /**
+  * 
+  * @param user 
+  * @param community 
+  * @param data 
+  */
+  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<MessageCategoryDto> {
+    const member: CommunityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
+
+    if (member && (member.isAdmin === true || member.extra?.isAdmin === true)) {
+      const category = await this.communityRepository.createCommunityMessageCategory(community, data)
+      if (category)
+        return {
+          id: (category as any)._id,
+          name: category.name,
+          description: category.description,
+          isReadOnly: category.readOnly
+        }
+
+      else throw new BadRequestException()
+    }
+
+    else throw new BadRequestException()
+  }
+
+  /**
+* 
+* @param community 
+* @returns 
+*/
+  async getCommunityMessageCategories(community: string): Promise<MessageCategoryDto[]> {
+    const categories = await this.communityRepository.getCommunityMessageCategories(community)
+    return categories.map((data) => {
+      return {
+        _id: (data as any)._id,
+        name: data.name,
+        description: data.description,
+        isReadOnly: data.readOnly
+      }
+    })
   }
 
   /**
@@ -681,48 +722,6 @@ export class CommunityService {
 
   /**
    * 
-   * @param user 
-   * @param community 
-   * @param data 
-   */
-  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<MessageCategoryDto> {
-    const member: CommunityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
-
-    if (member && (member.isAdmin === true || member.extra?.isAdmin === true)) {
-      const category = await this.communityRepository.createCommunityMessageCategory(community, data)
-      if (category)
-        return {
-          id: (category as any)._id,
-          name: category.name,
-          description: category.description,
-          isReadOnly: category.readOnly
-        }
-
-      else throw new BadRequestException()
-    }
-
-    else throw new BadRequestException()
-  }
-
-  /**
- * 
- * @param community 
- * @returns 
- */
-  async getCommunityMessageCategories(community: string): Promise<MessageCategoryDto[]> {
-    const categories = await this.communityRepository.getCommunityMessageCategories(community)
-    return categories.map((data) => {
-      return {
-        _id: (data as any)._id,
-        name: data.name,
-        description: data.description,
-        isReadOnly: data.readOnly
-      }
-    })
-  }
-
-  /**
-   * 
    * @param community 
    * @param code 
    * @returns 
@@ -1000,18 +999,6 @@ export class CommunityService {
   /**
    * 
    * @param community 
-   * @param page 
-   * @param limit 
-   * @param date 
-   * @returns 
-   */
-  async getCommunityMessages(community: string, page: number, limit: number, sort: string, date?: string): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getCommunityMessages(community, page, limit, sort, date)
-  }
-
-  /**
-   * 
-   * @param community 
    * @param user 
    * @param data 
    * @returns 
@@ -1091,16 +1078,4 @@ export class CommunityService {
     if (!request) throw new NotFoundException()
   }
 
-  /**
-   * 
-   * @param community 
-   * @param page 
-   * @param limit 
-   * @param sort 
-   * @param date 
-   * @returns 
-   */
-  async getCommunityPreviousMessages(community: string, page: number, limit: number, date: string, sort?: string): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getCommunityPreviousMessages(community, page, limit, date, sort)
-  }
 }
