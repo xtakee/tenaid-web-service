@@ -246,39 +246,39 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
   }
 
-    /**
+  /**
+ * 
+ * @param user 
+ * @param community 
+ * @param status 
+ * @param paginate 
+ * @returns 
+ */
+  @Post(':community/message/category')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Create a community message category' })
+  async createCommunityMessageCategory(@User() user: string,
+    @Param('community') community: string,
+    @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+
+    return await this.communityService.createCommunityMessageCategory(user, community, data)
+  }
+
+  /**
    * 
    * @param user 
    * @param community 
-   * @param status 
-   * @param paginate 
    * @returns 
    */
-    @Post(':community/message/category')
-    @BasicAuth()
-    @ApiOperation({ summary: 'Create a community message category' })
-    async createCommunityMessageCategory(@User() user: string,
-      @Param('community') community: string,
-      @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
-      if (!isMongoId(community)) throw new BadRequestException()
-  
-      return await this.communityService.createCommunityMessageCategory(user, community, data)
-    }
-  
-    /**
-     * 
-     * @param user 
-     * @param community 
-     * @returns 
-     */
-    @Get(':community/message/category')
-    @BasicAuth()
-    @ApiOperation({ summary: 'Get all community message categories' })
-    async getCommunityMessageCategory(
-      @Param('community') community: string): Promise<MessageCategoryDto[]> {
-      if (!isMongoId(community)) throw new BadRequestException()
-      return this.communityService.getCommunityMessageCategories(community)
-    }
+  @Get(':community/message/category')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community message categories' })
+  async getCommunityMessageCategory(
+    @Param('community') community: string): Promise<MessageCategoryDto[]> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return this.communityService.getCommunityMessageCategories(community)
+  }
 
   /**
    * 

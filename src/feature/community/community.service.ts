@@ -311,12 +311,7 @@ export class CommunityService {
    * @returns 
    */
   async getCommunityJoinRequestsCount(user: string, community: string): Promise<{}> {
-    const communityData = await this.communityRepository.getCommunity(community);
-
-    if (communityData && communityData.account.toString() === user)
-      return { count: await this.communityRepository.getCommunityJoinRequestsCount(community) }
-
-    throw new ForbiddenException()
+    return { count: await this.communityRepository.getCommunityJoinRequestsCount(community) }
   }
 
   /**
@@ -670,13 +665,7 @@ export class CommunityService {
    * @returns 
    */
   async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, search?: string, date?: string): Promise<PaginatedResult<any>> {
-
-    const member = await this.communityRepository.getApprovedCommunityMember(user, community)
-
-    if (member)
-      return await this.communityRepository.getAllCommunityMessagingMembers(user, community, page, limit, search, date)
-
-    else return PaginatedEmptyResult
+    return await this.communityRepository.getAllCommunityMessagingMembers(user, community, page, limit, search, date)
   }
 
   /**

@@ -14,6 +14,7 @@ import { MessageTypingDto } from "./dto/message.typing.dto"
 import { MessageCacheDto } from "./dto/message.cache"
 import { MessageStatus } from "./util/message.status"
 import { MessageNode } from "./model/message.node"
+import { CacheService } from "src/services/cache/cache.service"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -23,7 +24,6 @@ const EVENT_NAME_DELETE = 'community-message-delete'
 const EVENT_NAME_UPDATE = 'community-message-update'
 const EVENT_NAME_REFRESH = 'community-join-refresh'
 const EVENT_NAME_TYPING = 'community-message-typing'
-const EVENT_NAME_OFFLINE = 'community-message-offline'
 const EVENT_NAME_REACTION = 'community-message-reaction'
 
 class NodeData {
@@ -41,6 +41,7 @@ class NodeData {
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authGuard: WsJwtAuthGuard,
+    private readonly redisCache: CacheService,
     private readonly messageRepository: MessageRepository,
     private readonly communityRepository: CommunityRepository,
     private readonly notificationService: NotificationService,
@@ -62,10 +63,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     // client authentication
     const account: string = client.data.user.sub
     const platfom: string = client.handshake.headers.platform as string
-    const { community } = await this.communityRepository.getAccountPrimaryCommunity(account)
+    // 
+    const json = await this.redisCache.get(`${account}-${EVENT_NAME_TYPING}`)
+    const data: MessageTypingDto = JSON.parse(json)
 
-    const data = await this.getTypingEventData(community._id.toString(), account, false)
-    this.server.to(community).emit(EVENT_NAME_TYPING, data)
+    if (data)
+      this.server.to(data.room).emit(EVENT_NAME_TYPING, data)
 
     if (account)
       this.messageRepository.updateMessageNodesDisConnection(account, platfom)
@@ -98,13 +101,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         await this.messageRepository.getAllCachedMessages(account, rooms.map(room => new Types.ObjectId(room)), platform)
 
       // check for stale/offline events
-      if (cachedMessages.length > 0)
-        for (const cache of cachedMessages) {
-          //send to only connected client
-          if (cache.message !== null) {
-            this.server.to(account).emit(cache.type, cache.message)
-          }
+      for (const cache of cachedMessages) {
+        //send to only connected client
+        if (cache.message !== null) {
+          this.server.to(account).emit(cache.type, cache.message)
         }
+      }
+
 
     } else client.disconnect()
   }
@@ -219,23 +222,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     return message
   }
 
-  // process and send typing events to user
-  private async getTypingEventData(community: string, account: string, typing: Boolean, room?: string,): Promise<any> {
-    const member = await this.communityRepository.getCommunityMemberChatInfo(account, community)
-    if (!member) return
-
-    return {
-      id: (member as any)._id,
-      typing: typing,
-      firstName: member.extra.firstName,
-      lastName: member.extra.lastName,
-      community: member.community,
-      room: room,
-      photo: member.extra.photo,
-      isAdmin: member.isAdmin
-    }
-  }
-
   // handle message update
   @SubscribeMessage(EVENT_NAME_TYPING)
   async handleMessageTyping(
@@ -246,13 +232,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     if (authenticated) {
       try {
-        const community = message.community
-        const room = message.room
         const account: string = client.data.user.sub
 
+        const data = JSON.stringify(message)
+
+        // store account typing event data
+        await this.redisCache.set(`${account}-${EVENT_NAME_TYPING}`, data)
+
         // send typing event to users
-        const data = await this.getTypingEventData(community, account, message.typing, room)
-        client.to(community).emit(EVENT_NAME_TYPING, data)
+        client.to(message.room).emit(EVENT_NAME_TYPING, message)
       } catch (error) {
 
       }

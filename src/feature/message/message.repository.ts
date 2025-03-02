@@ -138,7 +138,7 @@ export class MessageRepository {
    * @param community 
    * @returns 
    */
-  async getMessageById(message: string, community: string): Promise<MessageResonseDto> {
+  async getMessageById(community: string, message: string): Promise<MessageResonseDto> {
     return (await this.messageModel.findOne(
       {
         _id: new Types.ObjectId(message),
@@ -280,7 +280,6 @@ export class MessageRepository {
    * @returns 
    */
   private buildMessage(user: string, data: MessageRequestDto) {
-    console.log(data)
     return {
       _id: new Types.ObjectId(data.remoteId),
       messageId: data.messageId,
@@ -460,7 +459,7 @@ export class MessageRepository {
       targets,
       targetNodes)
 
-    return await this.getMessageById(message.community, (MessageCacheType as any)._id.toString())
+    return await this.getMessageById(message.community, (messageData as any)._id.toString())
   }
 
   /**
@@ -573,13 +572,13 @@ export class MessageRepository {
     })
   }
 
-/**
- * 
- * @param user 
- * @param rooms 
- * @param date 
- * @returns 
- */
+  /**
+   * 
+   * @param user 
+   * @param rooms 
+   * @param date 
+   * @returns 
+   */
   async getAllRoomsLatestUnreadMessages(user: string, rooms: string[], date?: string): Promise<any> {
     const query: any = {
       room: { $in: rooms.map((room) => new Types.ObjectId(room)) },

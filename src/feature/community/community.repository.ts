@@ -928,7 +928,7 @@ export class CommunityRepository {
       query.updatedAt = { $gt: new Date(date) }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
-      select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt',
+      select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt building._id',
       page: page,
       limit: limit
     })
@@ -1262,9 +1262,10 @@ export class CommunityRepository {
    * @param user 
    * @returns 
    */
-  async getAccountPrimaryManagedCommunity(user: string,): Promise<Community> {
+  async getAccountPrimaryManagedCommunity(user: string): Promise<Community> {
     return await this.communityModel.findOne({
-      account: new Types.ObjectId(user)
+      account: new Types.ObjectId(user),
+      isPrimary: true
     })
   }
 
@@ -1294,7 +1295,10 @@ export class CommunityRepository {
   async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
     const prev = await this.communityMemberModel.updateMany({
       account: new Types.ObjectId(user),
-      status: ACCOUNT_STATUS.APPROVED
+      $or: [
+        { status: ACCOUNT_STATUS.APPROVED },
+        { status: ACCOUNT_STATUS.ACCEPTED }
+      ]
     },
       { $set: { isPrimary: false } }
     ).exec()
@@ -1319,10 +1323,9 @@ export class CommunityRepository {
    * @returns 
    */
   async getAccountPrimaryCommunity(user: string): Promise<any> {
-    return await this.communityMemberModel.findOneAndUpdate(
-      { account: new Types.ObjectId(user) },
-      { isPrimary: true },
-      { returnDocument: 'after', fields: COMMUNITY_MEMBER_PRIMARY_QUERY }
+    return await this.communityMemberModel.findOne(
+      { account: new Types.ObjectId(user), isPrimary: true },
+      COMMUNITY_MEMBER_PRIMARY_QUERY
     ).populate(MEMBER_COMMUNITIES_QUERY).exec()
   }
 
@@ -1413,6 +1416,7 @@ export class CommunityRepository {
    */
   async setJoinRequestStatus(member: string, status: string, community: string, code: string): Promise<any> {
     let primary = false
+    console.log(community)
 
     if (status === ACCOUNT_STATUS.APPROVED) {
       const memberData = await this.communityMemberModel.findById(member)
@@ -1603,7 +1607,8 @@ export class CommunityRepository {
     for (const accountCommunity of communities) {
       rooms.push((accountCommunity as any).community.toString())
       rooms.push((accountCommunity as any)._id.toString())
-      rooms.push(accountCommunity.building.toString())
+      if (accountCommunity.building)
+        rooms.push(accountCommunity.building.toString())
     }
 
     rooms.push(user)

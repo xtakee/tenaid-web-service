@@ -14,9 +14,10 @@ import { MessageNode, MessageNodeSchema } from './model/message.node';
 import { MessageCache, MessageCacheSchema } from './model/message.cache';
 import { MessageRepository } from './message.repository';
 import { CommunityModule } from '../community/community.module';
+import { CacheService } from 'src/services/cache/cache.service';
 
 @Module({
-  providers: [MessageService, MessageGateway, MessageRepository, WsJwtAuthGuard, AuthHelper, EventService, Paginator],
+  providers: [MessageService, MessageGateway, CacheService, MessageRepository, WsJwtAuthGuard, AuthHelper, EventService, Paginator],
   controllers: [MessageController],
   imports: [NotificationModule,
     CommunityModule,
