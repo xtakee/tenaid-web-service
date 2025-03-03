@@ -381,7 +381,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       tokens = silentNotifications.map((device: MessageNode) => (device as any).token)
 
       // send silent notifications to users who has recieved a wake previuosly
-      await this.sendOfflineMessages(message.community, room, sender, message, response.messageId, tokens, true)
+      await this.sendOfflineMessages(message.community, room, sender, message, response.messageId, tokens, false)
     }
 
     return message;
