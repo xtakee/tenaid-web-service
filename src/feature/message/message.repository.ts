@@ -106,7 +106,7 @@ export class MessageRepository {
       rooms: new Types.ObjectId(room),
       account: { $ne: new Types.ObjectId(account) },
       status: 'offline'
-    }, 'token appOpenedSinceLastPush account');
+    }, 'token appOpenedSinceLastPush account')
   }
 
   /**
@@ -126,8 +126,8 @@ export class MessageRepository {
    * @param user 
    * @returns 
    */
-  async setAppOpenedSinceLastPush(user: string): Promise<MessageNode[]> {
-    return await this.messageNodeModel.findOneAndUpdate({
+  async setAppOpenedSinceLastPush(user: string): Promise<void> {
+    await this.messageNodeModel.findOneAndUpdate({
       account: new Types.ObjectId(user)
     }, { appOpenedSinceLastPush: true })
   }
