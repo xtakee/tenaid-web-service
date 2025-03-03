@@ -928,7 +928,7 @@ export class CommunityRepository {
       query.updatedAt = { $gt: new Date(date) }
 
     return await this.paginator.paginate(this.communityMemberModel, query, {
-      select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt building._id',
+      select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt building',
       page: page,
       limit: limit
     })
