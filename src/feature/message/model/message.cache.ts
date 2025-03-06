@@ -26,6 +26,9 @@ export class MessageCache {
   @Prop({ default: 0 })
   reached?: number
 
+  @Prop({ default: 0 })
+  totalSeen?: number
+
   @Prop({ enum: MessageCacheType })
   type: string
 
@@ -34,6 +37,9 @@ export class MessageCache {
 
   @Prop()
   totalNodes: number
+
+  @Prop([{ type: MessageTarget }])
+  seenTargets?: MessageTarget[]
 
   @Prop([{ type: MessageTarget }])
   targets?: MessageTarget[]

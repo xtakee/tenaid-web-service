@@ -18,8 +18,10 @@ import { CacheService } from "src/services/cache/cache.service"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
+const EVENT_MESSAGE_SEEN_ACK = 'community-message-seen-ack'
 const EVENT_NAME_DELIVERY_ACK = 'community-message-delivery-ack'
 const EVENT_NAME_DELIVERY = 'community-message-delivery'
+const EVENT_NAME_MESSAGE_SEEN = 'community-message-seen'
 const EVENT_NAME_DELETE = 'community-message-delete'
 const EVENT_NAME_UPDATE = 'community-message-update'
 const EVENT_NAME_REFRESH = 'community-join-refresh'
@@ -177,6 +179,46 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       // join all active community rooms
       for (const room of rooms) client.join(room)
+    }
+
+    return message
+  }
+
+  // acknowledge message seen/read
+  @SubscribeMessage(EVENT_MESSAGE_SEEN_ACK)
+  async handleMessageSeenAck(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: MessageAckDto
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+
+    if (authenticated) {
+      const community = message.community
+      const account: string = client.data.user.sub
+      const platform: string = client.handshake.headers.platform as string
+
+      const ackMessage = await this.messageRepository.acknowledgeMessageSeen(account, message, platform)
+
+      if (ackMessage) {
+        // get message author
+        const author = ackMessage.author.toString()
+        const uniqueAckCount = await this.messageRepository.getTotalMessageUniqueSeenAck(community, message.message)
+        // check if message delivered to all clients
+
+        if (uniqueAckCount >= ackMessage.targetNodes && ackMessage.message.status !== MessageStatus.SEEN) {
+          // remove author from ack list so seen/read status is sent when connected
+          await this.messageRepository.removeMessageSeenAck(author, message, platform)
+          const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.SEEN)
+
+          // send delivery status to author
+          this.server.emit(`${author}-${EVENT_NAME_MESSAGE_SEEN}`, deliveredMessage)
+        }
+
+        if (ackMessage.totalSeen >= ackMessage.totalNodes && ackMessage.message.status === MessageStatus.SEEN) {
+          // remove message from server
+          await this.messageRepository.cleanUpMessage(account, community, message.message)
+        }
+      }
     }
 
     return message

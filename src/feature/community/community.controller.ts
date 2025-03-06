@@ -283,6 +283,21 @@ export class CommunityController {
 
   /**
    * 
+   * @param community 
+   * @returns 
+   */
+  @Get(':community/summary')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get community summary' })
+  async getCommunitySummary(
+    @Param('community') community: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+
+    return await this.communityService.getCommunitySummary(community)
+  }
+
+  /**
+   * 
    * @param user 
    * @param body 
    * @returns 

@@ -232,6 +232,23 @@ export class MessageRepository {
 
   /**
    * 
+   */
+  async removeMessageSeenAck(user: string, data: MessageAckDto, platform: string): Promise<MessageCache> {
+    return await this.messageCacheModel.findOneAndUpdate({
+      community: new Types.ObjectId(data.community),
+      message: new Types.ObjectId(data.message)
+    }, {
+      $pull: {
+        seenTargets: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      },
+    }, { new: true })
+  }
+
+  /**
+   * 
    * @param community 
    * @param room 
    * @param message 
@@ -645,6 +662,38 @@ export class MessageRepository {
 
   /**
    * 
+   * @param user 
+   * @param data 
+   * @param platform 
+   * @returns 
+   */
+  async acknowledgeMessageSeen(user: string, data: MessageAckDto, platform: string): Promise<any> {
+    return await this.messageCacheModel.findOneAndUpdate({
+      community: new Types.ObjectId(data.community),
+      message: new Types.ObjectId(data.message),
+      seenTargets: {
+        $ne: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      }
+    }, {
+      $addToSet: {
+        seenTargets: {
+          target: new Types.ObjectId(user),
+          platform: platform
+        }
+      },
+      $inc: { totalSeen: 1 }
+    }, { new: true }).populate({
+      path: 'message',
+      select: '_id status'
+    }
+    ).exec()
+  }
+
+  /**
+   * 
    * @param community 
    * @param message 
    * @returns 
@@ -659,6 +708,28 @@ export class MessageRepository {
       },
       { $unwind: '$targets' },
       { $group: { _id: '$targets.target', count: { $sum: 1 } } },
+      { $count: 'sum' },
+    ])
+
+    return result[0].sum
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param message 
+   * @returns 
+   */
+  async getTotalMessageUniqueSeenAck(community: string, message: string): Promise<number> {
+    const result = await this.messageCacheModel.aggregate([
+      {
+        $match: {
+          community: new Types.ObjectId(community),
+          message: new Types.ObjectId(message)
+        }
+      },
+      { $unwind: '$seenTargets' },
+      { $group: { _id: '$seenTargets.target', count: { $sum: 1 } } },
       { $count: 'sum' },
     ])
 

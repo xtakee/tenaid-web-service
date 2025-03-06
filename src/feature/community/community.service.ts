@@ -43,10 +43,11 @@ import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto
 import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
 import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
 import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { MessageRepository } from '../message/message.repository';
 import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityMember } from './model/community.member';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class CommunityService {
@@ -63,6 +64,7 @@ export class CommunityService {
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
     private readonly authHelper: AuthHelper,
+    @InjectQueue('community_worker_queue') private readonly communityQueue: Queue,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
 
@@ -107,6 +109,14 @@ export class CommunityService {
     }
 
     throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  private async updateCommuntitySummary(community: string): Promise<void> {
+    await this.communityQueue.add('update-community-summary', { community })
   }
 
   /**
@@ -413,6 +423,9 @@ export class CommunityService {
 
     if (community) {
       const path: CommunityStreet = await this.communityRepository.createStreet(user, data)
+
+      // queue summary job
+      await this.updateCommuntitySummary(data.community)
       return this.pathMapper.map(path)
     }
 
@@ -433,6 +446,18 @@ export class CommunityService {
 
     const saved = await this.communityRepository.updateCommunityStreet(community, street, data)
     if (saved) return this.pathMapper.map(saved)
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async getCommunitySummary(community: string): Promise<any> {
+    const data = await this.communityRepository.getCommunitySummary(community)
+
+    if (data) return data
 
     throw new NotFoundException()
   }
@@ -702,6 +727,9 @@ export class CommunityService {
     const _community = await this.communityRepository.getCommunityByUser(user, community)
     if (_community) {
       const result = await this.communityRepository.createCommunityBuilding(community, data)
+
+      // queue summary job
+      await this.updateCommuntitySummary(community)
       return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
     }
 

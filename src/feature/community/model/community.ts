@@ -22,7 +22,6 @@ export class CommunityKyc {
   bankAccountCompleted?: boolean
 }
 
-@Schema()
 export class CommunitySetup {
   @Prop({ required: true, default: false })
   street?: boolean

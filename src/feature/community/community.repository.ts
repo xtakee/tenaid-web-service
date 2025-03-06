@@ -33,6 +33,8 @@ import { CreateCommunityRegistrationDto } from "./dto/request/create.community.r
 import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto"
 import { MessageCategory } from "./model/message.category"
 import { UpdateCommunityStreetDto } from "./dto/request/update.community.street.dto"
+import { CommunitySummary } from "./model/community.summary"
+import { CommunitySummaryDto } from "./dto/request/community.summary.dto"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -184,6 +186,7 @@ export class CommunityRepository {
   constructor(
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
+    @InjectModel(CommunitySummary.name) private readonly communitySummayModel: Model<CommunitySummary>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
@@ -222,7 +225,13 @@ export class CommunityRepository {
       account: new Types.ObjectId(user)
     }
 
-    return await this.communityModel.create(community)
+    const result = await this.communityModel.create(community)
+
+    // create summary record
+    const summary: CommunitySummary = { community: (result as any)._id }
+    await this.communitySummayModel.create(summary)
+
+    return result
   }
 
   /**
@@ -240,6 +249,15 @@ export class CommunityRepository {
     }
 
     return await this.communityAccessPointModel.create(accessPoint)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunitySummary(community: string): Promise<CommunitySummary> {
+    return await this.communitySummayModel.findOne({ community: new Types.ObjectId(community) })
   }
 
   /**
@@ -1007,6 +1025,56 @@ export class CommunityRepository {
         end: { $gt: now }
       },
       getPaginatedCommunityVisitorsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async updateCommunitySummary(community: string, data: CommunitySummaryDto): Promise<void> {
+    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
+      $set: {
+        members: data.members,
+        streets: data.streets,
+        buildings: data.buildings,
+        community: new Types.ObjectId(community)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async getCommunityStreetsCount(community: string): Promise<number> {
+    return await this.communityPathModel.countDocuments({
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async getCommunityBuildingsCount(community: string): Promise<number> {
+    return await this.communityBuildingModel.countDocuments({
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async getCommunityResidentsCount(community: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      $or: [
+        { status: ACCOUNT_STATUS.ACCEPTED },
+        { status: ACCOUNT_STATUS.APPROVED }
+      ],
+      isOwner: true
+    })
   }
 
   /**

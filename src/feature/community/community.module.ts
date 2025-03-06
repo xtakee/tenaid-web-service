@@ -37,12 +37,11 @@ import { CommunityDirectorToDtoMapper } from './mapper/community.director.to.dto
 import { CommunityRegistration, CommunityRegistrationSchema } from './model/community.registration'
 import { BullModule } from '@nestjs/bullmq'
 import { CommunityQueueProcessor } from './queue/community.queue.processor'
-import { MessageModule } from '../message/message.module'
-import { MessageRepository } from '../message/message.repository'
 import { MessageCategory, MessageCategorySchema } from './model/message.category'
+import { CommunitySummary, CommunitySummarySchema } from './model/community.summary'
 
 const queue = BullModule.registerQueue({
-  name: 'community_message_queue',
+  name: 'community_worker_queue',
 })
 
 @Module({
@@ -112,6 +111,7 @@ const queue = BullModule.registerQueue({
       },
     }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
+    MongooseModule.forFeature([{ name: CommunitySummary.name, schema: CommunitySummarySchema }]),
     MongooseModule.forFeature([{ name: MessageCategory.name, schema: MessageCategorySchema }]),
     MongooseModule.forFeatureAsync([{
       name: CommunityMember.name,
