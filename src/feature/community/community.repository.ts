@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+import { Injectable, NotFoundException } from "@nestjs/common"
 import { Community } from "./model/community"
 import { InjectModel } from "@nestjs/mongoose"
 import { Model, Types } from "mongoose"
@@ -32,6 +32,7 @@ import { CommunityRegistration } from "./model/community.registration"
 import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto"
 import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto"
 import { MessageCategory } from "./model/message.category"
+import { UpdateCommunityStreetDto } from "./dto/request/update.community.street.dto"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -340,7 +341,7 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async createPath(user: string, data: CommunityPathRequestDto): Promise<CommunityStreet> {
+  async createStreet(user: string, data: CommunityPathRequestDto): Promise<CommunityStreet> {
     const street = await this.communityPathModel.create({
       community: new Types.ObjectId(data.community),
       account: new Types.ObjectId(user),
@@ -932,6 +933,27 @@ export class CommunityRepository {
       page: page,
       limit: limit
     })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param street 
+   * @param data 
+   */
+  async updateCommunityStreet(
+    community: string,
+    street: string,
+    data: UpdateCommunityStreetDto): Promise<CommunityStreet> {
+
+    return await this.communityPathModel.findOneAndUpdate({
+      _id: new Types.ObjectId(street),
+      community: new Types.ObjectId(community)
+    }, {
+      name: data.name,
+      description: data.description
+    }, { returnDocument: 'after' })
   }
 
   /**

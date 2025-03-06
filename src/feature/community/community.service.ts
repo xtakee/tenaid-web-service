@@ -46,6 +46,7 @@ import { AuthHelper } from 'src/core/helpers/auth.helper';
 import { MessageRepository } from '../message/message.repository';
 import { MessageCategoryDto } from './dto/request/message.category.dto';
 import { CommunityMember } from './model/community.member';
+import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 
 @Injectable()
 export class CommunityService {
@@ -407,13 +408,31 @@ export class CommunityService {
    * @param user 
    * @param data 
    */
-  async createCommunityPath(user: string, data: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
+  async createCommunityStreet(user: string, data: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
     const community = await this.communityRepository.getCommunityByUser(user, data.community)
 
     if (community) {
-      const path: CommunityStreet = await this.communityRepository.createPath(user, data)
+      const path: CommunityStreet = await this.communityRepository.createStreet(user, data)
       return this.pathMapper.map(path)
     }
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param street 
+   * @param data 
+   */
+  async updateCommunityStreet(
+    community: string,
+    street: string,
+    data: UpdateCommunityStreetDto): Promise<CommunityPathResponseDto> {
+
+    const saved = await this.communityRepository.updateCommunityStreet(community, street, data)
+    if (saved) return this.pathMapper.map(saved)
 
     throw new NotFoundException()
   }

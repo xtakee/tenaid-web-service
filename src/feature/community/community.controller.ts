@@ -31,6 +31,7 @@ import { CreateCommunityRegistrationDto } from './dto/request/create.community.r
 import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
 import { User } from 'src/core/decorators/user';
 import { Email } from 'src/core/decorators/email';
+import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 
 @Controller({
   version: '1',
@@ -406,8 +407,27 @@ export class CommunityController {
   @Post('street')
   @BasicAuth()
   @ApiOperation({ summary: 'Create community street' })
-  async createCommunityPath(@User() user: string, @Body() body: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
-    return await this.communityService.createCommunityPath(user, body)
+  async createCommunityStreet(@User() user: string, @Body() body: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
+    return await this.communityService.createCommunityStreet(user, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param body 
+   * @returns 
+   */
+  @Patch('/:community/street/:street')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Upate a community street' })
+  async updateCommunityStreet(
+    @Param('community') community: string,
+    @Param('street') street: string,
+    @Body() body: UpdateCommunityStreetDto): Promise<CommunityPathResponseDto> {
+    if (!isMongoId(street)) throw new BadRequestException()
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.updateCommunityStreet(community, street, body)
   }
 
   /**
