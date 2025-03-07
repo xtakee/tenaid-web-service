@@ -208,7 +208,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   // acknowledge message seen/read
-  @SubscribeMessage(EVENT_MESSAGE_SEEN_ACK)
+  @SubscribeMessage(EVENT_NAME_MESSAGE_SEEN)
   async handleMessageSeen(
     @ConnectedSocket() client: Socket,
     @MessageBody() message: MessageAckDto
