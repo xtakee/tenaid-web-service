@@ -155,10 +155,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       const ackMessage = await this.messageRepository.acknowledgeMessage(account, message, platform)
 
-      if (ackMessage && ackMessage.reached >= ackMessage.totalNodes) {
-        // remove message from server
-        await this.messageRepository.cleanUpMessage(account, community, message.message)
-      }
+      // if (ackMessage && ackMessage.reached >= ackMessage.totalNodes) {
+      //   // remove message from server
+      //   await this.messageRepository.cleanUpMessage(account, community, message.message)
+      // }
     }
 
     return message
@@ -174,14 +174,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
-      const platform: string = client.handshake.headers.platform as string
-
-      const ackMessage = await this.messageRepository.acknowledgeMessageSeen(account, message, platform)
-
-      if (ackMessage && ackMessage.totalSeen >= ackMessage.totalNodes) {
-        // remove message from server
-        await this.messageRepository.cleanUpMessage(account, community, message.message)
-      }
+      
+      // remove message from server
+      await this.messageRepository.cleanUpMessage(account, community, message.message)
     }
 
     return message
