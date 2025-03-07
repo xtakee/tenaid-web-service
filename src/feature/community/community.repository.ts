@@ -35,6 +35,7 @@ import { MessageCategory } from "./model/message.category"
 import { UpdateCommunityStreetDto } from "./dto/request/update.community.street.dto"
 import { CommunitySummary } from "./model/community.summary"
 import { CommunitySummaryDto } from "./dto/request/community.summary.dto"
+import { StreetSummary } from "./model/street.summary"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -149,37 +150,7 @@ const COMMUNITY_MEMBER_QUERY = [
   }
 ]
 
-const CommunityMessagePopulateQuery = [
-  {
-    path: 'author',
-    select: '_id isAdmin extra.firstName extra.lastName extra.photo',
-    strictPopulate: false
-  },
-  {
-    path: 'deletedBy',
-    select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-  },
-  { path: 'community', select: '_id name' },
-  { path: 'category', select: '_id name description readOnly', strictPopulate: false },
-  {
-    path: 'reactions.users',
-    model: 'CommunityMember',
-    select: { _id: 1, 'extra.firstName': 1, 'extra.lastName': 1, 'extra.photo': 1, isAdmin: 1 },
-    strictPopulate: false
-  }
-]
-
 const COMMUNITY_BUILDING_QUERY = '_id community street type contactEmail contactPhone contactPerson contactCountry buildingNumber apartments category name description'
-
-function getCommunityMessagesQuery(page: number, limit: number, sort: string) {
-  return {
-    select: '_id author messageId encryption status repliedTo body deleted edited name size extension type description date community category',
-    page: page,
-    limit: limit,
-    sort: { date: sort === SortDirection.ASC ? 1 : -1 },
-    populate: CommunityMessagePopulateQuery
-  }
-}
 
 @Injectable()
 export class CommunityRepository {
@@ -187,6 +158,7 @@ export class CommunityRepository {
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
     @InjectModel(CommunitySummary.name) private readonly communitySummayModel: Model<CommunitySummary>,
+    @InjectModel(StreetSummary.name) private readonly streetSummaryModel: Model<StreetSummary>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
@@ -258,6 +230,19 @@ export class CommunityRepository {
    */
   async getCommunitySummary(community: string): Promise<CommunitySummary> {
     return await this.communitySummayModel.findOne({ community: new Types.ObjectId(community) })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @returns 
+   */
+  async getCommunityStreetSummary(community: string, street: string): Promise<StreetSummary> {
+    return await this.streetSummaryModel.findOne({
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street)
+    })
   }
 
   /**
@@ -771,6 +756,34 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityStreetMembers(community: string, street: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityMember>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street)
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityMemberModel, query, {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      page: paginate.page,
+      limit: paginate.limit,
+      sort: paginate.sort,
+      populate: {
+        path: 'street',
+        select: '_id name description'
+      }
+    })
+  }
+
+  /**
+   * 
    * @param code 
    */
   async getVisitorByCode(code: string, community: string): Promise<any> {
@@ -1030,14 +1043,73 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param streets 
    */
-  async updateCommunitySummary(community: string, data: CommunitySummaryDto): Promise<void> {
+  async updateCommunityStreetsSummary(community: string, streets: number): Promise<void> {
     await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
       $set: {
-        members: data.members,
-        streets: data.streets,
-        buildings: data.buildings,
+        streets: streets,
         community: new Types.ObjectId(community)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param buildings 
+   */
+  async updateCommunityBuildingsSummary(community: string, buildings: number): Promise<void> {
+    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
+      $set: {
+        buildings: buildings,
+        community: new Types.ObjectId(community)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param members 
+   */
+  async updateCommunityMembersSummary(community: string, members: number): Promise<void> {
+    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
+      $set: {
+        members: members,
+        community: new Types.ObjectId(community)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param members 
+   */
+  async updateCommunityStreetMembersSummary(community: string, street: string, members: number): Promise<void> {
+    await this.streetSummaryModel.findOneAndUpdate({ community: new Types.ObjectId(community), street: new Types.ObjectId(street) }, {
+      $set: {
+        members: members,
+        community: new Types.ObjectId(community),
+        street: new Types.ObjectId(street)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param buildings 
+   */
+  async updateCommunityStreetBuildingsSummary(community: string, street: string, buildings: number): Promise<void> {
+    await this.streetSummaryModel.findOneAndUpdate({ community: new Types.ObjectId(community), street: new Types.ObjectId(street) }, {
+      $set: {
+        buildings: buildings,
+        community: new Types.ObjectId(community),
+        street: new Types.ObjectId(street)
       }
     }, { upsert: true, new: true })
   }
@@ -1051,6 +1123,34 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     })
   }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @returns 
+   */
+  async getCommunityStreetMembersCount(community: string, street: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street)
+    })
+  }
+
+
+   /**
+   * 
+   * @param community 
+   * @param street 
+   * @returns 
+   */
+   async getCommunityStreetBuildingsCount(community: string, street: string): Promise<number> {
+    return await this.communityBuildingModel.countDocuments({
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street)
+    })
+  }
+
 
   /**
    * 

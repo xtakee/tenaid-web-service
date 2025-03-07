@@ -296,6 +296,18 @@ export class CommunityController {
     return await this.communityService.getCommunitySummary(community)
   }
 
+  @Get(':community/:street/summary')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get community street summary' })
+  async getCommunityStreetSummary(
+    @Param('community') community: string,
+    @Param('street') street: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(street)) throw new BadRequestException()
+
+    return await this.communityService.getCommunityStreetSummary(community, street)
+  }
+
   /**
    * 
    * @param user 
@@ -711,6 +723,18 @@ export class CommunityController {
     if (!isMongoId(community)) throw new BadRequestException()
     if (!isMongoId(street)) throw new BadRequestException()
     return await this.communityService.getAllCommunityStreetBuildings(community, street, paginate)
+  }
+
+  @Get('/:community/:street/member')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community street members' })
+  async getAllCommunityStreetMembers(
+    @Param('community') community: string,
+    @Param('street') street: string,
+    @Query() paginate: PaginationRequestDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(street)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityStreetMembers(community, street, paginate)
   }
 
   /**

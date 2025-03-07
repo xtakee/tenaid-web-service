@@ -48,6 +48,7 @@ import { CommunityMember } from './model/community.member';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREETS_SUMMARY, STREET_BUILDINGS_SUMMARY, STREET_MEMBERS_SUMMARY } from './queue/community.queue.processor';
 
 @Injectable()
 export class CommunityService {
@@ -115,8 +116,18 @@ export class CommunityService {
    * 
    * @param community 
    */
-  private async updateCommuntitySummary(community: string): Promise<void> {
-    await this.communityQueue.add('update-community-summary', { community })
+  private async updateCommuntitySummary(community: string, action: string): Promise<void> {
+    await this.communityQueue.add(action, { community })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param action 
+   */
+  private async updateCommuntityStreetSummary(community: string, street: string, action: string): Promise<void> {
+    await this.communityQueue.add(action, { community, street })
   }
 
   /**
@@ -425,7 +436,7 @@ export class CommunityService {
       const path: CommunityStreet = await this.communityRepository.createStreet(user, data)
 
       // queue summary job
-      await this.updateCommuntitySummary(data.community)
+      await this.updateCommuntitySummary(data.community, COMMUNITY_STREETS_SUMMARY)
       return this.pathMapper.map(path)
     }
 
@@ -456,6 +467,20 @@ export class CommunityService {
    */
   async getCommunitySummary(community: string): Promise<any> {
     const data = await this.communityRepository.getCommunitySummary(community)
+
+    if (data) return data
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @returns 
+   */
+  async getCommunityStreetSummary(community: string, street: string): Promise<any> {
+    const data = await this.communityRepository.getCommunityStreetSummary(community, street)
 
     if (data) return data
 
@@ -729,7 +754,9 @@ export class CommunityService {
       const result = await this.communityRepository.createCommunityBuilding(community, data)
 
       // queue summary job
-      await this.updateCommuntitySummary(community)
+      await this.updateCommuntitySummary(community, COMMUNITY_BUILDINGS_SUMMARY)
+      await this.updateCommuntityStreetSummary(community, data.street, STREET_BUILDINGS_SUMMARY)
+
       return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
     }
 
@@ -744,6 +771,17 @@ export class CommunityService {
    */
   async getAllCommunityStreetBuildings(community: string, street: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityStreetBuildings(community, street, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityStreetMembers(community: string, street: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityStreetMembers(community, street, paginate)
   }
 
   /**
@@ -929,8 +967,14 @@ export class CommunityService {
           }
         })
 
-      if (data.status === ACCOUNT_STATUS.APPROVED)
+      if (data.status === ACCOUNT_STATUS.APPROVED) {
         await this.accountRepository.setAllDashboardFlagStatus(request.account)
+
+        // update community summary
+        await this.updateCommuntitySummary(data.community, COMMUNITY_MEMBERS_SUMMARY)
+
+        await this.updateCommuntityStreetSummary(data.community, request.street._id.toString(), STREET_MEMBERS_SUMMARY)
+      }
       else await this.accountRepository.setJoinFlagStatus(request.account, true)
     }
 

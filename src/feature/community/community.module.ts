@@ -39,6 +39,7 @@ import { BullModule } from '@nestjs/bullmq'
 import { CommunityQueueProcessor } from './queue/community.queue.processor'
 import { MessageCategory, MessageCategorySchema } from './model/message.category'
 import { CommunitySummary, CommunitySummarySchema } from './model/community.summary'
+import { StreetSummary, StreetSummarySchema } from './model/street.summary'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -112,6 +113,7 @@ const queue = BullModule.registerQueue({
     }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
     MongooseModule.forFeature([{ name: CommunitySummary.name, schema: CommunitySummarySchema }]),
+    MongooseModule.forFeature([{ name: StreetSummary.name, schema: StreetSummarySchema }]),
     MongooseModule.forFeature([{ name: MessageCategory.name, schema: MessageCategorySchema }]),
     MongooseModule.forFeatureAsync([{
       name: CommunityMember.name,
