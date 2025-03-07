@@ -254,10 +254,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           this.server.emit(`${author}-${EVENT_NAME_DELIVERY}`, deliveredMessage)
         }
 
-        if (ackMessage.reached >= ackMessage.totalNodes && ackMessage.message.status === MessageStatus.DELIVERED) {
-          // remove message from server
-          await this.messageRepository.cleanUpMessage(account, community, message.message)
-        }
+        // if (ackMessage.reached >= ackMessage.totalNodes && ackMessage.message.status === MessageStatus.DELIVERED) {
+        //   // remove message from server
+        //   await this.messageRepository.cleanUpMessage(account, community, message.message)
+        // }
       }
     }
 

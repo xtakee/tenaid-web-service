@@ -725,6 +725,13 @@ export class CommunityController {
     return await this.communityService.getAllCommunityStreetBuildings(community, street, paginate)
   }
 
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
   @Get('/:community/:street/member')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community street members' })
