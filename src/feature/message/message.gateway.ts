@@ -149,11 +149,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-      const community = message.community
+      //const community = message.community
       const account: string = client.data.user.sub
       const platform: string = client.handshake.headers.platform as string
 
-      const ackMessage = await this.messageRepository.acknowledgeMessage(account, message, platform)
+      await this.messageRepository.acknowledgeMessage(account, message, platform)
 
       // if (ackMessage && ackMessage.reached >= ackMessage.totalNodes) {
       //   // remove message from server
@@ -174,7 +174,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
-      
+
       // remove message from server
       await this.messageRepository.cleanUpMessage(account, community, message.message)
     }
