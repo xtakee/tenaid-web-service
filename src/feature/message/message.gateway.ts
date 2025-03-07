@@ -164,6 +164,29 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     return message
   }
 
+  // acknowledge delivery status received
+  @SubscribeMessage(EVENT_MESSAGE_SEEN_ACK)
+  async handleMessageSeenAck(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: MessageAckDto
+  ): Promise<any> {
+    const authenticated = await this.authGuard.validate(client)
+    if (authenticated) {
+      const community = message.community
+      const account: string = client.data.user.sub
+      const platform: string = client.handshake.headers.platform as string
+
+      const ackMessage = await this.messageRepository.acknowledgeMessageSeen(account, message, platform)
+
+      if (ackMessage && ackMessage.totalSeen >= ackMessage.totalNodes) {
+        // remove message from server
+        await this.messageRepository.cleanUpMessage(account, community, message.message)
+      }
+    }
+
+    return message
+  }
+
   // refresh communities joined
   @SubscribeMessage(EVENT_NAME_REFRESH)
   async handleJoinRefresh(
@@ -186,7 +209,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   // acknowledge message seen/read
   @SubscribeMessage(EVENT_MESSAGE_SEEN_ACK)
-  async handleMessageSeenAck(
+  async handleMessageSeen(
     @ConnectedSocket() client: Socket,
     @MessageBody() message: MessageAckDto
   ): Promise<any> {
