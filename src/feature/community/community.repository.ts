@@ -37,6 +37,9 @@ import { CommunitySummary } from "./model/community.summary"
 import { CommunitySummaryDto } from "./dto/request/community.summary.dto"
 import { StreetSummary } from "./model/street.summary"
 import path from "path"
+import { CreateCommunityContactDto } from "./dto/request/create.community.contact.dto"
+import { CommunityContactResponseDto } from "./dto/response/community.contact.response.dto"
+import { CommunityContact } from "./model/community.contact"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -162,6 +165,7 @@ export class CommunityRepository {
     @InjectModel(StreetSummary.name) private readonly streetSummaryModel: Model<StreetSummary>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
+    @InjectModel(CommunityContact.name) private readonly communityContactModel: Model<CommunityContact>,
     @InjectModel(CommunityMember.name) private readonly communityMemberModel: Model<CommunityMember>,
     @InjectModel(CommunityCheckins.name) private readonly communityCheckInsModel: Model<CommunityCheckins>,
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
@@ -484,6 +488,91 @@ export class CommunityRepository {
    */
   async getCommunity(community: string): Promise<Community> {
     return await this.communityModel.findById(community)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityContact(user: string, community: string, body: CreateCommunityContactDto): Promise<CommunityContact> {
+    let contact: CommunityContact = {
+      createdBy: new Types.ObjectId(user),
+      fullName: body.fullName,
+      community: new Types.ObjectId(community),
+      email: { value: body.email.trim().toLowerCase() },
+      country: body.country,
+      isActive: body.isActive,
+      phone: body.phone,
+      tag: body.tag
+    }
+
+    contact = await this.communityContactModel.create(contact)
+    return await this.getCommunityContact(community, (contact as any)._id.toString())
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param contact 
+   * @returns 
+   */
+  async getCommunityContact(community: string, contact: string): Promise<CommunityContact> {
+    return await this.communityContactModel.findOne({
+      community: new Types.ObjectId(community),
+      _id: new Types.ObjectId(contact)
+    }).populate({
+      path: 'createdBy',
+      select: '_id firstName lastName email.value',
+      strictPopulate: false
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param email 
+   * @returns 
+   */
+  async getCommunityContactByEmail(community: string, email: string): Promise<CommunityContact> {
+    return await this.communityContactModel.findOne({
+      community: new Types.ObjectId(community),
+      'email.value': email.trim().toLowerCase()
+    }).populate({
+      path: 'createdBy',
+      select: '_id firstName lastName email.value',
+      strictPopulate: false
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityContacts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityContact>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityContactModel, query,
+      {
+        select: '_id fullName email updatedAt createdAt createdBy community isActive country tag phone',
+        page: paginate.page,
+        limit: paginate.limit,
+        sort: paginate.sort,
+        populate: {
+          path: 'createdBy',
+          select: 'firstName lastName email.value',
+          strictPopulate: false
+        }
+      }
+    )
   }
 
   /**

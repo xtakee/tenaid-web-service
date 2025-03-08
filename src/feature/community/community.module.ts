@@ -40,6 +40,7 @@ import { CommunityQueueProcessor } from './queue/community.queue.processor'
 import { MessageCategory, MessageCategorySchema } from './model/message.category'
 import { CommunitySummary, CommunitySummarySchema } from './model/community.summary'
 import { StreetSummary, StreetSummarySchema } from './model/street.summary'
+import { CommunityContact, CommunityContactSchema } from './model/community.contact'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -88,7 +89,6 @@ const queue = BullModule.registerQueue({
           }
           next()
         })
-
         return schema
       },
     }]),
@@ -105,6 +105,24 @@ const queue = BullModule.registerQueue({
         schema.pre('findOneAndUpdate', async function (next) {
           if ((this.getUpdate() as any).password) {
             (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
+          }
+          next()
+        })
+        return schema
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityContact.name, useFactory: async () => {
+        const schema = CommunityContactSchema
+        schema.pre('save', async function () {
+          if (this.isModified('fullName') || this.isNew) {
+            this.searchable = searchable(this.fullName)
+          }
+        })
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).fullName) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).fullName)
           }
           next()
         })

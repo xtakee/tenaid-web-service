@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from "mongoose"
 import { Community } from "./community"
 export type CommunitySummaryDocument = HydratedDocument<CommunitySummary>
 
-@Schema()
+@Schema({ timestamps: true })
 export class CommunitySummary {
 
   @Prop({ type: Types.ObjectId, ref: Community.name })
@@ -17,6 +17,9 @@ export class CommunitySummary {
 
   @Prop({ default: 0 })
   members?: number
+
+  @Prop({ default: 0 })
+  visitors?: number
 }
 
 export const CommunitySummarySchema = SchemaFactory.createForClass(CommunitySummary)

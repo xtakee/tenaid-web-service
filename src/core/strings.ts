@@ -15,6 +15,7 @@ export const INVALID_COMMUNITY_PATH: string = "You have entered an invalid commu
 export const INVALID_DATE_FORMAT: string = "Invalid date format"
 export const DUPLICATE_ACCESS_POINT_ERROR: string = "An access point with this name exists. Provide a unique name"
 export const DUPLICATE_HOUSE_NUMBER_ERROR = "Duplicate buildig/house number"
+export const DUPLICATE_RECORD_ERROR = "Duplicate record found"
 
 // Push notification strings
 export const REQUEST_APPROVED: string = "Request Approved!"

@@ -32,6 +32,8 @@ import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.commun
 import { User } from 'src/core/decorators/user';
 import { Email } from 'src/core/decorators/email';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
+import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
+import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
 
 @Controller({
   version: '1',
@@ -471,10 +473,55 @@ export class CommunityController {
   @Get('/:community/street')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community streets' })
-  async getAllCommunityPath(@Param('community') community: string,
+  async getAllCommunityStreets(@Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityStreets(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/:community/contact')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Create a community contact/connect' })
+  async createCommunityContact(@User() user: string, @Param('community') community: string,
+    @Body() body: CreateCommunityContactDto): Promise<CommunityContactResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+
+    return await this.communityService.createCommunityContact(user, community, body)
+  }
+
+  /**
+   * s
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get(':community/contact')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community contact/connect' })
+  async getAllCommunityContact(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityContacts(community, paginate)
+  }
+
+  /**
+   * 
+   * @param contact 
+   * @param community 
+   * @returns 
+   */
+  @Get(':community/contact/:contact')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community contact/connect' })
+  async getCommunityContact(@Param('contact') contact: string, @Param('community') community: string): Promise<CommunityContactResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(contact)) throw new BadRequestException()
+    return await this.communityService.getCommunityContact(community, contact)
   }
 
   /**
@@ -486,6 +533,8 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community street' })
   async getCommunityPath(@Param('street') street: string, @Param('community') community: string): Promise<CommunityPathResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(street)) throw new BadRequestException()
     return await this.communityService.getCommunityStreet(street, community)
   }
 

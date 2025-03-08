@@ -4,7 +4,7 @@ import { Community } from "./community"
 import { CommunityStreet } from "./community.street"
 export type StreetSummaryDocument = HydratedDocument<StreetSummary>
 
-@Schema()
+@Schema({ timestamps: true })
 export class StreetSummary {
 
   @Prop({ type: Types.ObjectId, ref: Community.name })
@@ -18,6 +18,9 @@ export class StreetSummary {
 
   @Prop({ default: 0 })
   members?: number
+
+  @Prop({ default: 0 })
+  visitors?: number
 }
 
 export const StreetSummarySchema = SchemaFactory.createForClass(StreetSummary)
