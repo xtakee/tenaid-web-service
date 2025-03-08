@@ -13,6 +13,12 @@ export class CommunityStreet {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  createdBy?: Types.ObjectId
+
+  @Prop({ default: true })
+  isActive?: Boolean
+
   @Prop()
   name: string
 

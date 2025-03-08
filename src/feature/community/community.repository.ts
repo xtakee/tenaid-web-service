@@ -36,6 +36,7 @@ import { UpdateCommunityStreetDto } from "./dto/request/update.community.street.
 import { CommunitySummary } from "./model/community.summary"
 import { CommunitySummaryDto } from "./dto/request/community.summary.dto"
 import { StreetSummary } from "./model/street.summary"
+import path from "path"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -348,6 +349,7 @@ export class CommunityRepository {
     const street = await this.communityPathModel.create({
       community: new Types.ObjectId(data.community),
       account: new Types.ObjectId(user),
+      createdBy: new Types.ObjectId(user),
       name: data.name,
       description: data.description
     })
@@ -356,7 +358,7 @@ export class CommunityRepository {
       'communitySetup.street': true
     }).exec()
 
-    return street
+    return await this.getCommunityStreet((street as any)._id.toString(), data.community)
   }
 
   /**
@@ -518,10 +520,15 @@ export class CommunityRepository {
 
     return await this.paginator.paginate(this.communityPathModel, query,
       {
-        select: '_id name description updatedAt createdAt',
+        select: '_id name description updatedAt createdAt createdBy community isActive',
         page: paginate.page,
         limit: paginate.limit,
-        sort: paginate.sort
+        sort: paginate.sort,
+        populate: {
+          path: 'createdBy',
+          select: 'firstName lastName email.value',
+          strictPopulate: false
+        }
       }
     )
   }
@@ -549,8 +556,15 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getCommunityPath(path: string, community: string): Promise<CommunityStreet> {
-    return await this.communityPathModel.findOne({ _id: new Types.ObjectId(path), community: new Types.ObjectId(community) })
+  async getCommunityStreet(street: string, community: string): Promise<CommunityStreet> {
+    return await this.communityPathModel.findOne({
+      _id: new Types.ObjectId(street),
+      community: new Types.ObjectId(community)
+    }).populate({
+      path: 'createdBy',
+      select: 'firstName lastName email.value'
+    }
+    )
   }
 
   /**
@@ -1138,13 +1152,13 @@ export class CommunityRepository {
   }
 
 
-   /**
-   * 
-   * @param community 
-   * @param street 
-   * @returns 
-   */
-   async getCommunityStreetBuildingsCount(community: string, street: string): Promise<number> {
+  /**
+  * 
+  * @param community 
+  * @param street 
+  * @returns 
+  */
+  async getCommunityStreetBuildingsCount(community: string, street: string): Promise<number> {
     return await this.communityBuildingModel.countDocuments({
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(street)

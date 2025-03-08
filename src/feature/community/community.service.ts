@@ -433,11 +433,11 @@ export class CommunityService {
     const community = await this.communityRepository.getCommunityByUser(user, data.community)
 
     if (community) {
-      const path: CommunityStreet = await this.communityRepository.createStreet(user, data)
+      const street: CommunityStreet = await this.communityRepository.createStreet(user, data)
 
       // queue summary job
       await this.updateCommuntitySummary(data.community, COMMUNITY_STREETS_SUMMARY)
-      return this.pathMapper.map(path)
+      return this.pathMapper.map(street)
     }
 
     throw new NotFoundException()
@@ -470,7 +470,13 @@ export class CommunityService {
 
     if (data) return data
 
-    throw new NotFoundException()
+    return {
+      streets: 0,
+      buildings: 0,
+      members: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
   }
 
   /**
@@ -484,7 +490,12 @@ export class CommunityService {
 
     if (data) return data
 
-    throw new NotFoundException()
+    return {
+      buildings: 0,
+      members: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
   }
 
   /**
@@ -494,7 +505,7 @@ export class CommunityService {
    * @param limit 
    * @returns 
    */
-  async getAllCommunityPaths(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
+  async getAllCommunityStreets(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityStreets(community, paginate)
   }
 
@@ -504,7 +515,7 @@ export class CommunityService {
    * @returns 
    */
   async getCommunityStreet(street: string, community: string): Promise<CommunityPathResponseDto> {
-    const result = await this.communityRepository.getCommunityPath(street, community)
+    const result = await this.communityRepository.getCommunityStreet(street, community)
 
     if (result) return this.pathMapper.map(result)
 

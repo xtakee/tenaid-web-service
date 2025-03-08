@@ -8,9 +8,14 @@ export class CommunityPathToDtoMapper implements Mapper<any, CommunityPathRespon
 
   map(from: CommunityStreet): CommunityPathResponseDto {
     return {
-      id: (from as any)._id,
+      _id: (from as any)._id,
       description: from.description,
-      name: from.name
+      name: from.name,
+      createdAt: (from as any).createdAt,
+      updatedAt: (from as any).updatedAt,
+      createdBy: from.createdBy,
+      isActive: from.isActive ? from.isActive : true,
+      community: from.community.toString()
     }
   }
 

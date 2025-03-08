@@ -296,6 +296,12 @@ export class CommunityController {
     return await this.communityService.getCommunitySummary(community)
   }
 
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @returns 
+   */
   @Get(':community/:street/summary')
   @BasicAuth()
   @ApiOperation({ summary: 'Get community street summary' })
@@ -468,7 +474,7 @@ export class CommunityController {
   async getAllCommunityPath(@Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityPaths(community, paginate)
+    return await this.communityService.getAllCommunityStreets(community, paginate)
   }
 
   /**
