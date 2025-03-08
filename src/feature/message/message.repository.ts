@@ -223,7 +223,8 @@ export class MessageRepository {
     }, {
       $pull: {
         targets: {
-          target: new Types.ObjectId(user)
+          target: new Types.ObjectId(user),
+          platform: platform
         }
       },
     }, { new: true })
@@ -239,7 +240,8 @@ export class MessageRepository {
     }, {
       $pull: {
         seenTargets: {
-          target: new Types.ObjectId(user)
+          target: new Types.ObjectId(user),
+          platform: platform
         }
       },
     }, { new: true }).exec()
