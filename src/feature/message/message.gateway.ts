@@ -228,7 +228,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.SEEN)
 
           // send delivery status to author
-          this.server.emit(`${author}-${EVENT_NAME_MESSAGE_SEEN}`, deliveredMessage)
+          this.server.to(author).emit(EVENT_NAME_MESSAGE_SEEN, deliveredMessage)
         }
       }
     }
@@ -266,13 +266,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.DELIVERED)
 
           // send delivery status to author
-          this.server.emit(`${author}-${EVENT_NAME_DELIVERY}`, deliveredMessage)
+          this.server.to(author).emit(EVENT_NAME_DELIVERY, deliveredMessage)
         }
-
-        // if (ackMessage.reached >= ackMessage.totalNodes && ackMessage.message.status === MessageStatus.DELIVERED) {
-        //   // remove message from server
-        //   await this.messageRepository.cleanUpMessage(account, community, message.message)
-        // }
       }
     }
 
