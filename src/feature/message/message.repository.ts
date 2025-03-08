@@ -244,7 +244,7 @@ export class MessageRepository {
           platform: platform
         }
       },
-    }, { new: true })
+    }, { new: true }).exec()
   }
 
   /**
@@ -253,7 +253,7 @@ export class MessageRepository {
    * @param room 
    * @param message 
    */
-  async cleanUpMessage(community: string, room: string, message: string): Promise<void> {
+  async cleanUpMessage(community: string, message: string): Promise<void> {
     await this.messageModel.deleteOne({
       _id: new Types.ObjectId(message),
       community: new Types.ObjectId(community)

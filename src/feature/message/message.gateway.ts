@@ -149,16 +149,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ): Promise<any> {
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
-      //const community = message.community
       const account: string = client.data.user.sub
       const platform: string = client.handshake.headers.platform as string
 
       await this.messageRepository.acknowledgeMessage(account, message, platform)
-
-      // if (ackMessage && ackMessage.reached >= ackMessage.totalNodes) {
-      //   // remove message from server
-      //   await this.messageRepository.cleanUpMessage(account, community, message.message)
-      // }
     }
 
     return message
@@ -174,9 +168,14 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
+      const platform: string = client.handshake.headers.platform as string
 
-      // remove message from server
-      await this.messageRepository.cleanUpMessage(account, community, message.message)
+      const ackMessage = await this.messageRepository.acknowledgeMessageSeen(account, message, platform)
+
+      if (ackMessage && ackMessage.totalSeen >= ackMessage.totalNodes) {
+        // remove message from server
+        await this.messageRepository.cleanUpMessage(community, message.message)
+      }
     }
 
     return message
@@ -231,11 +230,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           // send delivery status to author
           this.server.emit(`${author}-${EVENT_NAME_MESSAGE_SEEN}`, deliveredMessage)
         }
-
-        if (ackMessage.totalSeen >= ackMessage.totalNodes && ackMessage.message.status === MessageStatus.SEEN) {
-          // remove message from server
-          await this.messageRepository.cleanUpMessage(account, community, message.message)
-        }
       }
     }
 
@@ -263,7 +257,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const uniqueAckCount = await this.messageRepository.getTotalMessageUniqueAck(community, message.message)
         // check if message delivered to all clients
 
-        if (uniqueAckCount >= ackMessage.targetNodes && ackMessage.message.status !== MessageStatus.DELIVERED) {
+        if (uniqueAckCount >= ackMessage.targetNodes
+          && ackMessage.message.status !== MessageStatus.DELIVERED
+          && ackMessage.message.status !== MessageStatus.SEEN
+        ) {
           // remove author from ack list so delivery status is sent when connected
           await this.messageRepository.removeMessageAck(author, message, platform)
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.DELIVERED)
