@@ -34,12 +34,12 @@ import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.commun
 import { MessageCategory } from "./model/message.category"
 import { UpdateCommunityStreetDto } from "./dto/request/update.community.street.dto"
 import { CommunitySummary } from "./model/community.summary"
-import { CommunitySummaryDto } from "./dto/request/community.summary.dto"
 import { StreetSummary } from "./model/street.summary"
-import path from "path"
 import { CreateCommunityContactDto } from "./dto/request/create.community.contact.dto"
-import { CommunityContactResponseDto } from "./dto/response/community.contact.response.dto"
 import { CommunityContact } from "./model/community.contact"
+import { CommunityGuard } from "./model/community.guard"
+import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dto"
+import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -162,6 +162,7 @@ export class CommunityRepository {
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
     @InjectModel(CommunitySummary.name) private readonly communitySummayModel: Model<CommunitySummary>,
+    @InjectModel(CommunityGuard.name) private readonly communityGuardModel: Model<CommunityGuard>,
     @InjectModel(StreetSummary.name) private readonly streetSummaryModel: Model<StreetSummary>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
@@ -216,16 +217,80 @@ export class CommunityRepository {
    * @param user 
    * @param data 
    */
-  async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto): Promise<CommunityAccessPoint> {
+  async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto, code: string): Promise<CommunityAccessPoint> {
     const accessPoint: CommunityAccessPoint = {
       name: data.name,
       description: data.description,
       account: new Types.ObjectId(user),
-      password: data.password,
+      code: code,
+      isActive: data.isActive,
+      createdBy: new Types.ObjectId(user),
       community: new Types.ObjectId(community)
     }
 
-    return await this.communityAccessPointModel.create(accessPoint)
+    const result = await this.communityAccessPointModel.create(accessPoint)
+    return await this.getCommunityAccessPoint(community, (result as any)._id.toString())
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityGuard(user: string, community: string, body: CreateCommunityGuardDto): Promise<CommunityGuardResponseDto> {
+    let guard: CommunityGuard = {
+      createdBy: new Types.ObjectId(user),
+      community: new Types.ObjectId(community),
+      fullName: body.fullName,
+      email: {
+        value: body.email.trim().toLowerCase()
+      },
+      phone: body.phone,
+      country: body.country,
+      password: body.password,
+      code: body.code,
+      encPassword: body.enPassword
+    }
+
+    guard = await this.communityGuardModel.create(guard)
+    return await this.getCommunityGuard(community, (guard as any)._id.toString())
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param guard 
+   * @returns 
+   */
+  async getCommunityGuard(community: string, guard: string): Promise<any> {
+    return await this.communityGuardModel.findOne({
+      _id: new Types.ObjectId(guard),
+      community: new Types.ObjectId(community),
+    }, '_id community createdBy fullName phone email.value country encPassword isActive code').populate([
+      {
+        path: 'community',
+        select: '_id name description code',
+        strictPopulate: false
+      }, {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value',
+        strictPopulate: false
+      }
+    ]).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param email 
+   * @returns 
+   */
+  async getCommunityGuardByEmail(community: string, email: string): Promise<CommunityGuard> {
+    return await this.communityGuardModel.findOne({
+      community: new Types.ObjectId(community),
+      'email.value': email.trim().toLowerCase()
+    })
   }
 
   /**
@@ -259,20 +324,81 @@ export class CommunityRepository {
     return await this.communityAccessPointModel.findOne({
       _id: new Types.ObjectId(access),
       community: new Types.ObjectId(community),
-    }).populate({
-      path: 'community',
-      select: '_id name description code images types address'
-    }).exec()
+    }).populate([
+      {
+        path: 'community',
+        select: '_id name description code',
+        strictPopulate: false
+      }, {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value',
+        strictPopulate: false
+      }
+    ]).exec()
   }
 
   /**
    * 
    * @param community 
+   * @param paginate 
    * @returns 
    */
-  async getCommunityAccessPoints(community: string): Promise<CommunityAccessPoint[]> {
-    return await this.communityAccessPointModel.find(
-      { community: new Types.ObjectId(community) })
+  async getCommunityAccessPoints(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.paginator.paginate(this.communityAccessPointModel,
+      { community: new Types.ObjectId(community) },
+      {
+        sort: paginate.sort,
+        limit: paginate.limit,
+        page: paginate.page,
+        select: '_id name description createdBy code createdAt updatedAt isActive',
+        populate: [
+          {
+            path: 'community',
+            select: '_id name description code',
+            strictPopulate: false
+          }, {
+            path: 'createdBy',
+            select: '_id firstName lastName email.value',
+            strictPopulate: false
+          }
+        ]
+      }
+    )
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityGuards(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityGuard>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.communityGuardModel, query,
+      {
+        select: '_id fullName email.value updatedAt createdAt createdBy community isActive country code phone encPassword',
+        page: paginate.page,
+        limit: paginate.limit,
+        sort: paginate.sort,
+        populate: [
+          {
+            path: 'community',
+            select: '_id name description code',
+            strictPopulate: false
+          }, {
+            path: 'createdBy',
+            select: '_id firstName lastName email.value',
+            strictPopulate: false
+          }
+        ]
+      }
+    )
   }
 
   /**

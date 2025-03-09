@@ -13,11 +13,20 @@ export class CommunityAccessPoint {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  createdBy: Types.ObjectId
+
   @Prop()
   password?: string
 
+  @Prop()
+  code?: string
+
   @Prop({ index: true })
   name: string
+
+  @Prop({ default: true })
+  isActive?: Boolean
 
   @Prop()
   description: string

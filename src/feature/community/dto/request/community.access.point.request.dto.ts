@@ -12,5 +12,5 @@ export class CommunityAccessPointRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  password: string
+  isActive: Boolean
 }

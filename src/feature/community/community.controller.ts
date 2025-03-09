@@ -34,6 +34,8 @@ import { Email } from 'src/core/decorators/email';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
 import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
+import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto';
+import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto';
 
 @Controller({
   version: '1',
@@ -911,9 +913,9 @@ export class CommunityController {
   @Get('/:community/join-request-count')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community join request count' })
-  async getCommunityJoinRequestsCount(@User() user: string, @Param('community') community: string): Promise<{}> {
+  async getCommunityJoinRequestsCount(@Param('community') community: string): Promise<{}> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityJoinRequestsCount(user, community)
+    return await this.communityService.getCommunityJoinRequestsCount(community)
   }
 
   /**
@@ -923,9 +925,55 @@ export class CommunityController {
    */
   @Get('/:community/access-point')
   @ApiOperation({ summary: 'Get all community access points' })
-  async getCommunityAccessPoints(@Param('community') community: string): Promise<CommunityAccessPointResonseDto[]> {
+  async getCommunityAccessPoints(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityAccessPoints(community)
+    return await this.communityService.getCommunityAccessPoints(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/:community/guard')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Create a community security guard' })
+  async createCommunityGuard(@User() user: string, @Param('community') community: string, @Body() body: CreateCommunityGuardDto): Promise<CommunityGuardResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.createCommunityGuard(user, community, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param guard 
+   * @returns 
+   */
+  @Get('/:community/guard/:guard')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community security guard' })
+  async getCommunityGuard(@Param('community') community: string, @Param('guard') guard: string): Promise<CommunityGuardResponseDto> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(guard)) throw new BadRequestException()
+    return await this.communityService.getCommunityGuard(community, guard)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/:community/guard')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community security guards' })
+  async getAllCommunityGuards(
+    @Param('community') community: string, 
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityGuardResponseDto>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityGuards(community, paginate)
   }
 
   /**

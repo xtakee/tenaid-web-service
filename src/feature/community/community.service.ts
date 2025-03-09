@@ -18,7 +18,7 @@ import { CommunityStreet } from './model/community.street';
 import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
 import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
 import { AccountCommunityToDtoMapper } from './mapper/account.community.to.dto.mapper';
-import { PaginatedEmptyResult, PaginatedResult } from 'src/core/helpers/paginator';
+import { PaginatedResult } from 'src/core/helpers/paginator';
 import { INVITE_STATUS, MAX_MEMBER_CODE_LENGTH } from './community.constants';
 import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
 import { AccountRepository } from '../account/account.respository';
@@ -52,6 +52,9 @@ import { COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREE
 import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
 import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
 import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper';
+import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto';
+import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto';
+import { CommunityGuard } from './model/community.guard';
 
 @Injectable()
 export class CommunityService {
@@ -250,11 +253,13 @@ export class CommunityService {
    * @param data 
    */
   async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
-    const _community = await this.communityRepository.getCommunityAccessPointByName(community, data.name)
-    if (_community) throw new BadRequestException(DUPLICATE_ACCESS_POINT_ERROR)
+    const _community = await this.communityRepository.getCommunity(community)
+    if (!_community) throw new NotFoundException()
 
-    const accessPoint = await this.communityRepository.createCommunityAccessPoint(user, community, data)
-    return this.accessPointMapper.map(accessPoint)
+    const code = `#TG${_community.code}-${this.authHelper.random(5)}`
+
+    const result = await this.communityRepository.createCommunityAccessPoint(user, community, data, code)
+    return this.accessPointMapper.map(result)
   }
 
   /**
@@ -262,9 +267,46 @@ export class CommunityService {
    * @param community 
    * @returns 
    */
-  async getCommunityAccessPoints(community: string): Promise<CommunityAccessPointResonseDto[]> {
-    const accessPoints = await this.communityRepository.getCommunityAccessPoints(community)
-    return accessPoints.map((point) => this.accessPointMapper.map(point))
+  async getCommunityAccessPoints(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityAccessPointResonseDto>> {
+    return await this.communityRepository.getCommunityAccessPoints(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityGuard(user: string, community: string, body: CreateCommunityGuardDto): Promise<CommunityGuardResponseDto> {
+    const exist = await this.communityRepository.getCommunityGuardByEmail(community, body.email)
+    if (exist) throw new ForbiddenException(DUPLICATE_RECORD_ERROR)
+
+    const _community = await this.communityRepository.getCommunity(community)
+    if (!_community) throw new NotFoundException()
+
+    body.code = `TG${_community.code}-${this.authHelper.random(4)}`.toUpperCase()
+    body.password = `#pW_${this.authHelper.random(5)}`
+
+    return await this.communityRepository.createCommunityGuard(user, community, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param guard 
+   */
+  async getCommunityGuard(community: string, guard: string): Promise<CommunityGuardResponseDto> {
+    return await this.communityRepository.getCommunityGuard(community, guard)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityGuards(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityGuards(community, paginate)
   }
 
   /**
@@ -335,7 +377,7 @@ export class CommunityService {
    * @param community 
    * @returns 
    */
-  async getCommunityJoinRequestsCount(user: string, community: string): Promise<{}> {
+  async getCommunityJoinRequestsCount(community: string): Promise<{}> {
     return { count: await this.communityRepository.getCommunityJoinRequestsCount(community) }
   }
 

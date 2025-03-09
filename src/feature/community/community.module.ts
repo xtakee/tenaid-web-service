@@ -41,6 +41,7 @@ import { MessageCategory, MessageCategorySchema } from './model/message.category
 import { CommunitySummary, CommunitySummarySchema } from './model/community.summary'
 import { StreetSummary, StreetSummarySchema } from './model/street.summary'
 import { CommunityContact, CommunityContactSchema } from './model/community.contact'
+import { CommunityGuard, CommunityGuardSchema } from './model/community.guard'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -93,12 +94,13 @@ const queue = BullModule.registerQueue({
       },
     }]),
     MongooseModule.forFeatureAsync([{
-      name: CommunityAccessPoint.name,
+      name: CommunityGuard.name,
       useFactory: async () => {
-        const schema = CommunityAccessPointSchema
+        const schema = CommunityGuardSchema
         schema.pre('save', async function () {
-          if (this.isModified('password') || this.isNew) {
+          if (this.isNew) {
             this.password = await (new AuthHelper()).hash(this.password)
+            this.searchable = searchable(this.fullName)
           }
         })
 
@@ -106,11 +108,15 @@ const queue = BullModule.registerQueue({
           if ((this.getUpdate() as any).password) {
             (this.getUpdate() as any).password = await (new AuthHelper()).hash((this.getUpdate() as any).password)
           }
+          if ((this.getUpdate() as any).fullName) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).fullName)
+          }
           next()
         })
         return schema
       },
     }]),
+    MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
     MongooseModule.forFeatureAsync([{
       name: CommunityContact.name, useFactory: async () => {
         const schema = CommunityContactSchema
