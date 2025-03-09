@@ -358,7 +358,6 @@ export class CommunityService {
     return await this.communityRepository.getUpcomingCommunityVisitors(community, page, limit)
   }
 
-
   /**
    * 
    * @param invite 

@@ -108,7 +108,7 @@ const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description kycAckn
 
 const MEMBER_COMMUNITIES_QUERY = [{
   path: 'street',
-  select: '_id name description isPrimary'
+  select: '_id name description community'
 }, {
   path: 'building',
   select: '_id buildingNumber type'
