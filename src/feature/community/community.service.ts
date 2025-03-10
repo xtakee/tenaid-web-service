@@ -845,18 +845,13 @@ export class CommunityService {
     if (building) throw new BadRequestException(DUPLICATE_HOUSE_NUMBER_ERROR)
 
     // check if user is owner
-    const _community = await this.communityRepository.getCommunityByUser(user, community)
-    if (_community) {
-      const result = await this.communityRepository.createCommunityBuilding(community, data)
+    const result = await this.communityRepository.createCommunityBuilding(user, community, data)
 
-      // queue summary job
-      await this.updateCommuntitySummary(community, COMMUNITY_BUILDINGS_SUMMARY)
-      await this.updateCommuntityStreetSummary(community, data.street, STREET_BUILDINGS_SUMMARY)
+    // queue summary job
+    await this.updateCommuntitySummary(community, COMMUNITY_BUILDINGS_SUMMARY)
+    await this.updateCommuntityStreetSummary(community, data.street, STREET_BUILDINGS_SUMMARY)
 
-      return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
-    }
-
-    throw new ForbiddenException()
+    return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
   }
 
   /**

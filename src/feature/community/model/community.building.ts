@@ -4,6 +4,7 @@ import { HydratedDocument, Types } from "mongoose"
 import { Email } from "src/feature/core/model/email.model"
 import { BUILDING_CATEGORY, BUILDING_TYPE } from "src/core/enums/building.type"
 import { CommunityStreet } from "./community.street"
+import { Account } from "src/feature/account/model/account.model"
 
 export type CommunityBuildingDocument = HydratedDocument<CommunityBuilding>
 
@@ -11,6 +12,9 @@ export type CommunityBuildingDocument = HydratedDocument<CommunityBuilding>
 export class CommunityBuilding {
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  createdBy: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityStreet.name })
   street: Types.ObjectId
@@ -20,6 +24,9 @@ export class CommunityBuilding {
 
   @Prop()
   contactPhone: string
+
+  @Prop({ default: true })
+  isActive: Boolean
 
   @Prop()
   contactPerson: string

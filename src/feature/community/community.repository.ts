@@ -103,7 +103,7 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
   }
 }
 
-const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
+const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra createdAt updatedAt isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
 const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description kycAcknowledged code members type images logo status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
@@ -154,7 +154,7 @@ const COMMUNITY_MEMBER_QUERY = [
   }
 ]
 
-const COMMUNITY_BUILDING_QUERY = '_id community street type contactEmail contactPhone contactPerson contactCountry buildingNumber apartments category name description'
+const COMMUNITY_BUILDING_QUERY = '_id isActive createdBy updatedAt createdAt community street type contactEmail contactPhone contactPerson contactCountry buildingNumber apartments category name description'
 
 @Injectable()
 export class CommunityRepository {
@@ -873,10 +873,17 @@ export class CommunityRepository {
       buildingNumber: buildingNumber.toLowerCase().trim(),
       street: new Types.ObjectId(street),
       community: new Types.ObjectId(community)
-    }).populate({
+    }).populate([{
       path: 'street',
       select: '_id name description'
-    }).exec()
+    }, {
+      path: 'createdBy',
+      select: '_id firstName lastName email.value',
+      strictPopulate: false
+    }, {
+      path: 'community',
+      select: '_id name description code'
+    }]).exec()
   }
 
   /**
@@ -885,14 +892,16 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async createCommunityBuilding(community: string, data: CommunityBuildingDto): Promise<CommunityBuilding> {
+  async createCommunityBuilding(user: string, community: string, data: CommunityBuildingDto): Promise<CommunityBuilding> {
     const building: CommunityBuilding = {
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(data.street),
+      createdBy: new Types.ObjectId(user),
       contactPerson: data.contactPerson,
       contactCountry: data.contactCountry,
       apartments: data.apartments,
       name: data.name,
+      isActive: true,
       category: data.category,
       description: data.description,
       contactPhone: data.contactPerson,
@@ -920,10 +929,18 @@ export class CommunityRepository {
     return await this.communityBuildingModel.findOne({
       _id: new Types.ObjectId(building),
       community: new Types.ObjectId(community)
-    }, COMMUNITY_BUILDING_QUERY).populate({
+    }, COMMUNITY_BUILDING_QUERY).populate([{
       path: 'street',
       select: '_id name description'
-    }).exec()
+    }, {
+      path: 'createdBy',
+      select: '_id firstName lastName email.value',
+      strictPopulate: false
+    }, {
+      path: 'community',
+      select: '_id name description code'
+    }
+    ]).exec()
   }
 
   /**
@@ -947,10 +964,17 @@ export class CommunityRepository {
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: {
+      populate: [{
         path: 'street',
         select: '_id name description'
+      }, {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value'
+      }, {
+        path: 'community',
+        select: '_id name description code'
       }
+      ]
     })
   }
 
@@ -976,10 +1000,18 @@ export class CommunityRepository {
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: {
+      populate: [{
         path: 'street',
         select: '_id name description'
+      }, {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value',
+        strictPopulate: false
+      }, {
+        path: 'community',
+        select: '_id name description code'
       }
+      ]
     })
   }
 
@@ -1004,10 +1036,15 @@ export class CommunityRepository {
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: {
-        path: 'street',
-        select: '_id name description'
-      }
+      populate: [
+        {
+          path: 'street',
+          select: '_id name description'
+        }, {
+          path: 'community',
+          select: '_id name description code'
+        }
+      ]
     })
   }
 
