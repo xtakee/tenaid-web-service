@@ -51,18 +51,6 @@ export class AdminService {
     return this.mapper.map(admin)
   }
 
-  /**
-   * 
-   * @param admin 
-   * @param data 
-   */
-  async reviewAddOnRequest(admin: string, data: ReviewAddOnRequestDto): Promise<void> {
-    const request = await this.accountRepository.reviewAddOnRequest(data.request, data.status, data.comment, admin)
-    if (!request) throw new NotFoundException()
-
-    await this.accountService.setAddOnPermissions(request.account.toString(), request.addOn)
-    await this.accountService.setAccountType(request.account.toString(), request.addOn, true)
-  }
 
   /**
    * 

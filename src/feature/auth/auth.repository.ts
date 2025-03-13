@@ -33,6 +33,4 @@ export class AuthRepository {
   async getAuthToken(key: string): Promise<string> {
     return await this.cache.get(key)
   }
-
- 
 }

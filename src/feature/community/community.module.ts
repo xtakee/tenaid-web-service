@@ -4,8 +4,6 @@ import { CommunityController } from './community.controller'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Community, CommunitySchema } from './model/community'
 import { CommunityStreet, CommunityStreetSchema } from './model/community.street'
-import { CounterRepository } from '../core/counter/counter.repository'
-import { Counter, CounterSchema } from '../core/counter/model/counter.model'
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper'
 import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper'
 import { CommunityRepository } from './community.repository'
@@ -51,7 +49,6 @@ const queue = BullModule.registerQueue({
   providers: [
     CommunityService,
     CommunityRepository,
-    CounterRepository,
     CommunityToDtoMapper,
     CodeGenerator,
     AuthHelper,
@@ -235,7 +232,6 @@ const queue = BullModule.registerQueue({
       },
     }]),
     MongooseModule.forFeature([{ name: CommunityRegistration.name, schema: CommunityRegistrationSchema }]),
-    MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
     NotificationModule,
     queue
   ]

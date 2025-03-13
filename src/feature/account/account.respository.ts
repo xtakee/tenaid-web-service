@@ -19,6 +19,7 @@ import { mergeArray } from "src/core/helpers/array.helper";
 import { DeviceToken } from "./model/device.token";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
+import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -38,7 +39,7 @@ export class AccountRepository implements IAccountRepository {
    * @returns Account
    */
   async getOneByEmail(email: string): Promise<Account> {
-    return await this.accountModel.findOne({ "email.value": email.trim().toLowerCase() }).exec();
+    return await this.accountModel.findOne({ "email.value": email.trim().toLowerCase() }).exec()
   }
 
   /**
@@ -267,11 +268,12 @@ export class AccountRepository implements IAccountRepository {
    * @param data 
    * @returns Account
    */
-  async create(data: AccountCreateDto): Promise<Account> {
+  async create(data: AccountCreateDto, hasPassword = true): Promise<Account> {
     const account: Account = {
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
+      hasPassword: hasPassword,
       country: data.country,
       kyc: {},
       email: {
@@ -304,6 +306,66 @@ export class AccountRepository implements IAccountRepository {
         page: page,
         populate: [{ path: 'account', select: ' _id firstName lastName email.value phone photo' }]
       })
+  }
+
+  /**
+   * 
+   * @param role 
+   * @param community 
+   */
+  async getCommunityAccountRole(community: string, role: string): Promise<ManagedAccount> {
+    return await this.managedAccountModel.findOne({
+      _id: new Types.ObjectId(role),
+      community: new Types.ObjectId(community)
+    }, '_id isActive account community createdBy permissions').populate([{
+      path: 'createdBy',
+      select: '_id firstName lastName email.value',
+      strictPopulate: false
+    }, {
+      path: 'community',
+      select: '_id name description code',
+      strictPopulate: false
+    }, {
+      path: 'account',
+      select: '_id firstName lastName email.value phone country',
+      strictPopulate: false
+    }
+    ])
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getAllCommunityAccountRoles(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<ManagedAccount>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
+    if (paginate.search)
+      query.$text = { $search: paginate.search }
+
+    return await this.paginator.paginate(this.managedAccountModel, query, {
+      select: '_id isActive account community createdBy permissions',
+      page: paginate.page,
+      limit: paginate.limit,
+      sort: paginate.sort,
+      populate: [{
+        path: 'createdBy',
+        select: '_id firstName lastName email.value',
+        strictPopulate: false
+      }, {
+        path: 'community',
+        select: '_id name description code',
+        strictPopulate: false
+      }, {
+        path: 'account',
+        select: '_id firstName lastName email.value phone country',
+        strictPopulate: false
+      }
+      ]
+    })
   }
 
   /**
@@ -504,8 +566,8 @@ export class AccountRepository implements IAccountRepository {
    * 
    * @param email 
    */
-  async getAccountByEmail(email: string): Promise<any> {
-
+  async getAccountByEmail(email: string): Promise<Account> {
+    return await this.accountModel.findOne({ "email.value": email.trim().toLowerCase() }).exec();
   }
 
   /**
@@ -529,7 +591,7 @@ export class AccountRepository implements IAccountRepository {
  * @param status 
  * @returns AuthRole
  */
-  async setPermissions(user: string, permissions: Permission[]): Promise<ManagedAccount> {
+  async setPermissions(user: string, community: string, account: string, permissions: Permission[]): Promise<ManagedAccount> {
     const roles = await this.managedAccountModel.findOne({
       account: new Types.ObjectId(user),
       owner: new Types.ObjectId(user)
@@ -537,8 +599,9 @@ export class AccountRepository implements IAccountRepository {
 
     if (!roles) {
       const role: ManagedAccount = {
+        community: new Types.ObjectId(community),
+        createdBy: new Types.ObjectId(user),
         account: new Types.ObjectId(user),
-        owner: new Types.ObjectId(user),
         permissions: permissions
       }
 
@@ -553,19 +616,61 @@ export class AccountRepository implements IAccountRepository {
   /**
    * 
    * @param user 
+   * @param account 
+   * @param community 
    * @param permission 
    * @returns 
    */
-  async addPermission(user: string, permission: Permission): Promise<ManagedAccount> {
-    const accountsManaged = await this.managedAccountModel.findOne({
-      account: new Types.ObjectId(user),
-      owner: new Types.ObjectId(user)
+  async createPermission(user: string, account: string, community: string, permission: Permission): Promise<ManagedAccount> {
+    const permissions: ManagedAccount = {
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(account),
+      createdBy: new Types.ObjectId(user),
+      permissions: [permission]
+    }
+
+    return await this.managedAccountModel.create(permissions)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param account 
+   * @param community 
+   * @param permissions 
+   * @returns 
+   */
+  async createPermissions(user: string, account: string, community: string, name: string, email: string, permissions: Permission[]): Promise<ManagedAccount> {
+    const data: ManagedAccount = {
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(account),
+      createdBy: new Types.ObjectId(user),
+      name: name,
+      email: email.trim().toLowerCase(),
+      permissions: permissions
+    }
+
+    const role = await this.managedAccountModel.create(data)
+    return await this.getCommunityAccountRole(community, (role as any)._id.toString())
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param account 
+   * @param community 
+   * @param permission 
+   * @returns 
+   */
+  async addPermission(user: string, account: string, community: string, permission: Permission): Promise<ManagedAccount> {
+    const role = await this.managedAccountModel.findOne({
+      account: new Types.ObjectId(account),
+      community: new Types.ObjectId(community)
     })
 
-    if (accountsManaged) {
-      const permissions = accountsManaged.permissions
+    if (role) {
+      const permissions = role.permissions
       const existing: Permission = permissions?.find((p) => p.authorization === permission.authorization)
-      console.log(existing)
 
       if (!existing) permissions.push(permission)
       else {
@@ -575,12 +680,11 @@ export class AccountRepository implements IAccountRepository {
       }
 
       return await this.managedAccountModel.findByIdAndUpdate(
-        (accountsManaged as any)._id,
+        (role as any)._id,
         { permissions: permissions }, { returnDocument: 'after' })
-
     }
 
-    throw new BadRequestException()
+    return await this.createPermission(user, account, community, permission)
   }
 
   /**

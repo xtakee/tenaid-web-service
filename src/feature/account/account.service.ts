@@ -10,7 +10,7 @@ import { BankRepository } from "../bank/bank.repository";
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
 import { AddressDto } from "src/feature/core/dto/address.dto";
-import { ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
+import { ACCOUNT_STATUS, ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultCommunityAdminPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
 import { Permission } from "../auth/model/permission";
 import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings";
@@ -25,6 +25,14 @@ import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { E2eeRepository } from "../e2ee/e2ee.repository";
 import { MessageRepository } from "../message/message.repository";
+import { CounterRepository } from "../core/counter/counter.repository";
+import { CreateCommunityDto } from "./dto/request/create.community.dto";
+import { CommunityResponseDto } from "./dto/response/community.response.dto";
+import { COUNTER_TYPE } from "../core/counter/constants";
+import { MAX_MEMBER_CODE_LENGTH } from "../community/community.constants";
+import { CommunityToDtoMapper } from "../community/mapper/community.to.dto.mapper";
+import { CreateRoleDto } from "./dto/request/create.role.dto";
+import { ManagedAccount } from "./model/managed.account";
 
 @Injectable()
 export class AccountService {
@@ -33,24 +41,14 @@ export class AccountService {
     private readonly accountRepository: AccountRepository,
     private readonly mapper: AccountToDtoMapper,
     private readonly authHelper: AuthHelper,
+    private readonly communityMapper: CommunityToDtoMapper,
+    private readonly counterRepository: CounterRepository,
     private readonly e2eeRepository: E2eeRepository,
     private readonly communityRepository: CommunityRepository,
     private readonly messageRepository: MessageRepository,
     private readonly bankRepository: BankRepository,
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
-
-  /**
-   * 
-   * @param type 
-   * @returns 
-   */
-  private getPermissons(type: string): Permission[] {
-    switch (type) {
-      case ADD_ON.AGENT: return defaultAgentPermissions
-      case ADD_ON.MANAGER: return defaultManagerPermissions
-    }
-  }
 
   /**
    * 
@@ -62,29 +60,11 @@ export class AccountService {
 
     if (!account) {
       account = await this.accountRepository.create(data)
-      await this.setPersonaPermissions((account as any)._id)
+      // send welcome email at this point
       return this.mapper.map(account)
     }
 
     throw new ForbiddenException(DUPLICATE_ACCOUNT_ERROR)
-  }
-
-  /**
- * 
- * @param addOnType 
- * @param user 
- */
-  async setPersonaPermissions(user: string): Promise<void> {
-    await this.accountRepository.setPermissions(user, defaultPermissions)
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param addOn 
-   */
-  async setAddOnPermissions(user: string, addOn: string): Promise<void> {
-    this.accountRepository.setPermissions(user, this.getPermissons(addOn))
   }
 
   /**
@@ -111,11 +91,6 @@ export class AccountService {
     if (account) {
       account = await this.accountRepository.setAddressKyc(id)
 
-      // community permissions
-      await this.accountRepository.addPermission(id, {
-        authorization: SYSTEM_FEATURES.COMMUNITIES,
-        claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE]
-      })
       return this.mapper.map(account)
     }
 
@@ -140,6 +115,115 @@ export class AccountService {
       return this.bankMapper.map(account)
     }
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   */
+  async createCommunity(user: string, data: CreateCommunityDto): Promise<CommunityResponseDto> {
+    const counter = await this.counterRepository.getCounter(COUNTER_TYPE.COMMUNITY)
+    data.code = counter.toString()
+
+    const account = await this.accountRepository.getOneById(user)
+
+    if (account) {
+      data.isPrimary = !account.hasCommunity
+    } else throw new BadRequestException()
+
+    // generate community group public encryption key
+    const groupKey = this.authHelper.randomKey()
+    const community = await this.communityRepository.createCommunity(user, groupKey, data)
+    if (community) {
+      const accountDetails = {
+        firstName: account.firstName,
+        lastName: account.lastName,
+        dob: account.dob,
+        gender: account.gender,
+        email: account.email,
+        phone: account.phone,
+        photo: account.photo,
+        country: account.country,
+        isAdmin: true
+      }
+
+      const member = {
+        code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
+        isAdmin: true,
+        status: ACCOUNT_STATUS.PENDING
+      }
+
+      // create a default admin community member
+      await this.communityRepository.createCommunityMember(user, accountDetails, (community as any)._id, member)
+      await this.accountRepository.setCreateFlagStatus(user, false)
+
+      // add default community admin permissions
+      const name = `${account.firstName} ${account.lastName}`
+      await this.accountRepository.createPermissions(
+        user, user,
+        (community as any)._id.toString(),
+        name, account.email.value,
+        defaultCommunityAdminPermissions)
+
+      await this.communityRepository.createCommunityMessageCategory((community as any)._id, {
+        name: 'General',
+        description: 'General community group chat',
+        isReadOnly: false
+      })
+
+      return this.communityMapper.map(community)
+    }
+
+    throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityAccountRole(user: string, community: string, body: CreateRoleDto): Promise<ManagedAccount> {
+    let account = await this.accountRepository.getAccountByEmail(body.email)
+
+    if (!account) {
+      // lets create a new account for user
+      account = await this.accountRepository.create({
+        password: this.authHelper.random(5),
+        email: body.email,
+        country: body.country,
+        phone: body.phone,
+        firstName: body.firstName,
+        lastName: body.lastName
+      }, false)
+    }
+
+    const name = `${body.firstName} ${body.lastName}`
+    return await this.accountRepository.createPermissions(user,
+      (account as any)._id.toString(),
+      community, name,
+      body.email, body.permissions)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param role 
+   * @returns 
+   */
+  async getCommunityAccountRole(community: string, role: string): Promise<ManagedAccount> {
+    return await this.accountRepository.getCommunityAccountRole(community, role)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityAccountRoles(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<ManagedAccount>> {
+    return await this.accountRepository.getAllCommunityAccountRoles(community, paginate)
   }
 
   /**

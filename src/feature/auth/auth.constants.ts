@@ -38,7 +38,8 @@ export enum GENDER {
 export enum CLAIM {
   WRITE = 'write',
   READ = 'read',
-  DELETE = 'delete'
+  DELETE = 'delete',
+  UPDATE = 'update'
 }
 
 export enum SYSTEM_FEATURES {
@@ -53,6 +54,20 @@ export enum SYSTEM_FEATURES {
   COMMUNITIES = 'feature_community',
   ACCESS_CONTROL = 'feature_community_access',
   LISTING = 'feature_listing'
+}
+
+export enum COMMUNITY_SYSTEM_FEATURES {
+  PERSONA = 'feature_persona',
+  TRANSACTIONS = 'feature_transaction',
+  BANK_ACCOUNT = 'feature_bank_account',
+  MESSAGES = 'feature_message',
+  COMMUNITY = 'feature_community',
+  MEMBER = 'feature_member',
+  USER_ADMIN = 'feature_admin',
+  ACCESS_CONTROL = 'feature_access',
+  BILLING = 'feature_billing',
+  BILLABLE = 'feature_billable',
+  SETTING = 'feature_setting'
 }
 
 export enum ADMIN_SYSTEM_FEATURES {
@@ -79,6 +94,20 @@ export const defaultManagerPermissions: Permission[] = [
   { authorization: SYSTEM_FEATURES.PROPERTIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.COMMUNITIES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: SYSTEM_FEATURES.ACCESS_CONTROL, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
+]
+
+export const defaultCommunityAdminPermissions: Permission[] = [
+  { authorization: COMMUNITY_SYSTEM_FEATURES.MESSAGES, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.TRANSACTIONS, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.ACCESS_CONTROL, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.BANK_ACCOUNT, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.COMMUNITY, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.MEMBER, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.BILLABLE, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.BILLING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.SETTING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.USER_ADMIN, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
 ]
 
 export const defaultAgentPermissions: Permission[] = [

@@ -25,15 +25,6 @@ export class AdminController {
   //   return await this.adminService.create(body)
   // }
 
-  @Post('add-on/review')
-  @ApiOperation({ summary: 'Review Add On Request' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, ADMIN_SYSTEM_FEATURES.MANAGERS))
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, ADMIN_SYSTEM_FEATURES.AGENTS))
-  async reviewAddOnRequest(@User() admin: string, @Body() data: ReviewAddOnRequestDto): Promise<void> {
-    return await this.adminService.reviewAddOnRequest(admin, data)
-  }
-
   /**
    * 
    * @param paginate 

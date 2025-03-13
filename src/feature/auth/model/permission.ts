@@ -1,7 +1,6 @@
 import { Prop, Schema } from "@nestjs/mongoose";
 import { CLAIM } from "../auth.constants";
 
-@Schema({ timestamps: true })
 export class Permission {
   @Prop({ required: true })
   authorization: string;

@@ -74,6 +74,9 @@ export class Account {
   @Prop()
   country?: string
 
+  @Prop({ default: true })
+  hasPassword?: Boolean
+
   @Prop({ type: DashboardFlags, default: new DashboardFlags() })
   flags?: DashboardFlags
 

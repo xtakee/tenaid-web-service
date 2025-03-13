@@ -48,19 +48,6 @@ export class CommunityController {
   /**
    * 
    * @param user 
-   * @param body 
-   * @returns 
-   */
-  @Post('')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Create a community' })
-  async createCommunity(@User() user: string, @Body() body: CommunityDto): Promise<CommunityDto> {
-    return this.communityService.createCommunity(user, body)
-  }
-
-  /**
-   * 
-   * @param user 
    * @param id 
    * @param body 
    * @returns 
@@ -123,6 +110,12 @@ export class CommunityController {
     return await this.communityService.getCommunityMemberAuthorizedAccess(community, member);
   }
 
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @returns 
+   */
   @Get(':community/:member/authorized-users')
   @BasicAuth()
   @ApiOperation({ summary: 'Get community member authorized users' })

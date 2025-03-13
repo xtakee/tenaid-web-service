@@ -2,8 +2,6 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException,
 import { CommunityRepository } from './community.repository';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
-import { CounterRepository } from '../core/counter/counter.repository';
-import { COUNTER_TYPE } from '../core/counter/constants';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
@@ -54,13 +52,11 @@ import { CommunityContactResponseDto } from './dto/response/community.contact.re
 import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper';
 import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto';
 import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto';
-import { CommunityGuard } from './model/community.guard';
 
 @Injectable()
 export class CommunityService {
   constructor(
     private readonly communityRepository: CommunityRepository,
-    private readonly counterRepository: CounterRepository,
     private readonly accountRepository: AccountRepository,
     private readonly communityDirectorMapper: CommunityDirectorToDtoMapper,
     private readonly notificationService: NotificationService,
@@ -74,49 +70,6 @@ export class CommunityService {
     @InjectQueue('community_worker_queue') private readonly communityQueue: Queue,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
   ) { }
-
-  /**
-   * 
-   * @param user 
-   * @param data 
-   * @returns 
-   */
-  async createCommunity(user: string, data: CommunityDto): Promise<CommunityDto> {
-    const counter = await this.counterRepository.getCounter(COUNTER_TYPE.COMMUNITY)
-    data.code = counter.toString()
-
-    const account = await this.accountRepository.getOneById(user)
-    if (account) {
-      data.isPrimary = !account.hasCommunity
-    } else throw new BadRequestException()
-
-    // generate community message encryption key
-    const encKey = this.authHelper.randomKey()
-    const community = await this.communityRepository.createCommunity(user, encKey, data)
-    if (community) {
-
-      const { member, _ } = await this.getMemberAccountExtras(user)
-      member.isAdmin = true
-
-      await this.communityRepository.createCommunityMember(user, member, (community as any)._id, {
-        code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
-        isAdmin: true,
-        status: ACCOUNT_STATUS.PENDING
-      })
-
-      await this.accountRepository.setCreateFlagStatus(user, false)
-
-      await this.communityRepository.createCommunityMessageCategory((community as any)._id, {
-        name: 'General',
-        description: 'General community group chat',
-        isReadOnly: false
-      })
-
-      return this.communityMapper.map(community)
-    }
-
-    throw new BadRequestException()
-  }
 
   /**
    * 

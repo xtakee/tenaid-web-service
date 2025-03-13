@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from "class-validator";
+import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from "class-validator";
 
 export enum SortDirection {
   ASC = 'asc',
@@ -24,6 +24,7 @@ export class PaginationRequestDto {
 
   @IsOptional()
   @IsString()
+  @IsEnum(SortDirection)
   @ApiProperty({ default: SortDirection.DEC })
   sort?: string = SortDirection.DEC
 

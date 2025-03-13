@@ -65,8 +65,7 @@ export class AuthService {
       return {
         authorization: permission.authorization,
         claim: permission.claim,
-        account: managedAccounts.account.toString(),
-        owner: managedAccounts.owner.toString()
+        account: managedAccounts.account.toString()
       }
     })
   }
@@ -172,16 +171,6 @@ export class AuthService {
     await this.authRepository.invalidateAuthToken(`${user}-${platform}`)
     await this.accountRepository.deleteDeviceToken(user, platform)
     await this.messageRepository.removeAccountMessageNode(user, platform)
-  }
-
-  /**
-   * 
-   * @param addOnType 
-   * @param user 
-   */
-  async setDefaultOwnerPermissions(addOnType: string, user: string): Promise<void> {
-    const permissions = addOnType === MANAGER ? defaultManagerPermissions : defaultAgentPermissions
-    await this.accountRepository.setPermissions(user, permissions)
   }
 
   /**

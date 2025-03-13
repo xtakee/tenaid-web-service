@@ -9,11 +9,11 @@ import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
 import { AddOnRequestDto } from "src/feature/account/dto/request/add.on.request.dto";
 import { CheckPolicies } from "../auth/guards/casl/policies.guard";
-import { ADD_ON, CLAIM, SYSTEM_FEATURES } from "../auth/auth.constants";
+import { ADD_ON, CLAIM, COMMUNITY_SYSTEM_FEATURES, SYSTEM_FEATURES } from "../auth/auth.constants";
 import { Auth, BasicAuth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
-import { isEmail, IsEmail, isMongoId } from "class-validator";
+import { isEmail, isMongoId } from "class-validator";
 import { ForgotPasswordDto } from "src/feature/account/dto/request/forgot.password.dto";
 import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
@@ -27,6 +27,9 @@ import { User } from "src/core/decorators/user";
 import { RootUser } from "src/core/decorators/root.user";
 import { Email } from "src/core/decorators/email";
 import { Platform } from "src/core/decorators/platfom";
+import { CreateCommunityDto } from "./dto/request/create.community.dto";
+import { CommunityResponseDto } from "./dto/response/community.response.dto";
+import { CreateRoleDto, UpdateRoleDto } from "./dto/request/create.role.dto";
 
 @Controller({
   version: '1',
@@ -79,6 +82,12 @@ export class AccountController {
     return await this.accountService.requestAddOn(body.addOn, id)
   }
 
+  /**
+   * 
+   * @param body 
+   * @param id 
+   * @returns 
+   */
   @Post('type')
   @ApiOperation({ summary: 'Set Primary Account Type' })
   @Auth()
@@ -252,6 +261,89 @@ export class AccountController {
   @ApiOperation({ summary: 'Reset Password' })
   async resetPassword(@Body() body: ResetForgotPasswordDto): Promise<void> {
     return await this.accountService.resetPassword(body)
+  }
+
+  /**
+   * 
+   * @param body 
+   * @returns 
+   */
+  @Get('community/:community/role/:role')
+  @ApiOperation({ summary: 'Get a community account role' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
+  async getCommunityAccountRole(@Param('community') community: string, @Param('role') role: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(role)) throw new BadRequestException()
+
+    return await this.accountService.getCommunityAccountRole(community, role)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('community/:community/role')
+  @ApiOperation({ summary: 'Get all community account roles' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
+  async getAllCommunityAccountRoles(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+
+    return await this.accountService.getAllCommunityAccountRoles(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  @Post('community/:community/role')
+  @ApiOperation({ summary: 'Create a new community account role' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
+  async createAccountRole(
+    @User() user: string,
+    @Param('community') community: string,
+    @Body() body: CreateRoleDto): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.accountService.createCommunityAccountRole(user, community, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param role 
+   * @param body 
+   */
+  @Patch('community/:community/role/:role')
+  @ApiOperation({ summary: 'Update a community account role' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
+  async updateAccountRole(
+    @User() user: string,
+    @Param('community') community: string,
+    @Param('role') role: string,
+    @Body() body: UpdateRoleDto): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    if (!isMongoId(role)) throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param body 
+   * @returns 
+   */
+  @Post('community')
+  @ApiOperation({ summary: 'Create a new community' })
+  @BasicAuth()
+  async createCommunity(@User() user: string, @Body() body: CreateCommunityDto): Promise<CommunityResponseDto> {
+    return await this.accountService.createCommunity(user, body)
   }
 
   /**

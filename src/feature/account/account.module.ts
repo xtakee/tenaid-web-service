@@ -24,6 +24,8 @@ import { searchable } from 'src/core/util/searchable';
 import { CommunityModule } from '../community/community.module';
 import { E2eeModule } from '../e2ee/e2ee.module';
 import { MessageModule } from '../message/message.module';
+import { CounterRepository } from '../core/counter/counter.repository';
+import { Counter, CounterSchema } from '../core/counter/model/counter.model';
 
 @Global()
 @Module({
@@ -56,6 +58,25 @@ import { MessageModule } from '../message/message.module';
       },
     }]),
     MongooseModule.forFeatureAsync([{
+      name: ManagedAccount.name,
+      useFactory: async () => {
+        const schema = ManagedAccountSchema
+        schema.pre('save', async function () {
+          if (this.isNew) {
+            this.searchable = searchable(this.name)
+          }
+        })
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).name) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
+          }
+          next()
+        })
+        return schema
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
       name: AccountAdmin.name, useFactory: async () => {
         const schema = AccountAdminSchema;
         schema.pre('save', async function () {
@@ -74,18 +95,18 @@ import { MessageModule } from '../message/message.module';
         return schema;
       },
     }]),
-
     MongooseModule.forFeature([{ name: BankAccount.name, schema: BankAccountSchema }]),
     MongooseModule.forFeature([{ name: DeviceToken.name, schema: DeviceTokenSchema }]),
-    MongooseModule.forFeature([{ name: ManagedAccount.name, schema: ManagedAccountSchema }]),
     MongooseModule.forFeature([{ name: Bank.name, schema: BankSchema }]),
     MongooseModule.forFeature([{ name: AddOnRequest.name, schema: AddOnRequestSchema }]),
+    MongooseModule.forFeature([{ name: Counter.name, schema: CounterSchema }]),
     CommunityModule,
     E2eeModule,
     MessageModule
   ],
   providers: [
     AccountService,
+    CounterRepository,
     AccountRepository,
     AccountToDtoMapper,
     AuthHelper,

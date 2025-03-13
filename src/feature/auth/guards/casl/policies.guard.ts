@@ -1,19 +1,19 @@
-import { Injectable, CanActivate, ExecutionContext, SetMetadata } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { CaslAbilityFactory } from "./casl.ability.factory";
-import { MongoAbility } from "@casl/ability";
+import { Injectable, CanActivate, ExecutionContext, SetMetadata } from "@nestjs/common"
+import { Reflector } from "@nestjs/core"
+import { CaslAbilityFactory } from "./casl.ability.factory"
+import { MongoAbility } from "@casl/ability"
 
 interface IPolicyHandler {
-  handle(ability: MongoAbility): boolean;
+  handle(ability: MongoAbility): boolean
 }
 
-type PolicyHandlerCallback = (ability: MongoAbility) => boolean;
+type PolicyHandlerCallback = (ability: MongoAbility) => boolean
 
-export type PolicyHandler = IPolicyHandler | PolicyHandlerCallback;
+export type PolicyHandler = IPolicyHandler | PolicyHandlerCallback
 
-export const CHECK_POLICIES_KEY = 'check_policy';
+export const CHECK_POLICIES_KEY = 'check_policy'
 export const CheckPolicies = (...handlers: PolicyHandler[]) =>
-  SetMetadata(CHECK_POLICIES_KEY, handlers);
+  SetMetadata(CHECK_POLICIES_KEY, handlers)
 
 @Injectable()
 export class PoliciesGuard implements CanActivate {
@@ -24,20 +24,20 @@ export class PoliciesGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const policyHandlers =
-      this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler(),) || [];
+      this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler(),) || []
 
-    const { user } = context.switchToHttp().getRequest();
-    const ability = this.caslAbilityFactory.createForUser(user);
+    const { user } = context.switchToHttp().getRequest()
+    const ability = this.caslAbilityFactory.createForUser(user)
 
     return policyHandlers.every((handler) =>
       this.execPolicyHandler(handler, ability),
-    );
+    )
   }
 
   private execPolicyHandler(handler: PolicyHandler, ability: MongoAbility) {
     if (typeof handler === 'function') {
-      return handler(ability);
+      return handler(ability)
     }
-    return handler.handle(ability);
+    return handler.handle(ability)
   }
 }
