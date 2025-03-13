@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Model, FilterQuery, PopulateOptions } from 'mongoose';
+import { SortDirection } from 'src/feature/core/dto/pagination.request.dto';
 
 export interface PaginationOptions {
   page?: number;
@@ -35,7 +36,10 @@ export class Paginator {
   ): Promise<PaginatedResult<T>> {
     const page = options.page || 1
     const limit = options.limit || 10
-    const sort = options.sort || { createdAt: -1 }
+    const sort: {} = options.sort == SortDirection.ASC
+      ? { createdAt: 1 }
+      : { createdAt: -1 }
+
     const select = options.select || ''
     const populate = options.populate || ''
 
