@@ -470,9 +470,12 @@ export class AccountRepository implements IAccountRepository {
   * @param user 
   * @returns 
   */
-  async getOwnPermissions(user: string): Promise<ManagedAccount> {
+  async getOwnPermissions(community: string, user: string): Promise<ManagedAccount> {
     return await this.managedAccountModel
-      .findOne({ account: new Types.ObjectId(user), owner: new Types.ObjectId(user), }, '_id permissions')
+      .findOne({
+        account: new Types.ObjectId(user),
+        community: new Types.ObjectId(community)
+      }, '_id permissions')
   }
 
   /**

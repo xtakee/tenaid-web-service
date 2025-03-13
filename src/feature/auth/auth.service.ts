@@ -42,8 +42,9 @@ export class AuthService {
    * @param user 
    * @returns PermissionDto[]
    */
-  private async getUserManageAccountPermissions(user: string): Promise<PermissionDto[]> {
-    const permissions = await this.accountRepository.getOwnPermissions(user)
+  private async getUserManageAccountPermissions(community: string, user: string): Promise<PermissionDto[]> {
+    const permissions = await this.accountRepository.getOwnPermissions(community, user)
+    if (!permissions) return []
 
     return permissions.permissions.map((permission: PermissionDto) => {
       return {
@@ -92,7 +93,9 @@ export class AuthService {
       }
     }
 
-    const permissions = await this.getUserManageAccountPermissions((account as any)._id)
+    const permissions = primaryManagedCommunity ?
+      await this.getUserManageAccountPermissions(dto.primaryCommunityId, (account as any)._id)
+      : []
 
     const payload = {
       sub: (account as any)._id,
