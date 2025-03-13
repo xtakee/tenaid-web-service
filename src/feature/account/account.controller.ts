@@ -166,10 +166,10 @@ export class AccountController {
     return await this.accountService.updateProfile(id, body)
   }
 
+  /** */
   @Patch('info')
   @ApiOperation({ summary: 'Update dob, phone, photo, firstname and lastname' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async updateProfileInfo(@Body() body: UpdateInfoDto, @User() id: string): Promise<AccountResponseDto> {
     return await this.accountService.updateProfileInfo(id, body)
   }
@@ -207,8 +207,7 @@ export class AccountController {
    */
   @Get('me')
   @ApiOperation({ summary: 'Get Own Account Details' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async getOwnAcccount(@User() id: string): Promise<AccountResponseDto> {
     return await this.accountService.getOwnAccount(id)
   }
