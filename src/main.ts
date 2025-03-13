@@ -1,5 +1,5 @@
 require('dotenv').config()
-import './services/sentry.logger'
+import * as Sentry from "@sentry/nestjs"
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import helmet from 'helmet'
@@ -11,6 +11,11 @@ import { ENV } from './core/util/env'
 import * as basicAuth from "express-basic-auth"
 
 async function main() {
+
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+  })
+
   const app = await NestFactory.create(AppModule)
   app.useGlobalInterceptors(new TransformResponseInterceptor())
   app.useGlobalFilters(new HttpExceptionFilter())
