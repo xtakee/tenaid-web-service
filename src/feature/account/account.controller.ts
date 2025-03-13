@@ -352,8 +352,7 @@ export class AccountController {
    * @returns 
    */
   @Post('change-password')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async changePassword(@RootUser() user: string, @Body() body: ChangePasswordDto): Promise<void> {
     return await this.accountService.changePassword(user, body.password)
   }
