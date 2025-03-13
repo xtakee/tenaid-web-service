@@ -1,31 +1,33 @@
-import { Module } from '@nestjs/common';
-import { AccountModule } from './feature/account/account.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { AdminModule } from './feature/admin/admin.module';
-import { DatabaseModule } from './core/database/database.module';
-import { PropertyModule } from './feature/property/property.module';
-import { AuthModule } from './feature/auth/auth.module';
-import { BankModule } from './feature/bank/bank.module';
-import { CloudinaryModule } from './services/cloudinary/cloudinary.module';
-import { FileModule } from './feature/file/file.module';
-import { ManagerModule } from './feature/manager/manager.module';
-import { AgentModule } from './feature/agent/agent.module';
-import { ListingModule } from './feature/listing/listing.module';
-import { LocationModule } from './feature/location/location.module';
-import { CommunityModule } from './feature/community/community.module';
-import { NotificationModule } from './feature/notification/notification.module';
-import { BullModule } from '@nestjs/bullmq';
-import { EventModule } from './feature/event/event.module';
-import { HealthModule } from './feature/health/health.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { JobsModule } from './jobs/jobs.module';
-import { UtilityModule } from './feature/utility/utility.module';
-import { BillingModule } from './feature/billing/billing.module';
-import { E2eeModule } from './feature/e2ee/e2ee.module';
-import { MessageModule } from './feature/message/message.module';
+import { Module } from '@nestjs/common'
+import { AccountModule } from './feature/account/account.module'
+import { ThrottlerModule } from '@nestjs/throttler'
+import { AdminModule } from './feature/admin/admin.module'
+import { DatabaseModule } from './core/database/database.module'
+import { PropertyModule } from './feature/property/property.module'
+import { AuthModule } from './feature/auth/auth.module'
+import { BankModule } from './feature/bank/bank.module'
+import { CloudinaryModule } from './services/cloudinary/cloudinary.module'
+import { FileModule } from './feature/file/file.module'
+import { ManagerModule } from './feature/manager/manager.module'
+import { AgentModule } from './feature/agent/agent.module'
+import { ListingModule } from './feature/listing/listing.module'
+import { LocationModule } from './feature/location/location.module'
+import { CommunityModule } from './feature/community/community.module'
+import { NotificationModule } from './feature/notification/notification.module'
+import { BullModule } from '@nestjs/bullmq'
+import { SentryModule } from '@sentry/nestjs/setup'
+import { EventModule } from './feature/event/event.module'
+import { HealthModule } from './feature/health/health.module'
+import { ScheduleModule } from '@nestjs/schedule'
+import { JobsModule } from './jobs/jobs.module'
+import { UtilityModule } from './feature/utility/utility.module'
+import { BillingModule } from './feature/billing/billing.module'
+import { E2eeModule } from './feature/e2ee/e2ee.module'
+import { MessageModule } from './feature/message/message.module'
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     AccountModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,
