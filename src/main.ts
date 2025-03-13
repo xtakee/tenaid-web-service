@@ -13,7 +13,7 @@ import * as basicAuth from "express-basic-auth"
 async function main() {
 
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: 'https://9579642eb8b49411b256e0afa1afd6d7@o1088808.ingest.us.sentry.io/4508969947627520',
   })
 
   const app = await NestFactory.create(AppModule)
