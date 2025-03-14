@@ -40,6 +40,7 @@ import { CommunityContact } from "./model/community.contact"
 import { CommunityGuard } from "./model/community.guard"
 import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dto"
 import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
+import { JoinBuildingDto } from "./dto/request/join.building.dto"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -718,6 +719,7 @@ export class CommunityRepository {
       kycAcknowledged: true
     }, { returnDocument: 'after' }).exec()
   }
+
   /**
    * 
    * @param community 
@@ -763,6 +765,23 @@ export class CommunityRepository {
       isAdmin: body.isAdmin,
       canSendMessage: body.canSendMessages
     }).exec()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async joinCommunityBuilding(user: string, community: string, body: JoinBuildingDto): Promise<void> {
+    await this.communityMemberModel.findOneAndUpdate({
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(user)
+    }, {
+      street: new Types.ObjectId(body.street),
+      building: new Types.ObjectId(body.building),
+      apartment: body.apartment
+    }, { returnDocument: 'after' })
   }
 
   /**

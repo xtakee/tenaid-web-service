@@ -52,6 +52,7 @@ import { CommunityContactResponseDto } from './dto/response/community.contact.re
 import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper';
 import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto';
 import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto';
+import { JoinBuildingDto } from './dto/request/join.building.dto';
 
 @Injectable()
 export class CommunityService {
@@ -506,6 +507,17 @@ export class CommunityService {
    */
   async getAllCommunityStreets(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityStreets(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  async joinCommunityBuilding(user: string, community: string, body: JoinBuildingDto): Promise<void> {
+    return await this.communityRepository.joinCommunityBuilding(user, community, body)
   }
 
   /**
