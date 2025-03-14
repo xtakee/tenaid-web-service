@@ -541,7 +541,7 @@ export class CommunityController {
    * @param body 
    * @returns 
    */
-  @Post(':community/building')
+  @Post(':community/member/building')
   @BasicAuth()
   @ApiOperation({ summary: 'Join a community building - Admin only' })
   async joinCommunityBuilding(@User() user: string, @Param('community') community: string, @Body() body: JoinBuildingDto): Promise<void> {
