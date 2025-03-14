@@ -8,7 +8,8 @@ import { Account } from "src/feature/account/model/account.model";
 export type CommunityInviteDocument = HydratedDocument<CommunityInvite>;
 enum InviteType {
   SINGLE = 'single',
-  EXTENDED = 'extended'
+  EXTENDED = 'extended',
+  SELF = 'self'
 }
 
 @Schema({ timestamps: true })

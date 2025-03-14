@@ -1,5 +1,11 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsDateString, IsMongoId, IsNotEmpty } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger"   
+import { IsBoolean, IsDateString, IsEnum, IsMongoId, IsNotEmpty } from "class-validator"   
+
+enum InviteType {
+  SINGLE = 'single',
+  EXTENDED = 'extended',
+  SELF = 'self'
+}
 
 export class CommunityInviteDto {
   alt?: string
@@ -27,6 +33,7 @@ export class CommunityInviteDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsEnum(InviteType)
   type: string
 
   @ApiProperty()
