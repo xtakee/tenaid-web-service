@@ -534,7 +534,14 @@ export class CommunityController {
     return await this.communityService.getCommunityStreet(street, community)
   }
 
-  @Get(':community/building')
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post(':community/building')
   @BasicAuth()
   @ApiOperation({ summary: 'Join a community building - Admin only' })
   async joinCommunityBuilding(@User() user: string, @Param('community') community: string, @Body() body: JoinBuildingDto): Promise<void> {
