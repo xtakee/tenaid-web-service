@@ -14,6 +14,5 @@ export class JoinBuildingDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsNumber()
   apartment: number
 }
