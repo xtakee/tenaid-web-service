@@ -6,7 +6,7 @@ import { CommunityStreet } from "./model/community.street"
 import { CommunityDto } from "src/feature/community/dto/community.dto"
 import { CommunityMember } from "./model/community.member"
 import { CommunityMemberRequestDto } from "src/feature/community/dto/request/community.member.request.dto"
-import { CommunityInvite } from "./model/community.invite"
+import { CommunityInvite, InviteType } from "./model/community.invite"
 import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto"
 import { ACCOUNT_STATUS } from "../auth/auth.constants"
 import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto"
@@ -41,6 +41,7 @@ import { CommunityGuard } from "./model/community.guard"
 import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dto"
 import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
 import { JoinBuildingDto } from "./dto/request/join.building.dto"
+import { INVITE_STATUS } from "./community.constants"
 
 const MIN_DIRECTORS_COUNT = 3
 
@@ -1527,7 +1528,8 @@ export class CommunityRepository {
       {
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community),
-        status: status
+        status: status,
+        type: { $ne: InviteType.SELF }
       },
       getPaginatedMemberVisitorsQuery(paginate))
   }
@@ -1554,6 +1556,7 @@ export class CommunityRepository {
     let query: any = {
       account: new Types.ObjectId(user),
       community: new Types.ObjectId(community),
+      type: { $ne: InviteType.SELF },
       $or: [
         { start: { $gte: startDate, $lte: endDate } },
         { start: { $lt: startDate }, end: { $gte: endDate } }]
@@ -1585,6 +1588,7 @@ export class CommunityRepository {
     let query: any = {
       account: new Types.ObjectId(user),
       community: new Types.ObjectId(community),
+      type: { $ne: InviteType.SELF },
       exitOnly: false,
       start: { $gte: now }
     }

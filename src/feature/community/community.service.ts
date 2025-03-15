@@ -416,10 +416,7 @@ export class CommunityService {
     community: string,
     status: string,
     paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    const visitors = await this.communityRepository.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
-    if (visitors) return visitors;
-
-    throw new NotFoundException()
+    return await this.communityRepository.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
   }
 
   /**

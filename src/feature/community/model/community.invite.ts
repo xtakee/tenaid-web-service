@@ -6,7 +6,7 @@ import { INVITE_STATUS } from "../community.constants";
 import { Account } from "src/feature/account/model/account.model";
 
 export type CommunityInviteDocument = HydratedDocument<CommunityInvite>;
-enum InviteType {
+export enum InviteType {
   SINGLE = 'single',
   EXTENDED = 'extended',
   SELF = 'self'
