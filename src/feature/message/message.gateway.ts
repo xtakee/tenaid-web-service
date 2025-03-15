@@ -73,7 +73,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       this.server.to(data.room).emit(EVENT_NAME_TYPING, data)
 
     if (account)
-      this.messageRepository.updateMessageNodesDisConnection(account, platfom)
+     await this.messageRepository.updateMessageNodesDisConnection(account, platfom)
   }
 
   // handle client connected
