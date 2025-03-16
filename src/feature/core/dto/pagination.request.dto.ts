@@ -11,7 +11,7 @@ export enum SortDirection {
 export function buildSearchQuery(query: any, search?: string) {
   // build search query
   if (!search) return query
-  const nGrans = searchable(search)
+  const nGrans = search.split(' ')
   query.searchable = { $in: nGrans }
 
   return query
