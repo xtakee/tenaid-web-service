@@ -9,11 +9,11 @@ export class CommunityBuildingDto {
 
   @IsOptional()
   @ApiProperty()
-  name?: string
+  name: string
 
   @IsOptional()
   @ApiProperty()
-  description?: string
+  description: string
 
   @ApiProperty()
   @IsNotEmpty()

@@ -65,10 +65,14 @@ export enum COMMUNITY_SYSTEM_FEATURES {
   MEMBER = 'feature_member',
   USER_ADMIN = 'feature_admin',
   ACCESS_CONTROL = 'feature_access',
+  ACCESS_POINT = 'feature_access_point',
   VISITOR_ACCESS = 'feature_vistor_access',
   BILLING = 'feature_billing',
   BILLABLE = 'feature_billable',
-  SETTING = 'feature_setting'
+  BUILDING = 'feature_building',
+  GUARD = 'feature_guard',
+  SETTING = 'feature_setting',
+  STREET = 'feature_street'
 }
 
 export enum ADMIN_SYSTEM_FEATURES {

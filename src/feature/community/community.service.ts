@@ -1012,13 +1012,13 @@ export class CommunityService {
    * @param data 
    * @returns 
    */
-  async setJoinRequestStatus(data: CommunityRequestStatusDto): Promise<void> {
+  async setJoinRequestStatus(id: string, data: CommunityRequestStatusDto): Promise<void> {
     let request: any = null
     let pushTitle = data.status === ACCOUNT_STATUS.APPROVED ? REQUEST_APPROVED : REQUEST_DENIED
     let pushBody = ''
     let code = '-1'
 
-    const community = await this.communityRepository.getNextMemberCode(data.community)
+    const community = await this.communityRepository.getNextMemberCode(id)
     if (!community) throw new NotFoundException()
 
     if (data.status === ACCOUNT_STATUS.APPROVED) {
@@ -1029,7 +1029,7 @@ export class CommunityService {
     }
 
     request = await this.communityRepository.
-      setJoinRequestStatus(data.request, data.status, data.community, code)
+      setJoinRequestStatus(data.request, data.status, id, code)
 
     if (request) {
       const deviceToken = await this.accountRepository.getDevicePushToken(request.account)
@@ -1038,7 +1038,7 @@ export class CommunityService {
           device: deviceToken.token, data: {
             title: pushTitle,
             type: MessageType.REQUEST_JOIN_COMMUNITY, description: pushBody, link: '/home',
-            community: data.community
+            community: id
           }
         })
 
@@ -1046,9 +1046,9 @@ export class CommunityService {
         await this.accountRepository.setAllDashboardFlagStatus(request.account)
 
         // update community summary
-        await this.updateCommuntitySummary(data.community, COMMUNITY_MEMBERS_SUMMARY)
+        await this.updateCommuntitySummary(id, COMMUNITY_MEMBERS_SUMMARY)
 
-        await this.updateCommuntityStreetSummary(data.community, request.street._id.toString(), STREET_MEMBERS_SUMMARY)
+        await this.updateCommuntityStreetSummary(id, request.street._id.toString(), STREET_MEMBERS_SUMMARY)
       }
       else await this.accountRepository.setJoinFlagStatus(request.account, true)
     }

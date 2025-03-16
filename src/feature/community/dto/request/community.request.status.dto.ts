@@ -14,11 +14,6 @@ export class CommunityRequestStatusDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsMongoId()
-  community: string
-
-  @ApiProperty()
-  @IsNotEmpty()
   @IsEnum(STATUS_TYPE)
   status: string
 
