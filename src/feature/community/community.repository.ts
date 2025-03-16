@@ -41,9 +41,8 @@ import { CommunityGuard } from "./model/community.guard"
 import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dto"
 import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
 import { JoinBuildingDto } from "./dto/request/join.building.dto"
-import { INVITE_STATUS } from "./community.constants"
 
-const MIN_DIRECTORS_COUNT = 3
+const MIN_DIRECTORS_COUNT = 2
 
 const MEMBER_VISITOR_QUERY = {
   path: 'member',
@@ -446,16 +445,18 @@ export class CommunityRepository {
    */
   async updateCommunity(user: string, id: string, data: CommunityDto): Promise<Community> {
     return await this.communityModel.findOneAndUpdate(
-      { _id: new Types.ObjectId(id), account: new Types.ObjectId(user) },
       {
-        name: data.name,
-        description: data.description,
-        type: data.type,
-        logo: data.logo,
-        images: data.images,
-        address: data.address,
-        'kyc.basicInfoCompleted': true
-      }, { returnDocument: 'after' }).exec()
+        _id: new Types.ObjectId(id),
+        account: new Types.ObjectId(user)
+      }, {
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      logo: data.logo,
+      images: data.images,
+      address: data.address,
+      'kyc.basicInfoCompleted': true
+    }, { returnDocument: 'after' }).exec()
   }
 
   /**

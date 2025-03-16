@@ -33,6 +33,7 @@ import { MAX_MEMBER_CODE_LENGTH } from "../community/community.constants";
 import { CommunityToDtoMapper } from "../community/mapper/community.to.dto.mapper";
 import { CreateRoleDto } from "./dto/request/create.role.dto";
 import { ManagedAccount } from "./model/managed.account";
+import { Account } from "./model/account.model";
 
 @Injectable()
 export class AccountService {
@@ -115,6 +116,40 @@ export class AccountService {
       return this.bankMapper.map(account)
     }
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param account 
+   * @param community 
+   */
+  async updatePermissionAuthorisation(account: Account, community: string, platform: string): Promise<void> {
+    const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
+    const primaryMemberCommunity = await this.communityRepository.getAccountPrimaryCommunity((account as any)._id.toString())
+
+    const primaryAccountId = primaryManagedCommunity ? (primaryManagedCommunity as any)?._id?.toString() : null
+
+    const permissions = primaryManagedCommunity ?
+      await this.accountRepository.getOwnPermissions(primaryAccountId, (account as any)._id)
+      : []
+
+    const payload = {
+      sub: (account as any)._id,
+      sub_0: (account as any)._id,
+      permissions: permissions,
+      primaryMember: primaryMemberCommunity?._id.toString(),
+      primaryCommunity: primaryMemberCommunity?.community?.id.toString(),
+      primaryManagedCommunity: primaryAccountId,
+      email: account.email.value,
+      platform: platform
+    }
+
+    // const token = this.jwtService.sign(payload)
+
+    // const platformKey = `${(account as any)._id.toString()}-${platform}`
+
+    // const authorization = this.authHelper.encrypt(platformKey)
+    // this.authRepository.saveAuthToken(platformKey, token)
   }
 
   /**

@@ -20,6 +20,7 @@ import { DeviceToken } from "./model/device.token";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
+import { PermissionDto } from "../core/model/permission";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -470,12 +471,21 @@ export class AccountRepository implements IAccountRepository {
   * @param user 
   * @returns 
   */
-  async getOwnPermissions(community: string, user: string): Promise<ManagedAccount> {
-    return await this.managedAccountModel
+  async getOwnPermissions(community: string, user: string): Promise<PermissionDto[]> {
+    const permissions = await this.managedAccountModel
       .findOne({
         account: new Types.ObjectId(user),
         community: new Types.ObjectId(community)
       }, '_id permissions')
+
+    if (!permissions) return []
+
+    return permissions.permissions.map((permission: PermissionDto) => {
+      return {
+        authorization: permission.authorization,
+        claim: permission.claim
+      }
+    })
   }
 
   /**
