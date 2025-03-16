@@ -571,10 +571,9 @@ export class CommunityService {
    * @param path 
    * @returns 
    */
-  async getCommunityStreet(street: string, community: string): Promise<CommunityPathResponseDto> {
+  async getCommunityStreet(street: string, community: string): Promise<any> {
     const result = await this.communityRepository.getCommunityStreet(street, community)
-
-    if (result) return this.pathMapper.map(result)
+    if (result) return result
 
     throw new NotFoundException()
   }

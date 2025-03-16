@@ -818,7 +818,7 @@ export class CommunityRepository {
     return await this.communityStreetModel.findOne({
       _id: new Types.ObjectId(street),
       community: new Types.ObjectId(community)
-    }).populate({
+    }, '_id name description updatedAt createdAt createdBy community isActive code').populate({
       path: 'createdBy',
       select: 'firstName lastName email.value'
     }
