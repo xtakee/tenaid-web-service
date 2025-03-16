@@ -6,8 +6,8 @@ import { ACCOUNT_STATUS, ADMIN_SYSTEM_FEATURES, CLAIM, SYSTEM_FEATURES } from '.
 import { ReviewAddOnRequestDto } from 'src/feature/admin/dto/request/review.add.on.request.dto';
 import { AccountRepository } from '../account/account.respository';
 import { PaginatedResult } from 'src/core/helpers/paginator';
-import { Account } from '../account/model/account.model';
-import { AddOnRequest } from '../account/model/add.on.request.model';
+import { Account } from '../account/model/account';
+import { AddOnRequest } from '../account/model/add.on.request';
 import { AccountAdminResponseDto } from 'src/feature/admin/dto/response/account.admin.response.dto';
 import { AccountAdminToDtoMapper } from './mapper/account.admin.to.dto.mapper';
 import { AccountService } from '../account/account.service';

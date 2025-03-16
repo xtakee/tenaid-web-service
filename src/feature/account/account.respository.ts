@@ -1,16 +1,16 @@
 import { AccountCreateDto } from "src/feature/account/dto/request/account.create.dto";
 import { IAccountRepository } from "src/domain/account/iaccount.repository";
-import { Account, AccountType } from "./model/account.model";
+import { Account, AccountType } from "./model/account";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto";
-import { BankAccount } from "./model/bank.account.model";
+import { BankAccount } from "./model/bank.account";
 import { Bank } from "../bank/model/bank.model";
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
 import { AddressDto } from "src/feature/core/dto/address.dto";
 import { Address } from "../core/model/address.model";
-import { AddOnRequest } from "./model/add.on.request.model";
+import { AddOnRequest } from "./model/add.on.request";
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator";
 import { ManagedAccount } from "./model/managed.account";
 import { Permission } from "../auth/model/permission";
@@ -19,7 +19,7 @@ import { mergeArray } from "src/core/helpers/array.helper";
 import { DeviceToken } from "./model/device.token";
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
-import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
+import { buildSearchQuery, PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { PermissionDto } from "../core/model/permission";
 
 @Injectable()
@@ -344,10 +344,7 @@ export class AccountRepository implements IAccountRepository {
       community: new Types.ObjectId(community)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.managedAccountModel, query, {
+    return await this.paginator.paginate(this.managedAccountModel, buildSearchQuery(query, paginate.search), {
       select: '_id isActive account community createdBy permissions',
       page: paginate.page,
       limit: paginate.limit,

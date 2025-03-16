@@ -19,7 +19,7 @@ import { CheckInOutVisitorRequestDto } from "./dto/request/check.in.out.visitor.
 import { CheckType } from "../core/dto/check.type"
 import { CommunityCheckins } from "./model/community.checkins"
 import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto"
-import { PaginationRequestDto, SortDirection } from "../core/dto/pagination.request.dto"
+import { buildSearchQuery, PaginationRequestDto } from "../core/dto/pagination.request.dto"
 import { AddMemberRequestDto } from "./dto/request/add.member.request.dto"
 import { MessageCategoryDto } from "./dto/request/message.category.dto"
 import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto"
@@ -399,10 +399,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityGuardModel, query,
+    return await this.paginator.paginate(this.communityGuardModel, buildSearchQuery(query, paginate.search),
       {
         select: '_id fullName email.value updatedAt createdAt createdBy community isActive country code phone encPassword',
         page: paginate.page,
@@ -708,10 +705,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityContactModel, query,
+    return await this.paginator.paginate(this.communityContactModel, buildSearchQuery(query, paginate.search),
       {
         select: '_id fullName email updatedAt createdAt createdBy community isActive country tag phone',
         page: paginate.page,
@@ -756,10 +750,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityStreetModel, query,
+    return await this.paginator.paginate(this.communityStreetModel, buildSearchQuery(query, paginate.search),
       {
         select: '_id name description updatedAt createdAt createdBy community isActive code',
         page: paginate.page,
@@ -999,10 +990,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityBuildingModel, query, {
+    return await this.paginator.paginate(this.communityBuildingModel, buildSearchQuery(query, paginate.search), {
       select: COMMUNITY_BUILDING_QUERY,
       page: paginate.page,
       limit: paginate.limit,
@@ -1035,10 +1023,7 @@ export class CommunityRepository {
       street: new Types.ObjectId(street)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityBuildingModel, query, {
+    return await this.paginator.paginate(this.communityBuildingModel, buildSearchQuery(query, paginate.search), {
       select: COMMUNITY_BUILDING_QUERY,
       page: paginate.page,
       limit: paginate.limit,
@@ -1071,10 +1056,7 @@ export class CommunityRepository {
       street: new Types.ObjectId(street)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityMemberModel, query, {
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
       select: COMMUNITY_MEMBER_PRIMARY_QUERY,
       page: paginate.page,
       limit: paginate.limit,
@@ -1188,13 +1170,10 @@ export class CommunityRepository {
       isOwner: true
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
     if (date)
       query.updatedAt = { $gt: new Date(date) }
 
-    return await this.paginator.paginate(this.communityMemberModel, query, {
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
       select: '_id street apartment building status code extra isAdmin updatedAt createdAt',
       page: paginate.page,
       limit: paginate.limit,
@@ -1229,10 +1208,7 @@ export class CommunityRepository {
       $ne: ACCOUNT_STATUS.DENIED
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityMemberModel, query, {
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
       select: '_id street apartment createdAt updatedAt building status canCreateInvite canSendMessage canCreateExit status code extra isAdmin community',
       page: paginate.page,
       limit: paginate.limit,
@@ -1250,7 +1226,7 @@ export class CommunityRepository {
    * @param filter 
    * @returns 
    */
-  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, search?: string, date?: string): Promise<PaginatedResult<any>> {
+  async getAllCommunityMessagingMembers(user: string, community: string, paginate: PaginationRequestDto, date?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
@@ -1262,16 +1238,13 @@ export class CommunityRepository {
       status: ACCOUNT_STATUS.APPROVED
     }
 
-    if (search)
-      query.$text = { $search: search }
-
     if (date)
       query.updatedAt = { $gt: new Date(date) }
 
-    return await this.paginator.paginate(this.communityMemberModel, query, {
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
       select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt building',
-      page: page,
-      limit: limit
+      page: paginate.page,
+      limit: paginate.limit
     })
   }
 
@@ -1498,10 +1471,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityInviteModel, query,
+    return await this.paginator.paginate(this.communityInviteModel, buildSearchQuery(query, paginate.search),
       getPaginatedMemberVisitorsQuery(paginate))
   }
 
@@ -1515,10 +1485,7 @@ export class CommunityRepository {
   async getAllCommunities(paginate: PaginationRequestDto, status?: string): Promise<PaginatedResult<any>> {
     const query: any = !status ? {} : { status }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityModel, query,
+    return await this.paginator.paginate(this.communityModel, buildSearchQuery(query, paginate.search),
       {
         select: '_id name size description code members type logo images status isPrimary address account createdAt updatedAt',
         populate: {
@@ -1585,10 +1552,7 @@ export class CommunityRepository {
         { start: { $lt: startDate }, end: { $gte: endDate } }]
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityInviteModel, query,
+    return await this.paginator.paginate(this.communityInviteModel, buildSearchQuery(query, paginate.search),
       getPaginatedMemberVisitorsQuery(paginate))
   }
 
@@ -1616,10 +1580,7 @@ export class CommunityRepository {
       start: { $gte: now }
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityInviteModel, query,
+    return await this.paginator.paginate(this.communityInviteModel, buildSearchQuery(query, paginate.search),
       getPaginatedMemberVisitorsQuery(paginate))
   }
 
@@ -1649,10 +1610,7 @@ export class CommunityRepository {
 
     let query: any = { community: new Types.ObjectId(community), invite: { $ne: null } }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityCheckInsModel, query,
+    return await this.paginator.paginate(this.communityCheckInsModel, buildSearchQuery(query, paginate.search),
       {
         select: '_id code date type accessPoint invite',
         limit: paginate.limit,
@@ -1748,10 +1706,7 @@ export class CommunityRepository {
       account: new Types.ObjectId(user)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityModel, query, {
+    return await this.paginator.paginate(this.communityModel, buildSearchQuery(query, paginate.search), {
       select: COMMUNITY_SELECT_QUERY,
       sort: paginate.sort,
       page: paginate.page,
@@ -1882,10 +1837,7 @@ export class CommunityRepository {
       status: ACCOUNT_STATUS.PENDING
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityMemberModel, query, {
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
       select: COMMUNITY_MEMBER_PRIMARY_QUERY,
       limit: paginate.limit,
       page: paginate.page,
@@ -2281,10 +2233,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }
 
-    if (paginate.search)
-      query.$text = { $search: paginate.search }
-
-    return await this.paginator.paginate(this.communityDirectorModel, query, {
+    return await this.paginator.paginate(this.communityDirectorModel, buildSearchQuery(query, paginate.search), {
       select: '_id firstName lastName idNumber email.value email.verified country phone identityType identity createdAt updatedAt',
       limit: paginate.limit,
       page: paginate.page,

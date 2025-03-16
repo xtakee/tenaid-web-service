@@ -35,8 +35,8 @@ export class CommunityDirector {
   @Prop()
   identity?: string
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
 const CommunityDirectorSchema = SchemaFactory.createForClass(CommunityDirector);

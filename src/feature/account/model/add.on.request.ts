@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 import { AccountAdmin } from "src/feature/admin/model/account.admin.model";
 import { ACCOUNT_STATUS, ADD_ON } from "src/feature/auth/auth.constants";
 

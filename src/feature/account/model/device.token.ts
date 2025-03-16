@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
-import { Account } from "./account.model";
+import { Account } from "./account";
 import { DEVICE_TYPE } from "src/feature/auth/auth.constants";
 
 export type DeviceTokenDocument = HydratedDocument<DeviceToken>;

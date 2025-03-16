@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
 import { HydratedDocument, Types } from "mongoose";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 import { Address } from "src/feature/core/model/address.model";
 
 export type AccountPropertyDocument = HydratedDocument<PropertyComplex>;

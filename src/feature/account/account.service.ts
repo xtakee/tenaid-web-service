@@ -32,7 +32,7 @@ import { MAX_MEMBER_CODE_LENGTH } from "../community/community.constants"
 import { CommunityToDtoMapper } from "../community/mapper/community.to.dto.mapper"
 import { CreateRoleDto } from "./dto/request/create.role.dto"
 import { ManagedAccount } from "./model/managed.account"
-import { Account } from "./model/account.model"
+import { Account } from "./model/account"
 import { AuthRepository } from "../auth/auth.repository"
 import { JwtService } from "@nestjs/jwt"
 

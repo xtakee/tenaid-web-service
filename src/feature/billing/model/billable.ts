@@ -4,7 +4,7 @@ import { BillClass } from "src/core/enums/bill.class";
 import { BillFrequency } from "src/core/enums/bill.frequency";
 import { BillType } from "src/core/enums/bill.type";
 import { BillableStatus } from "src/core/enums/billable.status";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 import { Community } from "src/feature/community/model/community";
 
 export type BillableDocument = HydratedDocument<Billable>;

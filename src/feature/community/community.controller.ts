@@ -466,6 +466,19 @@ export class CommunityController {
   }
 
   /**
+* 
+* @param community 
+* @returns 
+*/
+  @Get('/street')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all managed community streets' })
+  async getAllManagedCommunityStreets(@ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
+    return await this.communityService.getAllCommunityStreets(community, paginate)
+  }
+
+  /**
    * 
    * @param community 
    * @returns 
@@ -476,19 +489,6 @@ export class CommunityController {
   async getAllCommunityStreets(@Param('community') community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityStreets(community, paginate)
-  }
-
-  /**
- * 
- * @param community 
- * @returns 
- */
-  @Get('/street')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all managed community streets' })
-  async getAllManagedCommunityStreets(@ManagedCommunity() community: string,
-    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
     return await this.communityService.getAllCommunityStreets(community, paginate)
   }
 
@@ -747,7 +747,7 @@ export class CommunityController {
     @PrimaryCommunity() community: string,
     @Query() paginate: PaginationRequestDto,
     @Query() date?: DateDto): Promise<PaginatedResult<any>> {
-    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate.page, paginate.limit, paginate.search, date.date)
+    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate, date.date)
   }
 
   /**

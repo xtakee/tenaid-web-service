@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Community } from "./community"
 import { HydratedDocument, Types } from "mongoose"
 import { Email } from "src/feature/core/model/email.model"
-import { Account } from "src/feature/account/model/account.model"
+import { Account } from "src/feature/account/model/account"
 
 export type CommunityGuardDocument = HydratedDocument<CommunityGuard>
 
@@ -41,8 +41,8 @@ export class CommunityGuard {
   @Prop({ default: true })
   isActive?: Boolean
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
 const CommunityGuardSchema = SchemaFactory.createForClass(CommunityGuard);

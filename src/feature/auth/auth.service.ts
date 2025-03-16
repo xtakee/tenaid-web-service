@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { AccountRepository } from '../account/account.respository'
-import { Account } from '../account/model/account.model'
+import { Account } from '../account/model/account'
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper'
 import { AccountAuthResponseDto } from 'src/feature/auth/dto/response/account.auth.response.dto'
 import { JwtService } from '@nestjs/jwt'

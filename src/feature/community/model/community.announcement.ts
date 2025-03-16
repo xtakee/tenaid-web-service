@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { HydratedDocument, Types } from "mongoose"
-import { Account } from "src/feature/account/model/account.model"
+import { Account } from "src/feature/account/model/account"
 import { Community } from "src/feature/community/model/community"
 
 export type CommunityAnnouncementDocument = HydratedDocument<CommunityAnnouncement>;

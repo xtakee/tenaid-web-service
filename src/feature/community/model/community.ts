@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 import { COMMUNITY_TYPE } from "../community.constants";
 import { Address } from "src/feature/core/model/address.model";
 import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
@@ -56,8 +56,8 @@ export class Community {
   @Prop({ default: 0 })
   size: number
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 
   @Prop()
   description?: string

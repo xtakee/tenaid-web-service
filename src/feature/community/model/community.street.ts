@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { Community } from "./community";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 
 export type CommunityPathDocument = HydratedDocument<CommunityStreet>;
 
@@ -25,8 +25,8 @@ export class CommunityStreet {
   @Prop()
   code: string
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 
   @Prop()
   description: string

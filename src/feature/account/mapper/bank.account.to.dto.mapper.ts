@@ -1,5 +1,5 @@
 import { Mapper } from "src/core/util/mapper";
-import { BankAccount } from "../model/bank.account.model";
+import { BankAccount } from "../model/bank.account";
 import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts";
 
 export class BankAccountToDtoMapper implements Mapper<BankAccount, BankAccountResponseDto> {

@@ -1,12 +1,12 @@
-export function searchable(input: string, minLength = 2): string {
-  const maxLength = input.length;
-  const substrings: string[] = [];
+export function searchable(input: string, minLength = 2): string[] {
+  const substrings = new Set<string>() // Use a Set to prevent duplicates
 
-  for (let len = minLength; len <= maxLength; len++) {
-    for (let i = 0; i <= input.length - len; i++) {
-      const sub: string = input.slice(i, i + len)
-      if (sub.length >= minLength && !sub.includes(' ')) substrings.push(sub)
+  for (let i = 0; i < input.length; i++) {
+    for (let len = minLength; len <= input.length - i; len++) {
+      const sub = input.slice(i, i + len).toLowerCase();
+      if (!sub.includes(' ')) substrings.add(sub)
     }
   }
-  return substrings.join(' ').toLowerCase();
+
+  return Array.from(substrings)
 }

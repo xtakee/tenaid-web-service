@@ -1,10 +1,20 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from "class-validator";
+import { searchable } from "src/core/util/searchable";
 
 export enum SortDirection {
   ASC = 'asc',
   DEC = 'dec'
+}
+
+export function buildSearchQuery(query: any, search?: string) {
+  // build search query
+  if (!search) return query
+  const nGrans = searchable(search)
+  query.searchable = { $in: nGrans }
+
+  return query
 }
 
 export class PaginationRequestDto {

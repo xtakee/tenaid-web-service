@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { HydratedDocument, Types } from "mongoose"
 import { Platform } from "src/core/util/platform"
-import { Account } from "src/feature/account/model/account.model"
+import { Account } from "src/feature/account/model/account"
 
 export type E2eeKeyDocument = HydratedDocument<E2eeKey>
 

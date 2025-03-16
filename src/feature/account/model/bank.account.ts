@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { Type } from "class-transformer";
 import { Bank } from "src/feature/bank/model/bank.model";
-import { Account } from "./account.model";
+import { Account } from "./account";
 
 export type BankAccountDocument = HydratedDocument<BankAccount>;
 

@@ -4,7 +4,7 @@ import { HydratedDocument, Types } from "mongoose"
 import { Email } from "src/feature/core/model/email.model"
 import { BUILDING_CATEGORY, BUILDING_TYPE } from "src/core/enums/building.type"
 import { CommunityStreet } from "./community.street"
-import { Account } from "src/feature/account/model/account.model"
+import { Account } from "src/feature/account/model/account"
 
 export type CommunityBuildingDocument = HydratedDocument<CommunityBuilding>
 
@@ -52,8 +52,8 @@ export class CommunityBuilding {
   @Prop({ enum: BUILDING_CATEGORY })
   category?: string
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
 const CommunityBuildingSchema = SchemaFactory.createForClass(CommunityBuilding);

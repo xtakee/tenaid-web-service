@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { HydratedDocument, Types } from "mongoose"
-import { Account } from "src/feature/account/model/account.model"
+import { Account } from "src/feature/account/model/account"
 import { Community, E2eeData } from "src/feature/community/model/community"
 import { CommunityMember } from "src/feature/community/model/community.member"
 import { MessageStatus } from "../util/message.status"

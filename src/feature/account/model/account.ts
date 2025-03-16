@@ -89,8 +89,8 @@ export class Account {
   @Prop()
   photo?: string
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 
   @Prop({ type: Boolean, default: false })
   hasCommunity?: Boolean
@@ -111,7 +111,6 @@ export class Account {
   @Prop({ type: Types.ObjectId })
   @Type(() => Address)
   address?: Address
-
   @Prop({ required: true })
   password: string
 

@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from "mongoose";
 import { Community } from "./community";
 import { CommunityMember } from "./community.member";
 import { INVITE_STATUS } from "../community.constants";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 
 export type CommunityInviteDocument = HydratedDocument<CommunityInvite>;
 export enum InviteType {
@@ -62,8 +62,8 @@ export class CommunityInvite {
   @Prop()
   revokeReason?: string
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
 const CommunityInviteSchema = SchemaFactory.createForClass(CommunityInvite)

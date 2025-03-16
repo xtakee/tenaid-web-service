@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { Type } from "class-transformer";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 import { Permission } from "../../auth/model/permission";
 import { Community } from "src/feature/community/model/community";
 
@@ -32,8 +32,8 @@ export class ManagedAccount {
   @Prop()
   name?: string
 
-  @Prop({ index: true })
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
 export const ManagedAccountSchema = SchemaFactory.createForClass(ManagedAccount);

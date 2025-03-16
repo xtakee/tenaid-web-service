@@ -1,5 +1,5 @@
 import { Mapper } from "src/core/util/mapper";
-import { Account } from "../model/account.model";
+import { Account } from "../model/account";
 import { AccountResponseDto, DashboardFlagsDto, _KYC } from "src/feature/account/dto/response/account.response.dto";
 import { Injectable } from "@nestjs/common";
 import { ADD_ON } from "src/feature/auth/auth.constants";

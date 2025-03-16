@@ -1,7 +1,7 @@
 import { Prop, Schema } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
 import { Types } from "mongoose";
-import { Account } from "src/feature/account/model/account.model";
+import { Account } from "src/feature/account/model/account";
 import { Financial } from "src/feature/property/model/financial.model";
 import { APPLICATION_STATUS } from "../property.constants";
 import { Property } from "./property.model";

@@ -800,8 +800,8 @@ export class CommunityService {
    * @param filter 
    * @returns 
    */
-  async getAllCommunityMessagingMembers(user: string, community: string, page: number, limit: number, search?: string, date?: string): Promise<PaginatedResult<any>> {
-    return await this.communityRepository.getAllCommunityMessagingMembers(user, community, page, limit, search, date)
+  async getAllCommunityMessagingMembers(user: string, community: string, paginate: PaginationRequestDto, date?: string): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityMessagingMembers(user, community, paginate, date)
   }
 
   /**
