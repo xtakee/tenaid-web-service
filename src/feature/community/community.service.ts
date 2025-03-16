@@ -9,7 +9,7 @@ import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_ACCESS_POINT_ERRO
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
-import { CommunityPathRequestDto } from './dto/request/community.path.request.dto';
+import { CommunityStreetRequestDto } from './dto/request/community.street.request.dto';
 import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
 import { CommunityPathToDtoMapper } from './mapper/community.path.to.dto.mapper';
 import { CommunityStreet } from './model/community.street';
@@ -354,10 +354,7 @@ export class CommunityService {
    * @returns 
    */
   async getCommunityMemberVisitors(user: string, community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    const visitors = await this.communityRepository.getCommunityMemberVisitors(user, community, paginate)
-    if (visitors) return visitors
-
-    throw new NotFoundException()
+    return await this.communityRepository.getCommunityMemberVisitors(user, community, paginate)
   }
 
   /**
@@ -424,14 +421,15 @@ export class CommunityService {
    * @param user 
    * @param data 
    */
-  async createCommunityStreet(user: string, data: CommunityPathRequestDto): Promise<CommunityPathResponseDto> {
-    const community = await this.communityRepository.getCommunityByUser(user, data.community)
+  async createCommunityStreet(user: string, community: string, data: CommunityStreetRequestDto): Promise<CommunityPathResponseDto> {
+    const communityData = await this.communityRepository.getCommunityByUser(user, community)
 
     if (community) {
-      const street: CommunityStreet = await this.communityRepository.createStreet(user, data)
+      data.code = this.authHelper.random(5)
+      const street: CommunityStreet = await this.communityRepository.createStreet(user, community, data)
 
       // queue summary job
-      await this.updateCommuntitySummary(data.community, COMMUNITY_STREETS_SUMMARY)
+      await this.updateCommuntitySummary(community, COMMUNITY_STREETS_SUMMARY)
       return this.pathMapper.map(street)
     }
 

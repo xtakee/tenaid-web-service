@@ -10,7 +10,7 @@ import { CommunityInvite, InviteType } from "./model/community.invite"
 import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto"
 import { ACCOUNT_STATUS } from "../auth/auth.constants"
 import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto"
-import { CommunityPathRequestDto } from "./dto/request/community.path.request.dto"
+import { CommunityStreetRequestDto } from "./dto/request/community.street.request.dto"
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator"
 import { MemberAccount } from "./model/member.account"
 import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto"
@@ -174,7 +174,7 @@ export class CommunityRepository {
     @InjectModel(CommunityInvite.name) private readonly communityInviteModel: Model<CommunityInvite>,
     @InjectModel(CommunityRegistration.name) private readonly communityRegistrationModel: Model<CommunityRegistration>,
     @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
-    @InjectModel(CommunityStreet.name) private readonly communityPathModel: Model<CommunityStreet>,
+    @InjectModel(CommunityStreet.name) private readonly communityStreetModel: Model<CommunityStreet>,
     @InjectModel(MessageCategory.name) private readonly messageCategoryModel: Model<MessageCategory>
   ) { }
 
@@ -251,6 +251,7 @@ export class CommunityRepository {
       phone: body.phone,
       country: body.country,
       password: body.password,
+      secret: body.password,
       code: body.code,
       encPassword: body.enPassword
     }
@@ -477,20 +478,21 @@ export class CommunityRepository {
    * @param data 
    * @returns 
    */
-  async createStreet(user: string, data: CommunityPathRequestDto): Promise<CommunityStreet> {
-    const street = await this.communityPathModel.create({
-      community: new Types.ObjectId(data.community),
+  async createStreet(user: string, community: string, data: CommunityStreetRequestDto): Promise<CommunityStreet> {
+    const street = await this.communityStreetModel.create({
+      community: new Types.ObjectId(community),
       account: new Types.ObjectId(user),
       createdBy: new Types.ObjectId(user),
       name: data.name,
+      code: data.code,
       description: data.description
     })
 
-    await this.communityModel.findByIdAndUpdate(data.community, {
+    await this.communityModel.findByIdAndUpdate(community, {
       'communitySetup.street': true
     }).exec()
 
-    return await this.getCommunityStreet((street as any)._id.toString(), data.community)
+    return await this.getCommunityStreet((street as any)._id.toString(), community)
   }
 
   /**
@@ -736,9 +738,9 @@ export class CommunityRepository {
     if (paginate.search)
       query.$text = { $search: paginate.search }
 
-    return await this.paginator.paginate(this.communityPathModel, query,
+    return await this.paginator.paginate(this.communityStreetModel, query,
       {
-        select: '_id name description updatedAt createdAt createdBy community isActive',
+        select: '_id name description updatedAt createdAt createdBy community isActive code',
         page: paginate.page,
         limit: paginate.limit,
         sort: paginate.sort,
@@ -792,7 +794,7 @@ export class CommunityRepository {
    * @returns 
    */
   async getCommunityStreet(street: string, community: string): Promise<CommunityStreet> {
-    return await this.communityPathModel.findOne({
+    return await this.communityStreetModel.findOne({
       _id: new Types.ObjectId(street),
       community: new Types.ObjectId(community)
     }).populate({
@@ -1264,7 +1266,7 @@ export class CommunityRepository {
     street: string,
     data: UpdateCommunityStreetDto): Promise<CommunityStreet> {
 
-    return await this.communityPathModel.findOneAndUpdate({
+    return await this.communityStreetModel.findOneAndUpdate({
       _id: new Types.ObjectId(street),
       community: new Types.ObjectId(community)
     }, {
@@ -1405,7 +1407,7 @@ export class CommunityRepository {
    * @param community 
    */
   async getCommunityStreetsCount(community: string): Promise<number> {
-    return await this.communityPathModel.countDocuments({
+    return await this.communityStreetModel.countDocuments({
       community: new Types.ObjectId(community)
     })
   }

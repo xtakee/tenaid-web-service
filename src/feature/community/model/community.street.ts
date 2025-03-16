@@ -22,6 +22,9 @@ export class CommunityStreet {
   @Prop()
   name: string
 
+  @Prop()
+  code: string
+
   @Prop({ index: true })
   searchable?: string
 

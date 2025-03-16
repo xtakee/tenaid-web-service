@@ -24,6 +24,9 @@ export class CommunityGuard {
   phone: string
 
   @Prop()
+  secret: string
+
+  @Prop()
   country: string
 
   @Prop()

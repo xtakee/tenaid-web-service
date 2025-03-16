@@ -127,6 +127,9 @@ export class AccountService {
     data.code = counter.toString()
 
     const account = await this.accountRepository.getOneById(user)
+    const existing = await this.communityRepository.getAccountPrimaryManagedCommunity(user)
+
+    data.isPrimary = existing ? false : true
 
     if (account) {
       data.isPrimary = !account.hasCommunity
@@ -332,8 +335,6 @@ export class AccountService {
       if (primaryManagedCommunity) {
         accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
         // add account primary community
-        accountDto.primaryCommunityId = (primaryManagedCommunity as any)._id
-
         accountDto.communitySetup = {
           street: primaryManagedCommunity.communitySetup?.street === true,
           building: primaryManagedCommunity.communitySetup?.building === true,

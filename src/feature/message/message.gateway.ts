@@ -73,7 +73,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       this.server.to(data.room).emit(EVENT_NAME_TYPING, data)
 
     if (account)
-     await this.messageRepository.updateMessageNodesDisConnection(account, platfom)
+      await this.messageRepository.updateMessageNodesDisConnection(account, platfom)
   }
 
   // handle client connected
@@ -88,12 +88,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       // join all active community rooms
       for (const room of rooms) client.join(room)
 
-      const { token } = await this.accountRepository.getDevicePushToken(account)
+      const data = await this.accountRepository.getDevicePushToken(account)
 
       // udpate client nodes
       await this.updateClientConnection({
         rooms: rooms,
-        token: token,
+        token: data.token,
         account: account,
         platform: platform
       })

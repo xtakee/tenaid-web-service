@@ -1,12 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsMongoId, IsNotEmpty } from "class-validator";
 
-export class CommunityPathRequestDto {
+export class CommunityStreetRequestDto {
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsMongoId()
-  community: string
+  code?: string
 
   @ApiProperty()
   @IsNotEmpty()

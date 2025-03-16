@@ -26,10 +26,11 @@ import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { User } from "src/core/decorators/user";
 import { RootUser } from "src/core/decorators/root.user";
 import { Email } from "src/core/decorators/email";
-import { Platform } from "src/core/decorators/platfom";
+import { Platform } from "src/core/decorators/platform";
 import { CreateCommunityDto } from "./dto/request/create.community.dto";
 import { CommunityResponseDto } from "./dto/response/community.response.dto";
 import { CreateRoleDto, UpdateRoleDto } from "./dto/request/create.role.dto";
+import { ManagedCommunity } from "src/core/decorators/managed.community";
 
 @Controller({
   version: '1',
@@ -133,7 +134,7 @@ export class AccountController {
   @BasicAuth()
   async acknowledgeAccountCommunityKyc(
     @User() user: string,
-    @Param('community') community: string): Promise<void> {
+    @ManagedCommunity() community: string): Promise<void> {
     if (!isMongoId(community)) throw new BadRequestException()
     await this.accountService.acknowledgeAccountCommunityKyc(user, community)
   }
@@ -267,11 +268,11 @@ export class AccountController {
    * @param body 
    * @returns 
    */
-  @Get('community/:community/role/:role')
+  @Get('community/role/:role')
   @ApiOperation({ summary: 'Get a community account role' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
-  async getCommunityAccountRole(@Param('community') community: string, @Param('role') role: string): Promise<any> {
+  async getCommunityAccountRole(@ManagedCommunity() community: string, @Param('role') role: string): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
     if (!isMongoId(role)) throw new BadRequestException()
 
@@ -284,11 +285,11 @@ export class AccountController {
    * @param paginate 
    * @returns 
    */
-  @Get('community/:community/role')
+  @Get('community/role')
   @ApiOperation({ summary: 'Get all community account roles' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
-  async getAllCommunityAccountRoles(@Param('community') community: string, @Query() paginate: PaginationRequestDto): Promise<any> {
+  async getAllCommunityAccountRoles(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
 
     return await this.accountService.getAllCommunityAccountRoles(community, paginate)
@@ -300,13 +301,13 @@ export class AccountController {
    * @param community 
    * @param body 
    */
-  @Post('community/:community/role')
+  @Post('community/role')
   @ApiOperation({ summary: 'Create a new community account role' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
   async createAccountRole(
     @User() user: string,
-    @Param('community') community: string,
+    @ManagedCommunity() community: string,
     @Body() body: CreateRoleDto): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.accountService.createCommunityAccountRole(user, community, body)
@@ -319,13 +320,13 @@ export class AccountController {
    * @param role 
    * @param body 
    */
-  @Patch('community/:community/role/:role')
+  @Patch('community/role/:role')
   @ApiOperation({ summary: 'Update a community account role' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
   async updateAccountRole(
     @User() user: string,
-    @Param('community') community: string,
+    @ManagedCommunity() community: string,
     @Param('role') role: string,
     @Body() body: UpdateRoleDto): Promise<void> {
     if (!isMongoId(community)) throw new BadRequestException()

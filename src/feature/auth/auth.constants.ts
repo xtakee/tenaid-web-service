@@ -65,6 +65,7 @@ export enum COMMUNITY_SYSTEM_FEATURES {
   MEMBER = 'feature_member',
   USER_ADMIN = 'feature_admin',
   ACCESS_CONTROL = 'feature_access',
+  VISITOR_ACCESS = 'feature_vistor_access',
   BILLING = 'feature_billing',
   BILLABLE = 'feature_billable',
   SETTING = 'feature_setting'

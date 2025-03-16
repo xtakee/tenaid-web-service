@@ -1,8 +1,8 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
-export const Platform = createParamDecorator(
+export const PrimaryCommunity = createParamDecorator(
   (param: any, context: ExecutionContext) => {
     const request = context.switchToHttp().getRequest();
-    return request.user['platform']
+    return request.user['primaryCommunity']
   },
 )

@@ -1,24 +1,23 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { AccountRepository } from '../account/account.respository';
-import { Account } from '../account/model/account.model';
-import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper';
-import { AccountAuthResponseDto } from 'src/feature/auth/dto/response/account.auth.response.dto';
-import { JwtService } from '@nestjs/jwt';
-import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { MANAGER, defaultAgentPermissions, defaultManagerPermissions, defaultPermissions } from './auth.constants';
-import { AuthRepository } from './auth.repository';
-import { AdminRepository } from '../admin/admin.repository';
-import { PermissionDto } from 'src/feature/core/model/permission';
-import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response';
-import { AccountAdmin } from '../admin/model/account.admin.model';
-import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper';
-import { INVALID_LOGIN_ERROR } from 'src/core/strings';
-import { CommunityRepository } from '../community/community.repository';
-import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
-import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
-import { Community } from '../community/model/community';
-import { E2eeService } from '../e2ee/e2ee.service';
-import { MessageRepository } from '../message/message.repository';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { AccountRepository } from '../account/account.respository'
+import { Account } from '../account/model/account.model'
+import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper'
+import { AccountAuthResponseDto } from 'src/feature/auth/dto/response/account.auth.response.dto'
+import { JwtService } from '@nestjs/jwt'
+import { AuthHelper } from 'src/core/helpers/auth.helper'
+import { AuthRepository } from './auth.repository'
+import { AdminRepository } from '../admin/admin.repository'
+import { PermissionDto } from 'src/feature/core/model/permission'
+import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response'
+import { AccountAdmin } from '../admin/model/account.admin.model'
+import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper'
+import { INVALID_LOGIN_ERROR } from 'src/core/strings'
+import { CommunityRepository } from '../community/community.repository'
+import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto'
+import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper'
+import { Community } from '../community/model/community'
+import { E2eeService } from '../e2ee/e2ee.service'
+import { MessageRepository } from '../message/message.repository'
 
 @Injectable()
 export class AuthService {
@@ -80,12 +79,11 @@ export class AuthService {
 
     const dto = this.accountToDtoMapper.map(account)
     const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
+    const primaryMemberCommunity = await this.communityRepository.getAccountPrimaryCommunity((account as any)._id.toString())
 
     if (primaryManagedCommunity) {
       dto.communityKycAcknowledged = account.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
 
-      // add account primary community
-      dto.primaryCommunityId = (primaryManagedCommunity as any)._id
       dto.communitySetup = {
         street: primaryManagedCommunity.communitySetup?.street === true,
         building: primaryManagedCommunity.communitySetup?.building === true,
@@ -93,17 +91,23 @@ export class AuthService {
       }
     }
 
+    const primaryAccountId = (primaryManagedCommunity as any)._id?.toString()
     const permissions = primaryManagedCommunity ?
-      await this.getUserManageAccountPermissions(dto.primaryCommunityId, (account as any)._id)
+      await this.getUserManageAccountPermissions(primaryAccountId, (account as any)._id)
       : []
 
     const payload = {
       sub: (account as any)._id,
       sub_0: (account as any)._id,
       permissions: permissions,
+      primaryMember: primaryMemberCommunity?._id.toString(),
+      primaryCommunity: primaryMemberCommunity?.community?.id.toString(),
+      primaryManagedCommunity: primaryAccountId,
       email: account.email.value,
       platform: platform
     }
+
+    console.log(payload)
 
     const token = this.jwtService.sign(payload)
 
@@ -155,14 +159,14 @@ export class AuthService {
     const account: AccountAdmin = await this.adminRepository.getOneByEmail(username.trim().toLowerCase())
 
     if (account) {
-      const isMatch = await this.authHelper.isMatch(password, account.password);
+      const isMatch = await this.authHelper.isMatch(password, account.password)
 
       if (isMatch) {
         return await this.getAdminAuthorizationResponse(account)
       }
     }
 
-    throw new BadRequestException(INVALID_LOGIN_ERROR);
+    throw new BadRequestException(INVALID_LOGIN_ERROR)
   }
 
   /**
@@ -191,7 +195,7 @@ export class AuthService {
       }
     }))
 
-    const payload = { sub: (account as any)._id, permissions: permissions, email: account.email.value };
+    const payload = { sub: (account as any)._id, permissions: permissions, email: account.email.value }
     const token = this.jwtService.sign(payload)
 
     const key = (account as any)._id.toString()
@@ -228,7 +232,7 @@ export class AuthService {
     if (accessPoint) {
       const isMatch = await this.authHelper.isMatch(password, accessPoint.password)
       if (isMatch) {
-        const payload = { sub: (accessPoint as any).community._id.toString(), sub_0: (accessPoint as any).account };
+        const payload = { sub: (accessPoint as any).community._id.toString(), sub_0: (accessPoint as any).account }
         const token = this.jwtService.sign(payload)
 
         const key = (accessPoint as any)._id.toString()
@@ -268,7 +272,7 @@ export class AuthService {
         account.accountTypes = owner.accountTypes
 
         const dto = this.accountToDtoMapper.map(account)
-        const payload = { sub: (owner as any)._id, sub_0: (account as any)._id, permissions: permissions, email: owner.email.value };
+        const payload = { sub: (owner as any)._id, sub_0: (account as any)._id, permissions: permissions, email: owner.email.value }
 
         const token = this.jwtService.sign(payload)
 

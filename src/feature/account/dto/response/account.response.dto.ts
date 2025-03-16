@@ -38,7 +38,6 @@ export class AccountResponseDto {
   firstName: string
   lastName: string
   hasCommunity?: Boolean
-  primaryCommunityId?: string
   email: Email
   phone: string
   gender?: string
