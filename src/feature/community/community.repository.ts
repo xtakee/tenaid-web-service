@@ -938,7 +938,7 @@ export class CommunityRepository {
       isActive: true,
       category: data.category,
       description: data.description,
-      contactPhone: data.contactPerson,
+      contactPhone: data.contactPhone,
       type: data.type,
       buildingNumber: data.buildingNumber.toLowerCase().trim(),
       contactEmail: {
