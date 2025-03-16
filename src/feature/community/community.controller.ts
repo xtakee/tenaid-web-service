@@ -276,18 +276,18 @@ export class CommunityController {
     return this.communityService.getCommunityMessageCategories(community)
   }
 
-   /**
-   * 
-   * @param user 
-   * @param community 
-   * @returns 
-   */
-   @Get('managed/message/category/')
-   @BasicAuth()
-   @ApiOperation({ summary: 'Get all managed community message categories' })
-   async getManagedCommunityMessageCategory(@ManagedCommunity() community: string): Promise<MessageCategoryDto[]> {
-     return this.communityService.getCommunityMessageCategories(community)
-   }
+  /**
+  * 
+  * @param user 
+  * @param community 
+  * @returns 
+  */
+  @Get('managed/message/category/')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all managed community message categories' })
+  async getManagedCommunityMessageCategory(@ManagedCommunity() community: string): Promise<MessageCategoryDto[]> {
+    return this.communityService.getCommunityMessageCategories(community)
+  }
 
   /**
    * 
@@ -793,6 +793,21 @@ export class CommunityController {
     @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto): Promise<any> {
     return await this.communityService.getAllCommunityBuildings(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  @Get('/building/:building')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community building details' })
+  async getCommunityBuilding(
+    @ManagedCommunity() community: string,
+    @Param('building') building: string): Promise<any> {
+    return await this.communityService.getCommunityBuilding(community, building)
   }
 
   /**

@@ -947,6 +947,19 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  async getCommunityBuilding(community: string, building: string): Promise<any> {
+    const data = await this.communityRepository.getCommunityBuildingById(community, building)
+    if (data) return data
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    */
