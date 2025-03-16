@@ -1,39 +1,40 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { AccountRepository } from "./account.respository";
-import { AccountCreateDto } from "src/feature/account/dto/request/account.create.dto";
-import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto";
-import { AccountResponseDto, Role } from "src/feature/account/dto/response/account.response.dto";
-import { AccountToDtoMapper } from "./mapper/account.to.dto.mapper";
-import { AddBankAccountDto } from "src/feature/account/dto/request/add.bank.account.dto";
-import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts";
-import { BankRepository } from "../bank/bank.repository";
-import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper";
-import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto";
-import { AddressDto } from "src/feature/core/dto/address.dto";
-import { ACCOUNT_STATUS, ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultCommunityAdminPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants";
-import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
-import { Permission } from "../auth/model/permission";
-import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings";
-import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
-import { AuthHelper, EasGcmData } from "src/core/helpers/auth.helper";
-import { Types } from "mongoose";
-import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
-import { CommunityRepository } from "../community/community.repository";
-import { PaginatedResult } from "src/core/helpers/paginator";
-import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
-import { UpdateInfoDto } from "./dto/request/update.info.dto";
-import { PaginationRequestDto } from "../core/dto/pagination.request.dto";
-import { E2eeRepository } from "../e2ee/e2ee.repository";
-import { MessageRepository } from "../message/message.repository";
-import { CounterRepository } from "../core/counter/counter.repository";
-import { CreateCommunityDto } from "./dto/request/create.community.dto";
-import { CommunityResponseDto } from "./dto/response/community.response.dto";
-import { COUNTER_TYPE } from "../core/counter/constants";
-import { MAX_MEMBER_CODE_LENGTH } from "../community/community.constants";
-import { CommunityToDtoMapper } from "../community/mapper/community.to.dto.mapper";
-import { CreateRoleDto } from "./dto/request/create.role.dto";
-import { ManagedAccount } from "./model/managed.account";
-import { Account } from "./model/account.model";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common"
+import { AccountRepository } from "./account.respository"
+import { AccountCreateDto } from "src/feature/account/dto/request/account.create.dto"
+import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto"
+import { AccountResponseDto, Role } from "src/feature/account/dto/response/account.response.dto"
+import { AccountToDtoMapper } from "./mapper/account.to.dto.mapper"
+import { AddBankAccountDto } from "src/feature/account/dto/request/add.bank.account.dto"
+import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts"
+import { BankRepository } from "../bank/bank.repository"
+import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper"
+import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto"
+import { AddressDto } from "src/feature/core/dto/address.dto"
+import { ACCOUNT_STATUS, ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultCommunityAdminPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants"
+import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto"
+import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings"
+import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto"
+import { AuthHelper, EasGcmData } from "src/core/helpers/auth.helper"
+import { Types } from "mongoose"
+import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto"
+import { CommunityRepository } from "../community/community.repository"
+import { PaginatedResult } from "src/core/helpers/paginator"
+import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto"
+import { UpdateInfoDto } from "./dto/request/update.info.dto"
+import { PaginationRequestDto } from "../core/dto/pagination.request.dto"
+import { E2eeRepository } from "../e2ee/e2ee.repository"
+import { MessageRepository } from "../message/message.repository"
+import { CounterRepository } from "../core/counter/counter.repository"
+import { CreateCommunityDto } from "./dto/request/create.community.dto"
+import { CommunityResponseDto } from "./dto/response/community.response.dto"
+import { COUNTER_TYPE } from "../core/counter/constants"
+import { MAX_MEMBER_CODE_LENGTH } from "../community/community.constants"
+import { CommunityToDtoMapper } from "../community/mapper/community.to.dto.mapper"
+import { CreateRoleDto } from "./dto/request/create.role.dto"
+import { ManagedAccount } from "./model/managed.account"
+import { Account } from "./model/account.model"
+import { AuthRepository } from "../auth/auth.repository"
+import { JwtService } from "@nestjs/jwt"
 
 @Injectable()
 export class AccountService {
@@ -48,6 +49,8 @@ export class AccountService {
     private readonly communityRepository: CommunityRepository,
     private readonly messageRepository: MessageRepository,
     private readonly bankRepository: BankRepository,
+    private readonly jwtService: JwtService,
+    private readonly authRepository: AuthRepository,
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
 
@@ -123,7 +126,7 @@ export class AccountService {
    * @param account 
    * @param community 
    */
-  async updatePermissionAuthorisation(account: Account, community: string, platform: string): Promise<void> {
+  async updatePermissionAuthorisation(account: Account, platform: string): Promise<void> {
     const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
     const primaryMemberCommunity = await this.communityRepository.getAccountPrimaryCommunity((account as any)._id.toString())
 
@@ -144,12 +147,9 @@ export class AccountService {
       platform: platform
     }
 
-    // const token = this.jwtService.sign(payload)
-
-    // const platformKey = `${(account as any)._id.toString()}-${platform}`
-
-    // const authorization = this.authHelper.encrypt(platformKey)
-    // this.authRepository.saveAuthToken(platformKey, token)
+    const token = this.jwtService.sign(payload)
+    const platformKey = `${(account as any)._id.toString()}-${platform}`
+    this.authRepository.saveAuthToken(platformKey, token)
   }
 
   /**
@@ -157,7 +157,7 @@ export class AccountService {
    * @param user 
    * @param data 
    */
-  async createCommunity(user: string, data: CreateCommunityDto): Promise<CommunityResponseDto> {
+  async createCommunity(user: string, data: CreateCommunityDto, platform: string): Promise<CommunityResponseDto> {
     const counter = await this.counterRepository.getCounter(COUNTER_TYPE.COMMUNITY)
     data.code = `TG${counter}-${this.authHelper.random(3)}`.toUpperCase()
 
@@ -209,6 +209,9 @@ export class AccountService {
         description: 'General community group chat',
         isReadOnly: false
       })
+
+      // update user permissions
+      await this.updatePermissionAuthorisation(account, platform)
 
       return this.communityMapper.map(community)
     }

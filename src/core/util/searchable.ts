@@ -8,5 +8,5 @@ export function searchable(input: string, minLength = 2): string {
       if (sub.length >= minLength && !sub.includes(' ')) substrings.push(sub)
     }
   }
-  return substrings.join(' ');
+  return substrings.join(' ').toLowerCase();
 }

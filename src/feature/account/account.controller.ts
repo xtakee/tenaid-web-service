@@ -337,8 +337,8 @@ export class AccountController {
   @Post('community')
   @ApiOperation({ summary: 'Create a new community' })
   @BasicAuth()
-  async createCommunity(@User() user: string, @Body() body: CreateCommunityDto): Promise<CommunityResponseDto> {
-    return await this.accountService.createCommunity(user, body)
+  async createCommunity(@User() user: string, @Body() body: CreateCommunityDto, @Platform() platorm: string): Promise<CommunityResponseDto> {
+    return await this.accountService.createCommunity(user, body, platorm)
   }
 
   /**
