@@ -91,7 +91,7 @@ export class AuthService {
       }
     }
 
-    const primaryAccountId = (primaryManagedCommunity as any)._id?.toString()
+    const primaryAccountId = primaryManagedCommunity ? (primaryManagedCommunity as any)?._id?.toString() : null
     const permissions = primaryManagedCommunity ?
       await this.getUserManageAccountPermissions(primaryAccountId, (account as any)._id)
       : []
@@ -106,8 +106,6 @@ export class AuthService {
       email: account.email.value,
       platform: platform
     }
-
-    console.log(payload)
 
     const token = this.jwtService.sign(payload)
 

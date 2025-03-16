@@ -20,7 +20,7 @@ export class CommunityAccessPoint {
   password?: string
 
   @Prop()
-  code?: string
+  code: string
 
   @Prop({ index: true })
   name: string

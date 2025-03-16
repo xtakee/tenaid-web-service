@@ -262,6 +262,26 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param code 
+   */
+  async getCommunityAccessPointByCode(code: string): Promise<CommunityAccessPoint> {
+    return await this.communityAccessPointModel.findOne({
+      code: code.trim().toUpperCase(),
+    }).populate([
+      {
+        path: 'community',
+        select: '_id name description code',
+        strictPopulate: false
+      }, {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value',
+        strictPopulate: false
+      }
+    ]).exec()
+  }
+
+  /**
+   * 
    * @param community 
    * @param guard 
    * @returns 

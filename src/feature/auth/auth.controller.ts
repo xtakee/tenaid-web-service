@@ -9,7 +9,7 @@ import { JwtAuthGuard } from './guards/jwt.guard/jwt.auth.guard';
 import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/account.admin.auth.response';
 import { isMongoId } from 'class-validator';
 import { BasicAuth } from './guards/auth.decorator';
-import { AccountPointAuthRequestDto } from './dto/request/access.point.auth.request.dto';
+import { AccessPointAuthRequestDto } from './dto/request/access.point.auth.request.dto';
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
 import { AccountLogoutRequestDto } from './dto/request/account.logout.request.dto';
 import { PublicKey } from 'src/core/decorators/public.key';
@@ -53,7 +53,7 @@ export class AuthController {
    */
   @Post('community/:community/login')
   @ApiOperation({ summary: 'Login community access point' })
-  async loginCommunityAccessPoint(@Body() data: AccountPointAuthRequestDto, @Param('community') community: string): Promise<AccessPointAuthResponseDto> {
+  async loginCommunityAccessPoint(@Body() data: AccessPointAuthRequestDto, @Param('community') community: string): Promise<AccessPointAuthResponseDto> {
     return await this.authService.signInCommunityAccessPoint(community, data.access, data.password)
   }
 

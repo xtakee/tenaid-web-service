@@ -40,6 +40,7 @@ import { CommunitySummary, CommunitySummarySchema } from './model/community.summ
 import { StreetSummary, StreetSummarySchema } from './model/street.summary'
 import { CommunityContact, CommunityContactSchema } from './model/community.contact'
 import { CommunityGuard, CommunityGuardSchema } from './model/community.guard'
+import { CounterRepository } from '../core/counter/counter.repository'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -50,6 +51,7 @@ const queue = BullModule.registerQueue({
     CommunityService,
     CommunityRepository,
     CommunityToDtoMapper,
+    CounterRepository,
     CodeGenerator,
     AuthHelper,
     Paginator,

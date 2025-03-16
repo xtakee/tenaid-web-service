@@ -124,7 +124,7 @@ export class AccountService {
    */
   async createCommunity(user: string, data: CreateCommunityDto): Promise<CommunityResponseDto> {
     const counter = await this.counterRepository.getCounter(COUNTER_TYPE.COMMUNITY)
-    data.code = counter.toString()
+    data.code = `TG${counter}-${this.authHelper.random(3)}`.toUpperCase()
 
     const account = await this.accountRepository.getOneById(user)
     const existing = await this.communityRepository.getAccountPrimaryManagedCommunity(user)

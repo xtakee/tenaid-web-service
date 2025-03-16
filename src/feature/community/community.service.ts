@@ -53,6 +53,9 @@ import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper
 import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto';
 import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto';
 import { JoinBuildingDto } from './dto/request/join.building.dto';
+import { CounterRepository } from '../core/counter/counter.repository';
+import { COUNTER_TYPE } from '../core/counter/constants';
+import { CommunityAccessPoint } from './model/community.access.point';
 
 @Injectable()
 export class CommunityService {
@@ -67,6 +70,7 @@ export class CommunityService {
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
+    private readonly counterRepository: CounterRepository,
     private readonly authHelper: AuthHelper,
     @InjectQueue('community_worker_queue') private readonly communityQueue: Queue,
     private readonly communityAccountMapper: AccountCommunityToDtoMapper
@@ -207,10 +211,8 @@ export class CommunityService {
    * @param data 
    */
   async createCommunityAccessPoint(user: string, community: string, data: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
-    const _community = await this.communityRepository.getCommunity(community)
-    if (!_community) throw new NotFoundException()
-
-    const code = `#TG${_community.code}-${this.authHelper.random(5)}`
+    const counter = await this.counterRepository.getCounter(COUNTER_TYPE.ACCESS_POINT)
+    const code = `#TG${counter}-${this.authHelper.random(3)}`
 
     const result = await this.communityRepository.createCommunityAccessPoint(user, community, data, code)
     return this.accessPointMapper.map(result)
@@ -235,13 +237,23 @@ export class CommunityService {
     const exist = await this.communityRepository.getCommunityGuardByEmail(community, body.email)
     if (exist) throw new ForbiddenException(DUPLICATE_RECORD_ERROR)
 
-    const _community = await this.communityRepository.getCommunity(community)
-    if (!_community) throw new NotFoundException()
+    const counter = await this.counterRepository.getCounter(COUNTER_TYPE.ACCESS_POINT)
+    body.code = `#TG${counter}-${this.authHelper.random(3)}`.toString()
 
-    body.code = `TG${_community.code}-${this.authHelper.random(4)}`.toUpperCase()
-    body.password = `#pW_${this.authHelper.random(5)}`
+    body.password = this.authHelper.random(6)
 
     return await this.communityRepository.createCommunityGuard(user, community, body)
+  }
+
+  /**
+   * 
+   * @param code 
+   */
+  async getCommunityAccessPointByCode(code: string): Promise<CommunityAccessPoint> {
+    const accessPoint = await this.communityRepository.getCommunityAccessPointByCode(code)
+    if (accessPoint) return accessPoint
+
+    throw new NotFoundException()
   }
 
   /**
