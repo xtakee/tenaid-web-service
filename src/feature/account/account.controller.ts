@@ -147,8 +147,7 @@ export class AccountController {
    */
   @Patch('address')
   @ApiOperation({ summary: 'Update Address' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async updateAddess(@Body() body: AddressDto, @User() id: string): Promise<AccountResponseDto> {
     return await this.accountService.updateAddress(body, id)
   }
@@ -161,8 +160,7 @@ export class AccountController {
    */
   @Patch('profile')
   @ApiOperation({ summary: 'Update dob, phone, photo and proof-of-ID' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async updateProfile(@Body() body: AccountProfileDto, @User() id: string): Promise<AccountResponseDto> {
     return await this.accountService.updateProfile(id, body)
   }
@@ -182,8 +180,7 @@ export class AccountController {
    */
   @Get('managed')
   @ApiOperation({ summary: 'Get Managed Accounts' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async getManagedAccounts(@User() id: string): Promise<Role[]> {
     return await this.accountService.getManagedAccounts(id)
   }
@@ -195,8 +192,7 @@ export class AccountController {
    */
   @Get('bank')
   @ApiOperation({ summary: 'Get all account\'s Bank Accounts' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async getBankAccounts(@User() user: string): Promise<BankAccountResponseDto[]> {
     return await this.accountService.getBankAccounts(user)
   }
@@ -221,8 +217,7 @@ export class AccountController {
    */
   @Get('bank/:id')
   @ApiOperation({ summary: 'Get an account\'s Bank Account' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, SYSTEM_FEATURES.PERSONA))
+  @BasicAuth()
   async getBankAccount(@Param('id') bank: string, @User() user: string): Promise<BankAccountResponseDto> {
     if (!isMongoId(bank)) throw new BadRequestException()
     return await this.accountService.getBankAccount(user, bank)
