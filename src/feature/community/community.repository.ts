@@ -2379,3 +2379,8 @@ export class CommunityRepository {
   }
 
 }
+
+/*
+NEXT_PUBLIC_BASE_URL=https://www.bv-tenaid.ieapis.com/v1
+NEXT_PUBLIC_BUGSNAG_API_KEY=a5c17bbdb73f9c445c1617d0f8ed3d22
+*/

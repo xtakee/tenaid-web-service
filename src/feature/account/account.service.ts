@@ -453,9 +453,10 @@ export class AccountService {
       signature = this.authHelper.encrypt((new Types.ObjectId()).toString())
     }
 
-    return {
-      signature
-    }
+    return process.env.NODE_ENV === 'development' ? {
+      signature,
+      otp
+    } : { signature }
   }
 
   /**
