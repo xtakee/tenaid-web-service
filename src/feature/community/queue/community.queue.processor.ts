@@ -3,6 +3,8 @@ import { Injectable } from "@nestjs/common"
 import { Job } from "bullmq"
 import { CommunityRepository } from "../community.repository"
 
+export const BUILDING_MEMBERS_SUMMARY = 'update-building-member-summary'
+
 export const STREET_MEMBERS_SUMMARY = 'update-street-member-summary'
 export const STREET_BUILDINGS_SUMMARY = 'update-street-building-summary'
 
@@ -27,6 +29,16 @@ export class CommunityQueueProcessor extends WorkerHost {
           const members = await this.communityRepository.getCommunityStreetMembersCount(community, street)
 
           await this.communityRepository.updateCommunityStreetMembersSummary(community, street, members)
+
+          return
+        }
+
+        case BUILDING_MEMBERS_SUMMARY: {
+          // update community summary
+          const { community, building } = job.data
+          const members = await this.communityRepository.getCommunityBuildingMembersCount(community, building)
+
+          await this.communityRepository.updateCommunityBuildingMembersSummary(community, building, members)
 
           return
         }

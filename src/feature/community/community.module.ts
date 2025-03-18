@@ -41,6 +41,7 @@ import { StreetSummary, StreetSummarySchema } from './model/street.summary'
 import { CommunityContact, CommunityContactSchema } from './model/community.contact'
 import { CommunityGuard, CommunityGuardSchema } from './model/community.guard'
 import { CounterRepository } from '../core/counter/counter.repository'
+import { BuildingSummary, BuildingSummarySchema } from './model/building.summary'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -136,6 +137,7 @@ const queue = BullModule.registerQueue({
     }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
     MongooseModule.forFeature([{ name: CommunitySummary.name, schema: CommunitySummarySchema }]),
+    MongooseModule.forFeature([{ name: BuildingSummary.name, schema: BuildingSummarySchema }]),
     MongooseModule.forFeature([{ name: StreetSummary.name, schema: StreetSummarySchema }]),
     MongooseModule.forFeature([{ name: MessageCategory.name, schema: MessageCategorySchema }]),
     MongooseModule.forFeatureAsync([{

@@ -312,6 +312,24 @@ export class CommunityController {
 
   /**
    * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  @Get('/:building/summary')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
+  @ApiOperation({ summary: 'Get community building summary' })
+  async getCommunityBuildingSummary(
+    @ManagedCommunity() community: string,
+    @Param('building') building: string): Promise<any> {
+    if (!isMongoId(building)) throw new BadRequestException()
+
+    return await this.communityService.getCommunityBuildingSummary(community, building)
+  }
+
+  /**
+   * 
    * @param user 
    * @param body 
    * @returns 

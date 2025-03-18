@@ -41,6 +41,7 @@ import { CommunityGuard } from "./model/community.guard"
 import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dto"
 import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
 import { JoinBuildingDto } from "./dto/request/join.building.dto"
+import { BuildingSummary } from "./model/building.summary"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -165,6 +166,7 @@ export class CommunityRepository {
     @InjectModel(CommunitySummary.name) private readonly communitySummayModel: Model<CommunitySummary>,
     @InjectModel(CommunityGuard.name) private readonly communityGuardModel: Model<CommunityGuard>,
     @InjectModel(StreetSummary.name) private readonly streetSummaryModel: Model<StreetSummary>,
+    @InjectModel(BuildingSummary.name) private readonly buildingSummaryModel: Model<BuildingSummary>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityContact.name) private readonly communityContactModel: Model<CommunityContact>,
@@ -334,6 +336,19 @@ export class CommunityRepository {
     return await this.streetSummaryModel.findOne({
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(street)
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  async getCommunityBuildingSummary(community: string, building: string): Promise<StreetSummary> {
+    return await this.buildingSummaryModel.findOne({
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building)
     })
   }
 
@@ -1383,6 +1398,25 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param building 
+   * @param members 
+   */
+  async updateCommunityBuildingMembersSummary(community: string, building: string, members: number): Promise<void> {
+    await this.buildingSummaryModel.findOneAndUpdate({
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(building)
+    }, {
+      $set: {
+        members: members,
+        community: new Types.ObjectId(community),
+        building: new Types.ObjectId(building)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
    * @param street 
    * @param buildings 
    */
@@ -1419,6 +1453,18 @@ export class CommunityRepository {
     })
   }
 
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  async getCommunityBuildingMembersCount(community: string, building: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building)
+    })
+  }
 
   /**
   * 
@@ -2379,8 +2425,3 @@ export class CommunityRepository {
   }
 
 }
-
-/*
-NEXT_PUBLIC_BASE_URL=https://www.bv-tenaid.ieapis.com/v1
-NEXT_PUBLIC_BUGSNAG_API_KEY=a5c17bbdb73f9c445c1617d0f8ed3d22
-*/

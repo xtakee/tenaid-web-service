@@ -46,7 +46,7 @@ import { CommunityMember } from './model/community.member';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREETS_SUMMARY, STREET_BUILDINGS_SUMMARY, STREET_MEMBERS_SUMMARY } from './queue/community.queue.processor';
+import { BUILDING_MEMBERS_SUMMARY, COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREETS_SUMMARY, STREET_BUILDINGS_SUMMARY, STREET_MEMBERS_SUMMARY } from './queue/community.queue.processor';
 import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
 import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
 import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper';
@@ -92,6 +92,16 @@ export class CommunityService {
    */
   private async updateCommuntityStreetSummary(community: string, street: string, action: string): Promise<void> {
     await this.communityQueue.add(action, { community, street })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param action 
+   */
+  private async updateCommuntityBuildingSummary(community: string, building: string, action: string): Promise<void> {
+    await this.communityQueue.add(action, { community, building })
   }
 
   /**
@@ -498,6 +508,25 @@ export class CommunityService {
 
     return {
       buildings: 0,
+      members: 0,
+      visitors: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  async getCommunityBuildingSummary(community: string, building: string): Promise<any> {
+    const data = await this.communityRepository.getCommunityBuildingSummary(community, building)
+
+    if (data) return data
+
+    return {
       members: 0,
       visitors: 0,
       createdAt: new Date(),
@@ -1049,6 +1078,7 @@ export class CommunityService {
         await this.updateCommuntitySummary(id, COMMUNITY_MEMBERS_SUMMARY)
 
         await this.updateCommuntityStreetSummary(id, request.street._id.toString(), STREET_MEMBERS_SUMMARY)
+        await this.updateCommuntityBuildingSummary(id, request.building._id.toString(), BUILDING_MEMBERS_SUMMARY)
       }
       else await this.accountRepository.setJoinFlagStatus(request.account, true)
     }
