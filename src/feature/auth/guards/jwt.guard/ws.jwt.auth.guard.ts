@@ -1,11 +1,11 @@
 
-import { Injectable } from '@nestjs/common';
-import { AuthRepository } from '../../auth.repository';
-import { AuthHelper } from 'src/core/helpers/auth.helper';
-import { JwtService } from '@nestjs/jwt';
-import { JwtConstants } from '../../jwt.constants';
+import { Injectable } from '@nestjs/common'
+import { AuthRepository } from '../../auth.repository'
+import { AuthHelper } from 'src/core/helpers/auth.helper'
+import { JwtService } from '@nestjs/jwt'
+import { JwtConstants } from '../../jwt.constants'
 
-import { Socket } from 'socket.io';
+import { Socket } from 'socket.io'
 
 @Injectable()
 export class WsJwtAuthGuard {
@@ -38,7 +38,7 @@ export class WsJwtAuthGuard {
   }
 
   private extractTokenFromHeader(client: any): string | undefined {
-    const [type, token] = client.handshake.auth.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const [type, token] = client.handshake.auth.authorization?.split(' ') ?? []
+    return type === 'Bearer' ? token : undefined
   }
 }

@@ -64,7 +64,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   private async updateClientDisConnection(client: Socket): Promise<void> {
     // client authentication
     const account: string = client.data.user.sub
-    const platfom: string = client.handshake.headers.platform as string
+    const platfom: string = client.data.user.platform
     // 
     const json = await this.redisCache.get(`${account}-${EVENT_NAME_TYPING}`)
     const data: MessageTypingDto = JSON.parse(json)
@@ -81,7 +81,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
       const account: string = client.data.user.sub
-      const platform: string = client.handshake.headers.platform as string
+      const platform: string = client.data.user.platform
 
       const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
@@ -150,7 +150,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
       const account: string = client.data.user.sub
-      const platform: string = client.handshake.headers.platform as string
+      const platform: string = client.data.user.platform
 
       await this.messageRepository.acknowledgeMessage(account, message, platform)
     }
@@ -168,7 +168,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
-      const platform: string = client.handshake.headers.platform as string
+      const platform: string = client.data.user.platform
 
       const ackMessage = await this.messageRepository.acknowledgeMessageSeen(account, message, platform)
 
@@ -212,7 +212,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
-      const platform: string = client.handshake.headers.platform as string
+      const platform: string = client.data.user.platform
 
       const ackMessage = await this.messageRepository.acknowledgeMessageSeen(account, message, platform)
 
@@ -247,7 +247,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const community = message.community
       const account: string = client.data.user.sub
-      const platform: string = client.handshake.headers.platform as string
+      const platform: string = client.data.user.platform
 
       const ackMessage = await this.messageRepository.acknowledgeMessage(account, message, platform)
 
@@ -399,7 +399,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const authenticated = await this.authGuard.validate(client)
     if (authenticated) {
       const room = message.room
-      const platform: string = client.handshake.headers.platform as string
+      const platform: string = client.data.user.platform
       const account: string = client.data.user.sub
 
       // get total expected audience
