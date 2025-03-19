@@ -24,6 +24,9 @@ export class CommunityMember {
   apartment?: string
 
   @Prop()
+  memberId?: string
+
+  @Prop()
   comment?: string
 
   @Prop({ default: 0 })

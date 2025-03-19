@@ -1046,19 +1046,21 @@ export class CommunityService {
     let pushTitle = data.status === ACCOUNT_STATUS.APPROVED ? REQUEST_APPROVED : REQUEST_DENIED
     let pushBody = ''
     let code = '-1'
+    let memberId = '-1'
 
     const community = await this.communityRepository.getNextMemberCode(id)
     if (!community) throw new NotFoundException()
 
     if (data.status === ACCOUNT_STATUS.APPROVED) {
       code = community.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')
+      memberId = `TG${code}-${this.authHelper.random(3)}`.toUpperCase()
       pushBody = `${REQUEST_APPROVED_BODY} ${community.name}`
     } else {
       pushBody = `Whoops! ${community.name} has denied your join request. Kindly ensure your details are correct`
     }
 
     request = await this.communityRepository.
-      setJoinRequestStatus(data.request, data.status, id, code)
+      setJoinRequestStatus(data.request, data.status, id, code, memberId)
 
     if (request) {
       const deviceToken = await this.accountRepository.getDevicePushToken(request.account)

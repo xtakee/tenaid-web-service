@@ -105,7 +105,7 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
   }
 }
 
-const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code street extra createdAt updatedAt isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
+const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code memberId street extra createdAt updatedAt isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
 const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description kycAcknowledged code members type images logo status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
@@ -119,7 +119,7 @@ const MEMBER_COMMUNITIES_QUERY = [{
   select: '_id name code members description kycAcknowledged images type logo address createdAt updatedAt encryption'
 }, {
   path: 'linkedTo',
-  select: '_id extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
+  select: '_id memberId code extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
   strictPopulate: false
 }]
 
@@ -151,7 +151,7 @@ const COMMUNITY_MEMBER_QUERY = [
     strictPopulate: false
   }, {
     path: 'linkedTo',
-    select: '_id extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
+    select: '_id memberId code extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
     strictPopulate: false
   }
 ]
@@ -540,6 +540,7 @@ export class CommunityRepository {
       code: data.code,
       isAdmin: data.isAdmin,
       apartment: data.apartment,
+      memberId: data.memberId,
       street: data.street ? new Types.ObjectId(data.street) : null,
       status: data.status,
       building: data.building ? new Types.ObjectId(data.building) : null,
@@ -1731,14 +1732,13 @@ export class CommunityRepository {
           { status: ACCOUNT_STATUS.PENDING },
           { status: ACCOUNT_STATUS.ACCEPTED },
         ]
-      },
-      {
-        select: COMMUNITY_MEMBER_PRIMARY_QUERY,
-        limit: paginate.limit,
-        page: paginate.page,
-        sort: paginate.sort,
-        populate: MEMBER_COMMUNITIES_QUERY
-      })
+      }, {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: MEMBER_COMMUNITIES_QUERY
+    })
   }
 
   /**
@@ -1914,9 +1914,8 @@ export class CommunityRepository {
    * @param code 
    * @returns 
    */
-  async setJoinRequestStatus(member: string, status: string, community: string, code: string): Promise<any> {
+  async setJoinRequestStatus(member: string, status: string, community: string, code: string, memberId): Promise<any> {
     let primary = false
-    console.log(community)
 
     if (status === ACCOUNT_STATUS.APPROVED) {
       const memberData = await this.communityMemberModel.findById(member)
@@ -1931,7 +1930,7 @@ export class CommunityRepository {
 
     return await this.communityMemberModel.findOneAndUpdate(
       { _id: new Types.ObjectId(member), community: new Types.ObjectId(community) },
-      { status: status, code: code, comment: status, isPrimary: primary },
+      { status: status, code: code, comment: status, isPrimary: primary, memberId: memberId },
       { returnDocument: 'after' })
       .populate(COMMUNITY_MEMBER_QUERY).exec()
   }

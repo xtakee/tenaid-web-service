@@ -186,8 +186,10 @@ export class AccountService {
         isAdmin: true
       }
 
+      const code = '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0')
       const member = {
-        code: '0'.padStart(MAX_MEMBER_CODE_LENGTH, '0'),
+        code,
+        memberId: `TG${code}-${this.authHelper.random(3)}`.toUpperCase(),
         isAdmin: true,
         status: ACCOUNT_STATUS.PENDING
       }

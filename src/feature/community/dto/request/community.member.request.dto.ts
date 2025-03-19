@@ -7,6 +7,7 @@ export class CommunityMemberRequestDto {
   isAdmin?: boolean
   status?: string
   code?: string
+  memberId?: string
 
   @ApiProperty()
   @IsNotEmpty()
