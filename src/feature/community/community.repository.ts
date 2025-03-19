@@ -1914,7 +1914,7 @@ export class CommunityRepository {
    * @param code 
    * @returns 
    */
-  async setJoinRequestStatus(member: string, status: string, community: string, code: string, memberId): Promise<any> {
+  async setJoinRequestStatus(member: string, status: string, community: string, code: string, memberId?: string): Promise<any> {
     let primary = false
 
     if (status === ACCOUNT_STATUS.APPROVED) {
