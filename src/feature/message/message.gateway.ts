@@ -57,7 +57,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     // client authentication
     const { account, rooms, token, platform } = node
 
-    this.messageRepository.updateMessageNodesConnection(rooms, account, token, platform)
+    await this.messageRepository.updateMessageNodesConnection(rooms, account, token, platform)
   }
 
   // process disconnected
@@ -105,11 +105,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       // check for stale/offline events
       for (const cache of cachedMessages) {
         //send to only connected client
-        if (cache.message !== null) {
+        if (cache.message !== null)
           this.server.to(account).emit(cache.type, cache.message)
-        }
-      }
 
+      }
 
     } else client.disconnect()
   }
