@@ -497,7 +497,7 @@ export class CommunityController {
    * @param invite 
    * @returns 
    */
-  @Get(':community/invite/:invite')
+  @Get('/invite/:invite')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ACCESS_CONTROL))
   @ApiOperation({ summary: 'Get a community invite/visitor' })
