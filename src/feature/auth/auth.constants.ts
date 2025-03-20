@@ -72,6 +72,7 @@ export enum COMMUNITY_SYSTEM_FEATURES {
   BUILDING = 'feature_building',
   GUARD = 'feature_guard',
   SETTING = 'feature_setting',
+  ANNOUNCEMENT = 'feature_announcement',
   STREET = 'feature_street'
 }
 
@@ -116,7 +117,8 @@ export const defaultCommunityAdminPermissions: Permission[] = [
   { authorization: COMMUNITY_SYSTEM_FEATURES.BILLABLE, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: COMMUNITY_SYSTEM_FEATURES.BILLING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: COMMUNITY_SYSTEM_FEATURES.SETTING, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
-  { authorization: COMMUNITY_SYSTEM_FEATURES.USER_ADMIN, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
+  { authorization: COMMUNITY_SYSTEM_FEATURES.USER_ADMIN, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.ANNOUNCEMENT, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
 ]
 
 export const defaultAgentPermissions: Permission[] = [

@@ -42,6 +42,7 @@ import { CommunityContact, CommunityContactSchema } from './model/community.cont
 import { CommunityGuard, CommunityGuardSchema } from './model/community.guard'
 import { CounterRepository } from '../core/counter/counter.repository'
 import { BuildingSummary, BuildingSummarySchema } from './model/building.summary'
+import { CommunityAnnouncement, CommunityAnnouncementSchema } from './model/community.announcement'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -129,6 +130,24 @@ const queue = BullModule.registerQueue({
         schema.pre('findOneAndUpdate', async function (next) {
           if ((this.getUpdate() as any).fullName) {
             (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).fullName)
+          }
+          next()
+        })
+        return schema
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityAnnouncement.name, useFactory: async () => {
+        const schema = CommunityAnnouncementSchema
+        schema.pre('save', async function () {
+          if (this.isNew) {
+            this.searchable = searchable(this.title)
+          }
+        })
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).title) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).title)
           }
           next()
         })

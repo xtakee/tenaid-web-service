@@ -22,9 +22,9 @@ export class BillingRepository {
    * @param data 
    * @returns 
    */
-  async createBillable(user: string, data: CreateBillableDto): Promise<Billable> {
+  async createBillable(community: string, user: string, data: CreateBillableDto): Promise<Billable> {
     const billable: Billable = {
-      community: new Types.ObjectId(data.community),
+      community: new Types.ObjectId(community),
       account: new Types.ObjectId(user),
       name: data.name,
       description: data.description,

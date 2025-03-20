@@ -42,6 +42,8 @@ import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dt
 import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
 import { JoinBuildingDto } from "./dto/request/join.building.dto"
 import { BuildingSummary } from "./model/building.summary"
+import { CreateAnnouncementDto } from "./dto/request/create.announcement.dto"
+import { CommunityAnnouncement, CommunityAnnouncementSchema } from "./model/community.announcement"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -176,7 +178,8 @@ export class CommunityRepository {
     @InjectModel(CommunityRegistration.name) private readonly communityRegistrationModel: Model<CommunityRegistration>,
     @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
     @InjectModel(CommunityStreet.name) private readonly communityStreetModel: Model<CommunityStreet>,
-    @InjectModel(MessageCategory.name) private readonly messageCategoryModel: Model<MessageCategory>
+    @InjectModel(MessageCategory.name) private readonly messageCategoryModel: Model<MessageCategory>,
+    @InjectModel(CommunityAnnouncement.name) private readonly announcementModel: Model<CommunityAnnouncement>
   ) { }
 
   /**
@@ -2092,6 +2095,115 @@ export class CommunityRepository {
     return await this.paginator.paginate(this.communityCheckInsModel,
       { community: new Types.ObjectId(community) },
       getVisitorsCheckinsQuery(page, limit))
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityAnnouncement(user: string, community: string, body: CreateAnnouncementDto): Promise<CommunityAnnouncement> {
+    let announcement: CommunityAnnouncement = {
+      community: new Types.ObjectId(community),
+      title: body.title,
+      body: body.body,
+      isActive: body.isActive,
+      images: body.images,
+      isRecurring: body.isRecurring,
+      startDate: new Date(body.startDate),
+      endDate: new Date(body.endDate),
+      frequency: body.frequency,
+      createdBy: new Types.ObjectId(user)
+    }
+
+    announcement = await this.announcementModel.create(announcement)
+    return await this.getCommunityAnnouncement(community, (announcement as any)._id.toString())
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param announcement 
+   * @returns 
+   */
+  async getCommunityAnnouncement(community: string, announcement: string): Promise<CommunityAnnouncement> {
+    return await this.announcementModel.findOne({
+      _id: new Types.ObjectId(announcement),
+      community: new Types.ObjectId(community)
+    }, '_id community createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt').populate([
+      {
+        path: 'community',
+        select: '_id name code',
+        strictPopulate: false
+      }, {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value',
+        strictPopulate: false
+      }
+    ])
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getCommunityActiveAnnouncements(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityAnnouncement>> {
+    const date = Date.now()
+
+    const query: any = {
+      community: new Types.ObjectId(community),
+      startDate: { $lte: date },
+      endDate: { $gte: date }
+    }
+
+    return await this.paginator.paginate(this.announcementModel, buildSearchQuery(query, paginate.search), {
+      select: '_id community createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt',
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: [
+        {
+          path: 'community',
+          select: '_id name code',
+          strictPopulate: false
+        }, {
+          path: 'createdBy',
+          select: '_id firstName lastName email.value',
+          strictPopulate: false
+        }
+      ]
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getCommunityAnnouncements(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityAnnouncement>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
+    return await this.paginator.paginate(this.announcementModel, buildSearchQuery(query, paginate.search), {
+      select: '_id community createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt',
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: [
+        {
+          path: 'community',
+          select: '_id name code',
+          strictPopulate: false
+        }, {
+          path: 'createdBy',
+          select: '_id firstName lastName email.value',
+          strictPopulate: false
+        }
+      ]
+    })
   }
 
   /**

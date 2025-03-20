@@ -42,6 +42,7 @@ import { PrimaryCommunity } from 'src/core/decorators/primary.community';
 import { MongoAbility } from '@casl/ability';
 import { CLAIM, COMMUNITY_SYSTEM_FEATURES } from '../auth/auth.constants';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
+import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
 
 @Controller({
   version: '1',
@@ -339,6 +340,64 @@ export class CommunityController {
   @ApiOperation({ summary: 'Revoke Invite Code' })
   async revokeInvite(@User() user: string, @Body() body: CommunityInviteRevokeDto): Promise<void> {
     return await this.communityService.revokeInvite(user, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/announcement')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.ANNOUNCEMENT))
+  @ApiOperation({ summary: 'Create community announcement' })
+  async createCommunityAnnouncement(@User() user: string, @ManagedCommunity() community: string, @Body() body: CreateAnnouncementDto): Promise<any> {
+    return await this.communityService.createCommunityAnnouncement(user, community, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/announcement')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ANNOUNCEMENT))
+  @ApiOperation({ summary: 'Get all community announcements' })
+  async getCommunityAnnouncements(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<any> {
+    return await this.communityService.getCommunityAnnouncements(community, paginate)
+  }
+
+  /**
+ * 
+ * @param community 
+ * @param paginate 
+ * @returns 
+ */
+  @Get('/announcement/active')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ANNOUNCEMENT))
+  @ApiOperation({ summary: 'Get all active community announcements' })
+  async getCommunityActiveAnnouncements(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<any> {
+    return await this.communityService.getCommunityActiveAnnouncements(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param announcement 
+   * @returns 
+   */
+  @Get('/announcement/:announcement')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ANNOUNCEMENT))
+  @ApiOperation({ summary: 'Get a community announcement' })
+  async getCommunityAnnouncement(@ManagedCommunity() community: string, @Param('announcement') announcement: string): Promise<any> {
+    return await this.communityService.getCommunityAnnouncement(community, announcement)
   }
 
   /**

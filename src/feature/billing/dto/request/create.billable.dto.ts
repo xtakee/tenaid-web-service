@@ -1,16 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsDateString, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, ValidateIf } from "class-validator";
 import { BillClass } from "src/core/enums/bill.class";
-import { BillFrequency } from "src/core/enums/bill.frequency";
 import { BillType } from "src/core/enums/bill.type";
 import { BillableStatus } from "src/core/enums/billable.status";
+import { Frequency } from "src/core/enums/frequency";
 
 export class CreateBillableDto {
-  @ApiProperty()
-  @IsMongoId()
-  @IsNotEmpty()
-  community: string
-
   @ApiProperty()
   @IsNotEmpty()
   name: string
@@ -45,6 +40,6 @@ export class CreateBillableDto {
 
   @ApiProperty()
   @ValidateIf((params) => params.type === BillType.RECURRING)
-  @IsEnum(BillFrequency)
+  @IsEnum(Frequency)
   frequency?: string
 }

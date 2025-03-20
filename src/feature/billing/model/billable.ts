@@ -1,13 +1,13 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
-import { BillClass } from "src/core/enums/bill.class";
-import { BillFrequency } from "src/core/enums/bill.frequency";
-import { BillType } from "src/core/enums/bill.type";
-import { BillableStatus } from "src/core/enums/billable.status";
-import { Account } from "src/feature/account/model/account";
-import { Community } from "src/feature/community/model/community";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
+import { HydratedDocument, Types } from "mongoose"
+import { BillClass } from "src/core/enums/bill.class"
+import { BillType } from "src/core/enums/bill.type"
+import { BillableStatus } from "src/core/enums/billable.status"
+import { Frequency } from "src/core/enums/frequency"
+import { Account } from "src/feature/account/model/account"
+import { Community } from "src/feature/community/model/community"
 
-export type BillableDocument = HydratedDocument<Billable>;
+export type BillableDocument = HydratedDocument<Billable>
 
 @Schema({ timestamps: true })
 export class Billable {
@@ -39,7 +39,7 @@ export class Billable {
   @Prop({ enum: BillClass })
   billClass: string
 
-  @Prop({ enum: BillFrequency })
+  @Prop({ enum: Frequency })
   frequency?: string
 
   @Prop()

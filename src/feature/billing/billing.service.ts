@@ -20,8 +20,8 @@ export class BillingService {
    * @param user 
    * @param data 
    */
-  async createBillable(user: string, data: CreateBillableDto): Promise<BillableDto> {
-    const billable = await this.billingRepository.createBillable(user, data)
+  async createBillable(community: string, user: string, data: CreateBillableDto): Promise<BillableDto> {
+    const billable = await this.billingRepository.createBillable(community, user, data)
 
     if (billable) return this.billableMapper.map(billable)
 

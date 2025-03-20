@@ -56,6 +56,8 @@ import { JoinBuildingDto } from './dto/request/join.building.dto';
 import { CounterRepository } from '../core/counter/counter.repository';
 import { COUNTER_TYPE } from '../core/counter/constants';
 import { CommunityAccessPoint } from './model/community.access.point';
+import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
+import { CommunityAnnouncement } from './model/community.announcement';
 
 @Injectable()
 export class CommunityService {
@@ -294,6 +296,47 @@ export class CommunityService {
     const invite = await this.communityRepository.revokeInvite(user, data)
 
     if (!invite) throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   */
+  async createCommunityAnnouncement(user: string, community: string, body: CreateAnnouncementDto): Promise<CommunityAnnouncement> {
+    return await this.communityRepository.createCommunityAnnouncement(user, community, body)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param announcement 
+   */
+  async getCommunityAnnouncement(community: string, announcement: string): Promise<CommunityAnnouncement> {
+    const data = await this.communityRepository.getCommunityAnnouncement(community, announcement)
+    if (data) return data
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityActiveAnnouncements(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityAnnouncement>> {
+    return this.communityRepository.getCommunityActiveAnnouncements(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getCommunityAnnouncements(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityAnnouncement>> {
+    return await this.communityRepository.getCommunityAnnouncements(community, paginate)
   }
 
   /**

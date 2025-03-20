@@ -7,6 +7,7 @@ import { BillableDto } from './dto/response/billable.dto';
 import { BillingService } from './billing.service';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';
 import { PaginatedResult } from 'src/core/helpers/paginator';
+import { ManagedCommunity } from 'src/core/decorators/managed.community';
 
 @Controller({
   version: '1',
@@ -22,8 +23,8 @@ export class BillingController {
   @Post('/billable')
   @BasicAuth()
   @ApiOperation({ summary: 'Create a community billable' })
-  async createBillable(@User() user: string, @Body() body: CreateBillableDto): Promise<BillableDto> {
-    return await this.billingService.createBillable(user, body)
+  async createBillable(@User() user: string, @ManagedCommunity() community: string, @Body() body: CreateBillableDto): Promise<BillableDto> {
+    return await this.billingService.createBillable(community, user, body)
   }
 
   /**

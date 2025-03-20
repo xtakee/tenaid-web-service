@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { HydratedDocument, Types } from "mongoose"
+import { Frequency } from "src/core/enums/frequency";
 import { Account } from "src/feature/account/model/account"
 import { Community } from "src/feature/community/model/community"
 
@@ -19,17 +20,29 @@ export class CommunityAnnouncement {
   @Prop()
   body: string
 
+  @Prop({ enum: Frequency })
+  frequency?: string
+
+  @Prop({ default: false })
+  isRecurring: Boolean
+
   @Prop()
-  coverPhoto?: string
+  images?: string[]
 
   @Prop({ default: false })
   isActive: Boolean
 
   @Prop()
-  startAt: Date
+  startDate: Date
 
   @Prop()
-  endAt: Date
+  endDate?: Date
+
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
-export const CommunityAnnouncementSchema = SchemaFactory.createForClass(CommunityAnnouncement);
+const CommunityAnnouncementSchema = SchemaFactory.createForClass(CommunityAnnouncement);
+CommunityAnnouncementSchema.index({ searchable: 'text', code: 'text' })
+
+export { CommunityAnnouncementSchema }
