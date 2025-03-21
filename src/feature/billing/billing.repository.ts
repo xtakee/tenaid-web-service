@@ -5,7 +5,6 @@ import { Model, Types } from "mongoose"
 import { Billable } from "./model/billable"
 import { CreateBillableDto } from "./dto/request/create.billable.dto"
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator"
-import { query } from "express"
 import { PaginationRequestDto } from "../core/dto/pagination.request.dto"
 
 @Injectable()

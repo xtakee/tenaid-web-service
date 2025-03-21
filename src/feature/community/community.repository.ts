@@ -2131,7 +2131,7 @@ export class CommunityRepository {
     return await this.announcementModel.findOne({
       _id: new Types.ObjectId(announcement),
       community: new Types.ObjectId(community)
-    }, '_id community createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt').populate([
+    }, '_id community createdBy images title body frequency isActive isRecurring startDate endDate createdAt updatedAt').populate([
       {
         path: 'community',
         select: '_id name code',
@@ -2159,7 +2159,7 @@ export class CommunityRepository {
     }
 
     return await this.paginator.paginate(this.announcementModel, buildSearchQuery(query, paginate.search), {
-      select: '_id community createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt',
+      select: '_id community images createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
@@ -2188,7 +2188,7 @@ export class CommunityRepository {
     }
 
     return await this.paginator.paginate(this.announcementModel, buildSearchQuery(query, paginate.search), {
-      select: '_id community createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt',
+      select: '_id community images createdBy title body frequency isActive isRecurring startDate endDate createdAt updatedAt',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
