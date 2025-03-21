@@ -52,6 +52,34 @@ import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
 export class CommunityController {
   constructor(private readonly communityService: CommunityService) { }
 
+    /**
+   * 
+   * @param community 
+   * @returns 
+   */
+    @Get('/access-point')
+    @ApiOperation({ summary: 'Get all community access points' })
+    @Auth()
+    @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT))
+    async getCommunityAccessPoints(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+      return await this.communityService.getCommunityAccessPoints(community, paginate)
+    }
+
+      /**
+   * 
+   * @param user 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/access-point')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT))
+  @ApiOperation({ summary: 'Create a community access point' })
+  async createCommunityAccessPoint(@User() user: string, @ManagedCommunity() community: string, @Body() body: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
+    return await this.communityService.createCommunityAccessPoint(user, community, body)
+  }
+
   /**
    * 
    * @param user 
@@ -497,7 +525,7 @@ export class CommunityController {
    * @param invite 
    * @returns 
    */
-  @Get('/invite/:invite')
+  @Get(':community/invite/:invite')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ACCESS_CONTROL))
   @ApiOperation({ summary: 'Get a community invite/visitor' })
@@ -1042,21 +1070,6 @@ export class CommunityController {
    * 
    * @param user 
    * @param community 
-   * @param body 
-   * @returns 
-   */
-  @Post('/access-point')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT))
-  @ApiOperation({ summary: 'Create a community access point' })
-  async createCommunityAccessPoint(@User() user: string, @ManagedCommunity() community: string, @Body() body: CommunityAccessPointRequestDto): Promise<CommunityAccessPointResonseDto> {
-    return await this.communityService.createCommunityAccessPoint(user, community, body)
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
    * @returns 
    */
   @Get('/join-request-count')
@@ -1065,19 +1078,6 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community join request count' })
   async getCommunityJoinRequestsCount(@ManagedCommunity() community: string,): Promise<{}> {
     return await this.communityService.getCommunityJoinRequestsCount(community)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  @Get('/access-point')
-  @ApiOperation({ summary: 'Get all community access points' })
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT))
-  async getCommunityAccessPoints(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.communityService.getCommunityAccessPoints(community, paginate)
   }
 
   /**
