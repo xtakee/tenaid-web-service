@@ -13,6 +13,10 @@ export class CreateCommunityContactDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  description: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   phone: string
 
   @ApiProperty()

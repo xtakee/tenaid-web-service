@@ -667,6 +667,7 @@ export class CommunityRepository {
     let contact: CommunityContact = {
       createdBy: new Types.ObjectId(user),
       fullName: body.fullName,
+      description: body.description,
       community: new Types.ObjectId(community),
       email: { value: body.email.trim().toLowerCase() },
       country: body.country,
@@ -726,7 +727,7 @@ export class CommunityRepository {
 
     return await this.paginator.paginate(this.communityContactModel, buildSearchQuery(query, paginate.search),
       {
-        select: '_id fullName email updatedAt createdAt createdBy community isActive country tag phone',
+        select: '_id fullName email description updatedAt createdAt createdBy community isActive country tag phone',
         page: paginate.page,
         limit: paginate.limit,
         sort: paginate.sort,

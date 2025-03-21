@@ -18,6 +18,9 @@ export class CommunityContact {
   fullName?: string
 
   @Prop()
+  description?: string
+
+  @Prop()
   email: Email
 
   @Prop()
