@@ -65,6 +65,23 @@ export class CommunityController {
     return await this.communityService.getCommunityAccessPoints(community, paginate)
   }
 
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/guard')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.GUARD))
+  @ApiOperation({ summary: 'Get all community security guards' })
+  async getAllCommunityGuards(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityGuardResponseDto>> {
+    return await this.communityService.getAllCommunityGuards(community, paginate)
+  }
+
   /**
 * 
 * @param user 
@@ -822,7 +839,7 @@ export class CommunityController {
    * @param paginate 
    * @returns 
    */
-  @Get('search')
+  @Get('/search')
   @BasicAuth()
   @ApiOperation({ summary: 'Search a community' })
   async searchCommunity(@User() user: string, @Query('query') query: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
@@ -1162,22 +1179,6 @@ export class CommunityController {
   async getCommunityGuard(@ManagedCommunity() community: string, @Param('guard') guard: string): Promise<CommunityGuardResponseDto> {
     if (!isMongoId(guard)) throw new BadRequestException()
     return await this.communityService.getCommunityGuard(community, guard)
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param paginate 
-   * @returns 
-   */
-  @Get('/guard')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.GUARD))
-  @ApiOperation({ summary: 'Get all community security guards' })
-  async getAllCommunityGuards(
-    @ManagedCommunity() community: string,
-    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityGuardResponseDto>> {
-    return await this.communityService.getAllCommunityGuards(community, paginate)
   }
 
   /**
