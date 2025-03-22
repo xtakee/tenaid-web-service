@@ -2156,8 +2156,8 @@ export class CommunityRepository {
 
     const query: any = {
       community: new Types.ObjectId(community),
-      //startDate: { $lte: date },
-      //endDate: { $gte: date }
+      startDate: { $lte: date },
+      endDate: { $gte: date }
     }
 
     return await this.paginator.paginate(this.announcementModel, buildSearchQuery(query, paginate.search), {
