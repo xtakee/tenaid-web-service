@@ -99,6 +99,34 @@ export class AccountController {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  @Post('/:community/primary-community')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Set a primary account community' })
+  async setPrimaryAccountCommunity(@User() user: string, @Platform() platform: string, @Param('community') community: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.accountService.setPrimaryAccountCommunity(user, community, platform)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  @Post('/:community/managed/primary')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Set a primary managed community' })
+  async setPrimaryCommunity(@User() user: string, @Platform() platform: string, @Param('community') community: string): Promise<any> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.accountService.setPrimaryCommunity(user, community, platform)
+  }
+
+  /**
+   * 
    * @param body 
    * @returns AccountAuthResponseDto
    */

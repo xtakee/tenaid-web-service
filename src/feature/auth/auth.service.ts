@@ -95,7 +95,7 @@ export class AuthService {
     const platformKey = `${(account as any)._id.toString()}-${platform}`
 
     const authorization = this.authHelper.encrypt(platformKey)
-    this.authRepository.saveAuthToken(platformKey, token)
+    await this.authRepository.saveAuthToken(platformKey, token)
 
     const encKey = await this.e2eeService.generateKeys((account as any)._id.toString(), {
       platform: platform,
@@ -181,7 +181,7 @@ export class AuthService {
 
     const key = (account as any)._id.toString()
     const authorization = this.authHelper.encrypt(key)
-    this.authRepository.saveAuthToken(key, token)
+    await this.authRepository.saveAuthToken(key, token)
 
     return {
       account: dto,
@@ -218,7 +218,7 @@ export class AuthService {
 
         const key = (accessPoint as any)._id.toString()
         const authorization = this.authHelper.encrypt(key)
-        this.authRepository.saveAuthToken(key, token)
+        await this.authRepository.saveAuthToken(key, token)
 
         return {
           account: {
@@ -259,7 +259,7 @@ export class AuthService {
 
         const key = (account as any)._id.toString()
         const authorization = this.authHelper.encrypt(key)
-        this.authRepository.saveAuthToken(key, token)
+        await this.authRepository.saveAuthToken(key, token)
 
         return {
           account: dto,

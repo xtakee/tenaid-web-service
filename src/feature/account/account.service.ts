@@ -149,7 +149,8 @@ export class AccountService {
 
     const token = this.jwtService.sign(payload)
     const platformKey = `${(account as any)._id.toString()}-${platform}`
-    this.authRepository.saveAuthToken(platformKey, token)
+
+    await this.authRepository.saveAuthToken(platformKey, token)
   }
 
   /**
@@ -601,6 +602,44 @@ export class AccountService {
 
     return result
   }
+
+  /**
+ * 
+ * @param user 
+ * @param community 
+ * @returns 
+ */
+  async setPrimaryCommunity(user: string, community: string, platform: string): Promise<any> {
+    const response = await this.communityRepository.setPrimaryCommunity(user, community)
+    if (response) {
+      const account: Account = await this.accountRepository.getOneById(user)
+      if (!account) throw new ForbiddenException()
+
+      await this.updatePermissionAuthorisation(account, platform)
+      return response
+    }
+
+    throw new NotFoundException()
+  }
+
+  /**
+ * 
+ * @param user 
+ * @param community 
+ */
+  async setPrimaryAccountCommunity(user: string, community: string, platform: string): Promise<any> {
+    const response = await this.communityRepository.setPrimaryAccountCommunity(user, community)
+    if (response) {
+      const account: Account = await this.accountRepository.getOneById(user)
+      if (!account) throw new ForbiddenException()
+
+      await this.updatePermissionAuthorisation(account, platform)
+      return response
+    }
+
+    throw new NotFoundException()
+  }
+
 
   /**
    * 

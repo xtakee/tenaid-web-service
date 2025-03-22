@@ -1032,31 +1032,6 @@ export class CommunityService {
 
   /**
    * 
-   * @param user 
-   * @param community 
-   */
-  async setPrimaryAccountCommunity(user: string, community: string): Promise<any> {
-    const response = await this.communityRepository.setPrimaryAccountCommunity(user, community)
-    if (response) return response
-
-    throw new NotFoundException()
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @returns 
-   */
-  async setPrimaryCommunity(user: string, community: string): Promise<any> {
-    const response = await this.communityRepository.setPrimaryCommunity(user, community)
-    if (response) return response
-
-    throw new NotFoundException()
-  }
-
-  /**
-   * 
    * @param community 
    * @param request 
    * @returns 
