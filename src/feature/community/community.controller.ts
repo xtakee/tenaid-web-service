@@ -359,6 +359,26 @@ export class CommunityController {
   /**
    * 
    * @param community 
+   * @param paginate 
+   * @param building 
+   * @returns 
+   */
+  @Get('/:building/members')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
+  @ApiOperation({ summary: 'Get all community building members' })
+  async getCommunityBuildingMembers(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Param('building') building: string): Promise<any> {
+    if (!isMongoId(building)) throw new BadRequestException()
+
+    return await this.communityService.getCommunityBuildingMembers(community, building, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
    * @param building 
    * @returns 
    */

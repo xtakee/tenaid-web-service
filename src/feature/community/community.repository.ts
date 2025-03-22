@@ -2149,6 +2149,32 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param building 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityBuildingMembers(community: string, building: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityMember>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building),
+      $or: [
+        { status: ACCOUNT_STATUS.APPROVED },
+        { status: ACCOUNT_STATUS.ACCEPTED }
+      ]
+    }
+
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: MEMBER_COMMUNITIES_QUERY
+    })
+  }
+
+  /**
+   * 
+   * @param community 
    * @param paginate 
    */
   async getCommunityActiveAnnouncements(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityAnnouncement>> {

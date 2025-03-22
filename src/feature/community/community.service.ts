@@ -580,6 +580,16 @@ export class CommunityService {
   /**
    * 
    * @param community 
+   * @param building 
+   * @param paginate 
+   */
+  async getCommunityBuildingMembers(community: string, building: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityMember>> {
+    return await this.communityRepository.getCommunityBuildingMembers(community, building, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
    * @param page 
    * @param limit 
    * @returns 
