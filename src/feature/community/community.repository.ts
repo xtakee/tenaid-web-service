@@ -2156,6 +2156,7 @@ export class CommunityRepository {
 
     const query: any = {
       community: new Types.ObjectId(community),
+      isActive: true,
       startDate: { $lte: date },
       endDate: { $gte: date }
     }
