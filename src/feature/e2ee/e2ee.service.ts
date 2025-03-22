@@ -29,6 +29,4 @@ export class E2eeService {
 
     return e2eeKeys.publicKey
   }
-
-
 }
