@@ -487,11 +487,17 @@ export class AccountService {
    * @param user 
    * @param password 
    */
-  async changePassword(user: string, password: string): Promise<void> {
-    const account = await this.accountRepository.updatePassword(user, password)
-    if (account) return
+  async changePassword(user: string, oldPassword: string, password: string): Promise<void> {
 
-    throw new UnauthorizedException()
+    const accountInfo = await this.accountRepository.getOneById(user)
+    if (accountInfo) {
+      const isMatch = await this.authHelper.isMatch(oldPassword, accountInfo.password)
+      if (isMatch) {
+        await this.accountRepository.updatePassword(user, password)
+      } else throw new BadRequestException()
+    }
+
+    else throw new UnauthorizedException()
   }
 
   /**

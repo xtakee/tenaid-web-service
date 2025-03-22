@@ -7,4 +7,9 @@ export class ChangePasswordDto {
   @IsNotEmpty()
   @MinLength(PASSWORD_MIN_LENGTH)
   password: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @MinLength(PASSWORD_MIN_LENGTH)
+  oldPassword: string
 }

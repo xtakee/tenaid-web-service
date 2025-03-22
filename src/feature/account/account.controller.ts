@@ -378,7 +378,7 @@ export class AccountController {
   @Post('change-password')
   @BasicAuth()
   async changePassword(@RootUser() user: string, @Body() body: ChangePasswordDto): Promise<void> {
-    return await this.accountService.changePassword(user, body.password)
+    return await this.accountService.changePassword(user, body.oldPassword, body.password)
   }
   /**
    * 
