@@ -278,7 +278,7 @@ export class CommunityRepository {
         strictPopulate: false
       }, {
         path: 'createdBy',
-        select: '_id firstName lastName email.value',
+        select: '_id firstName lastName email.value photo',
         strictPopulate: false
       }
     ]).exec()
@@ -301,7 +301,7 @@ export class CommunityRepository {
         strictPopulate: false
       }, {
         path: 'createdBy',
-        select: '_id firstName lastName email.value',
+        select: '_id firstName lastName email.value photo',
         strictPopulate: false
       }
     ]).exec()
@@ -371,7 +371,7 @@ export class CommunityRepository {
         strictPopulate: false
       }, {
         path: 'createdBy',
-        select: '_id firstName lastName email.value',
+        select: '_id firstName lastName email.value photo',
         strictPopulate: false
       }
     ]).exec()
@@ -398,7 +398,7 @@ export class CommunityRepository {
             strictPopulate: false
           }, {
             path: 'createdBy',
-            select: '_id firstName lastName email.value',
+            select: '_id firstName lastName email.value photo',
             strictPopulate: false
           }
         ]
@@ -430,7 +430,7 @@ export class CommunityRepository {
             strictPopulate: false
           }, {
             path: 'createdBy',
-            select: '_id firstName lastName email.value',
+            select: '_id firstName lastName email.value photo',
             strictPopulate: false
           }
         ]
@@ -692,7 +692,7 @@ export class CommunityRepository {
       _id: new Types.ObjectId(contact)
     }).populate({
       path: 'createdBy',
-      select: '_id firstName lastName email.value',
+      select: '_id firstName lastName email.value photo',
       strictPopulate: false
     })
   }
@@ -709,7 +709,7 @@ export class CommunityRepository {
       'email.value': email.trim().toLowerCase()
     }).populate({
       path: 'createdBy',
-      select: '_id firstName lastName email.value',
+      select: '_id firstName lastName email.value photo',
       strictPopulate: false
     })
   }
@@ -733,7 +733,7 @@ export class CommunityRepository {
         sort: paginate.sort,
         populate: {
           path: 'createdBy',
-          select: 'firstName lastName email.value',
+          select: 'firstName lastName email.value photo',
           strictPopulate: false
         }
       }
@@ -778,7 +778,7 @@ export class CommunityRepository {
         sort: paginate.sort,
         populate: {
           path: 'createdBy',
-          select: 'firstName lastName email.value',
+          select: 'firstName lastName email.value photo',
           strictPopulate: false
         }
       }
@@ -831,7 +831,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }, '_id name description updatedAt createdAt createdBy community isActive code').populate({
       path: 'createdBy',
-      select: 'firstName lastName email.value'
+      select: 'firstName lastName email.value photo'
     }
     )
   }
@@ -932,7 +932,7 @@ export class CommunityRepository {
       select: '_id name description'
     }, {
       path: 'createdBy',
-      select: '_id firstName lastName email.value',
+      select: '_id firstName lastName email.value photo',
       strictPopulate: false
     }, {
       path: 'community',
@@ -988,7 +988,7 @@ export class CommunityRepository {
       select: '_id name description'
     }, {
       path: 'createdBy',
-      select: '_id firstName lastName email.value',
+      select: '_id firstName lastName email.value photo',
       strictPopulate: false
     }, {
       path: 'community',
@@ -1020,7 +1020,7 @@ export class CommunityRepository {
         select: '_id name description'
       }, {
         path: 'createdBy',
-        select: '_id firstName lastName email.value'
+        select: '_id firstName lastName email.value photo'
       }, {
         path: 'community',
         select: '_id name description code'
@@ -1053,7 +1053,7 @@ export class CommunityRepository {
         select: '_id name description'
       }, {
         path: 'createdBy',
-        select: '_id firstName lastName email.value',
+        select: '_id firstName lastName email.value photo',
         strictPopulate: false
       }, {
         path: 'community',
@@ -1520,6 +1520,7 @@ export class CommunityRepository {
     let query: any = {
       account: new Types.ObjectId(user),
       community: new Types.ObjectId(community),
+      type: { $ne: InviteType.SELF }
     }
 
     return await this.paginator.paginate(this.communityInviteModel, buildSearchQuery(query, paginate.search),
@@ -2139,7 +2140,7 @@ export class CommunityRepository {
         strictPopulate: false
       }, {
         path: 'createdBy',
-        select: '_id firstName lastName email.value',
+        select: '_id firstName lastName email.value photo',
         strictPopulate: false
       }
     ])
@@ -2155,8 +2156,8 @@ export class CommunityRepository {
 
     const query: any = {
       community: new Types.ObjectId(community),
-      startDate: { $lte: date },
-      endDate: { $gte: date }
+      //startDate: { $lte: date },
+      //endDate: { $gte: date }
     }
 
     return await this.paginator.paginate(this.announcementModel, buildSearchQuery(query, paginate.search), {
@@ -2171,7 +2172,7 @@ export class CommunityRepository {
           strictPopulate: false
         }, {
           path: 'createdBy',
-          select: '_id firstName lastName email.value',
+          select: '_id firstName lastName email.value photo',
           strictPopulate: false
         }
       ]
@@ -2200,7 +2201,7 @@ export class CommunityRepository {
           strictPopulate: false
         }, {
           path: 'createdBy',
-          select: '_id firstName lastName email.value',
+          select: '_id firstName lastName email.value photo',
           strictPopulate: false
         }
       ]
