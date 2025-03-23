@@ -37,7 +37,11 @@ class NodeData {
 
 @WebSocketGateway({
   namespace: 'messaging',
-  cors: { origin: '*' },
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
   pingInterval: 10000,  // Send a ping every 10 seconds
   pingTimeout: 5000
 })
@@ -64,6 +68,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   // process disconnected
   private async updateClientDisConnection(client: Socket): Promise<void> {
     // client authentication
+    if (!client.data.user) return
+
     const account: string = client.data.user.sub
     const platfom: string = client.data.user.platform
     // 
