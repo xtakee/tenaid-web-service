@@ -16,7 +16,9 @@ export class WsJwtAuthGuard {
   ) { }
 
   async validate(client: Socket): Promise<boolean> {
-    const encryptedKey = this.extractTokenFromHeader(client) ?? this.extractTokenFromAuth(client)
+    const encryptedKey = this.extractTokenFromHeader(client)
+      ?? this.extractTokenFromAuth(client)
+      ?? this.extractTokenFromQuery(client)
 
     if (!encryptedKey) return false
     try {
@@ -42,6 +44,11 @@ export class WsJwtAuthGuard {
 
   private extractTokenFromAuth(client: any): string | undefined {
     const [type, token] = client.handshake.auth.authorization?.split(' ') ?? []
+    return type === 'Bearer' ? token : undefined
+  }
+
+  private extractTokenFromQuery(client: any): string | undefined {
+    const [type, token] = client.handshake.query.authorization?.split(' ') ?? []
     return type === 'Bearer' ? token : undefined
   }
 }
