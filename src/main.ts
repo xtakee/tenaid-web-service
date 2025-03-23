@@ -47,14 +47,7 @@ async function main() {
   }
 
   app.use(helmet())
-
-  // Enable CORS for HTTP routes
-  app.enableCors({
-    origin: '*', // Allow all origins
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
+  app.enableCors()
 
   await app.listen(process.env.PORT)
 }
