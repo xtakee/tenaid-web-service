@@ -117,7 +117,24 @@ const queue = BullModule.registerQueue({
         return schema
       },
     }]),
-    MongooseModule.forFeature([{ name: CommunityAccessPoint.name, schema: CommunityAccessPointSchema }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityAccessPoint.name, useFactory: async () => {
+        const schema = CommunityAccessPointSchema
+        schema.pre('save', async function () {
+          if (this.isNew) {
+            this.searchable = searchable(this.name)
+          }
+        })
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).name) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
+          }
+          next()
+        })
+        return schema
+      },
+    }]),
     MongooseModule.forFeatureAsync([{
       name: CommunityContact.name, useFactory: async () => {
         const schema = CommunityContactSchema

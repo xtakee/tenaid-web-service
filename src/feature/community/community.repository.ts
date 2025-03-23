@@ -384,8 +384,12 @@ export class CommunityRepository {
    * @returns 
    */
   async getCommunityAccessPoints(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community)
+    }
+
     return await this.paginator.paginate(this.communityAccessPointModel,
-      { community: new Types.ObjectId(community) },
+      buildSearchQuery(query, paginate.search),
       {
         sort: paginate.sort,
         limit: paginate.limit,
