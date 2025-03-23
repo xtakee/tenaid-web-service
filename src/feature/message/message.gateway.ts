@@ -37,7 +37,7 @@ class NodeData {
 
 @WebSocketGateway({
   namespace: 'messaging',
-  cors: { origin: '*' },
+  cors: { origin: '*:*' },
   pingInterval: 10000,  // Send a ping every 10 seconds
   pingTimeout: 5000
 })
