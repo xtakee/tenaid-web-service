@@ -36,7 +36,7 @@ class NodeData {
 }
 
 @WebSocketGateway({
-  namespace: 'messaging',
+  namespace: 'messaging/',
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
@@ -89,11 +89,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const account: string = client.data.user.sub
       const platform: string = client.data.user.platform
+      const privateRoom = `${account}-${platform}`
 
       const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
       // join all active community rooms
       for (const room of rooms) client.join(room)
+
+      // join account private room
+      client.join(privateRoom)
 
       const data = await this.accountRepository.getDevicePushToken(account)
 
@@ -113,8 +117,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       for (const cache of cachedMessages) {
         //send to only connected client
         if (cache.message !== null)
-          this.server.to(account).emit(cache.type, cache.message)
-
+          this.server.to(privateRoom).emit(cache.type, cache.message)
       }
 
     } else client.disconnect()
@@ -197,11 +200,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     if (authenticated) {
       const account: string = client.data.user.sub
+      const platform: string = client.data.user.platform
 
       const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
       // join all active community rooms
       for (const room of rooms) client.join(room)
+
+      // join account private room
+      client.join(`${account}-${platform}`)
     }
 
     return message
