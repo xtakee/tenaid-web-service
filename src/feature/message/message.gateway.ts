@@ -15,6 +15,7 @@ import { MessageCacheDto } from "./dto/message.cache"
 import { MessageStatus } from "./util/message.status"
 import { MessageNode } from "./model/message.node"
 import { CacheService } from "src/services/cache/cache.service"
+import { Platform } from "src/core/util/platform"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -90,11 +91,19 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const account: string = client.data.user.sub
       const platform: string = client.data.user.platform
       const privateRoom = `${account}-${platform}`
+      const managedRoom: string = client.data.user.primaryManagedCommunity
 
       const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
-      // join all active community rooms
-      for (const room of rooms) client.join(room)
+      // leave all active community rooms
+      for (const room of rooms) client.leave(room)
+
+      if (platform === Platform.WEB) {
+        if (managedRoom) client.join(managedRoom)
+      } else {
+        // join all active community rooms
+        for (const room of rooms) client.join(room)
+      }
 
       // join account private room
       client.join(privateRoom)
@@ -109,9 +118,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         platform: platform
       })
 
+      const managedRooms: string[] = managedRoom ? [managedRoom] : []
+      const clientRooms: string[] = platform === Platform.WEB ? managedRooms : rooms
+
       // get all unread messages/events
       const cachedMessages: MessageCacheDto[] =
-        await this.messageRepository.getAllCachedMessages(account, rooms.map(room => new Types.ObjectId(room)), platform)
+        await this.messageRepository.getAllCachedMessages(account, clientRooms.map(room => new Types.ObjectId(room)), platform)
 
       // check for stale/offline events
       for (const cache of cachedMessages) {
@@ -204,8 +216,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       const rooms: string[] = await this.communityRepository.getAllAccountCommunityRooms(account)
 
-      // join all active community rooms
-      for (const room of rooms) client.join(room)
+      // leave all active community rooms
+      for (const room of rooms) client.leave(room)
+
+      if (platform === Platform.WEB) {
+        const room: string = client.data.user.primaryManagedCommunity
+        if (room) client.join(room) // join all active community rooms
+      } else {
+        for (const room of rooms) client.join(room) // join all active community rooms
+      }
 
       // join account private room
       client.join(`${account}-${platform}`)
