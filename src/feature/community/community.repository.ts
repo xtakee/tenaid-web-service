@@ -874,7 +874,10 @@ export class CommunityRepository {
     return await this.communityMemberModel.findOne({
       account: new Types.ObjectId(user),
       community: new Types.ObjectId(community),
-      status: ACCOUNT_STATUS.APPROVED
+      $or: [
+        { status: ACCOUNT_STATUS.APPROVED },
+        { status: ACCOUNT_STATUS.ACCEPTED }
+      ]
     })
   }
 
