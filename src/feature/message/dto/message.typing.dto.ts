@@ -6,6 +6,10 @@ export class MessageTypingDto {
 
   @IsNotEmpty()
   @IsMongoId()
+  id: string
+
+  @IsNotEmpty()
+  @IsMongoId()
   room: string
 
   @IsNotEmpty()
