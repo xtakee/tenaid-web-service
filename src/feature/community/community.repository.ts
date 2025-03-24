@@ -1823,8 +1823,7 @@ export class CommunityRepository {
         {
           account: new Types.ObjectId(user),
           community: new Types.ObjectId(community)
-        },
-        { isPrimary: true },
+        }, { isPrimary: true },
         { returnDocument: 'after', fields: COMMUNITY_MEMBER_PRIMARY_QUERY }
       ).populate(MEMBER_COMMUNITIES_QUERY).exec()
     }
@@ -1852,10 +1851,8 @@ export class CommunityRepository {
    */
   async setPrimaryCommunity(user: string, community: string): Promise<any> {
     const updateResult = await this.communityModel.updateMany({
-      account: new Types.ObjectId(user),
-      _id: new Types.ObjectId(community)
-    },
-      { $set: { isPrimary: false } }
+      account: new Types.ObjectId(user)
+    }, { $set: { isPrimary: false } }
     ).exec()
 
     if (updateResult) {
