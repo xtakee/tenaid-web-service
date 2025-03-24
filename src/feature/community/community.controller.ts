@@ -571,11 +571,12 @@ export class CommunityController {
    * @param data 
    * @returns 
    */
-  @Post('/member-invite/decline')
+  @Post('/member-invite/:invite/decline')
   @BasicAuth()
   @ApiOperation({ summary: 'Decline community member invite' })
-  async declineCommunityMemberInvite(@User() user: string, @Email() email: string, @Body() data: DeclineCommunityInviteDto): Promise<void> {
-    return await this.communityService.declineCommunityMemberInvite(email, data.invite, data.comment)
+  async declineCommunityMemberInvite(@User() user: string, @Email() email: string, @Param('invite') invite: string, @Body() data: DeclineCommunityInviteDto): Promise<void> {
+    if (!isMongoId(invite)) throw new BadRequestException()
+    return await this.communityService.declineCommunityMemberInvite(email, invite, data.comment)
   }
 
   /**
@@ -787,12 +788,12 @@ export class CommunityController {
     return await this.communityService.getCommunintyJoinRequest(community, request)
   }
 
-/**
- * 
- * @param community 
- * @param member 
- * @returns 
- */
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @returns 
+   */
   @Get('/member/:member')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
