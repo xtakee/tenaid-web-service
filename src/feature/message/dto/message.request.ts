@@ -3,7 +3,6 @@ import { EncryptionData } from "src/feature/e2ee/dto/encryption.data"
 import { MessageType } from "../util/message.type"
 import { ReactionDto } from "./message.reaction.dto"
 
-
 export class MessageRequestDto {
   @IsNotEmpty()
   @IsMongoId()

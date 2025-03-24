@@ -16,6 +16,7 @@ import { MessageStatus } from "./util/message.status"
 import { MessageNode } from "./model/message.node"
 import { CacheService } from "src/services/cache/cache.service"
 import { Platform } from "src/core/util/platform"
+import { UsePipes, ValidationPipe } from "@nestjs/common"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -37,15 +38,12 @@ class NodeData {
 }
 
 @WebSocketGateway({
-  namespace: 'messaging/',
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
+  namespace: 'messaging',
+  cors: { origin: '*' },
   pingInterval: 10000,  // Send a ping every 10 seconds
   pingTimeout: 5000
 })
+@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authGuard: WsJwtAuthGuard,
