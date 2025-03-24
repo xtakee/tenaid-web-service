@@ -2,7 +2,7 @@ import { Catch, ArgumentsHost, BadRequestException, WsExceptionFilter } from '@n
 import { WsException } from '@nestjs/websockets'
 import { Socket } from 'socket.io'
 
-const MESSAGE_ERROR = 'message-validation-error'
+export const WS_MESSAGE_ERROR = 'message-validation-error'
 
 @Catch(BadRequestException, WsException)
 export class WsExceptionHandler implements WsExceptionFilter {
@@ -23,7 +23,7 @@ export class WsExceptionHandler implements WsExceptionFilter {
       message = exception.getError() as string
     }
 
-    client.emit(MESSAGE_ERROR, message)
+    client.emit(WS_MESSAGE_ERROR, message)
     return
   }
 }

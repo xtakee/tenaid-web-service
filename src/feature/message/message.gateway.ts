@@ -17,7 +17,7 @@ import { MessageNode } from "./model/message.node"
 import { CacheService } from "src/services/cache/cache.service"
 import { Platform } from "src/core/util/platform"
 import { BadRequestException, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common"
-import { WsExceptionHandler } from "./ws.exception.handler"
+import { WS_MESSAGE_ERROR, WsExceptionHandler } from "./ws.exception.handler"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -325,7 +325,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         // send typing event to users
         client.to(message.room).emit(EVENT_NAME_TYPING, message)
       } catch (error) {
-
+        client.emit(WS_MESSAGE_ERROR, error.toString())
       }
     }
 

@@ -1054,6 +1054,18 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @param member 
+   */
+  async getCommunityMember(community: string, member: string): Promise<CommunityMember> {
+    const data = await this.communityRepository.getCommunityMember(member, community)
+    if (data) return data
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @param member 

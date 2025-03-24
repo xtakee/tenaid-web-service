@@ -787,6 +787,23 @@ export class CommunityController {
     return await this.communityService.getCommunintyJoinRequest(community, request)
   }
 
+/**
+ * 
+ * @param community 
+ * @param member 
+ * @returns 
+ */
+  @Get('/member/:member')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get a community member details' })
+  async getCommunityMember(@ManagedCommunity() community: string, @Param('member') member: string): Promise<any> {
+    if (!isMongoId(member)) throw new BadRequestException()
+
+    return await this.communityService.getCommunityMember(community, member)
+  }
+
+
   /**
    * 
    * @param user 
