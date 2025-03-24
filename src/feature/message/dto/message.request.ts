@@ -2,10 +2,11 @@ import { IsNotEmpty, IsMongoId, IsArray, IsDateString, IsOptional, IsEnum } from
 import { EncryptionData } from "src/feature/e2ee/dto/encryption.data"
 import { MessageType } from "../util/message.type"
 import { ReactionDto } from "./message.reaction.dto"
+import { MessageVisibility } from "../util/message.visibility"
+import { MessageStatus } from "../util/message.status"
 
 export class MessageRequestDto {
   @IsNotEmpty()
-  @IsMongoId()
   messageId: string
 
   @IsNotEmpty()
@@ -27,9 +28,11 @@ export class MessageRequestDto {
   @IsNotEmpty()
   body: string
 
+  @IsOptional()
   @IsMongoId()
   deletedBy?: string
 
+  @IsNotEmpty()
   @IsMongoId()
   room: string
 
@@ -40,12 +43,15 @@ export class MessageRequestDto {
   path?: string
 
   @IsOptional()
+  @IsMongoId()
   category?: string
 
   @IsOptional()
+  @IsEnum(MessageVisibility)
   visibility?: string
 
   @IsOptional()
+  @IsMongoId()
   building?: string
 
   @IsNotEmpty()
@@ -64,6 +70,7 @@ export class MessageRequestDto {
   size?: number
 
   @IsOptional()
+  @IsEnum(MessageStatus)
   status?: string
 
   @IsOptional()
@@ -75,5 +82,6 @@ export class MessageRequestDto {
   @IsOptional()
   reaction?: ReactionDto
 
-  encryption?: EncryptionData
+  @IsNotEmpty()
+  encryption: EncryptionData
 }

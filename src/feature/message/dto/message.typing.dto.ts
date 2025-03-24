@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsMongoId } from "class-validator"
+import { IsNotEmpty, IsMongoId, IsOptional } from "class-validator"
 
 export class MessageTypingDto {
   @IsNotEmpty()
@@ -9,19 +9,16 @@ export class MessageTypingDto {
   room: string
 
   @IsNotEmpty()
-  member?: string
+  lastName: string
 
   @IsNotEmpty()
-  lastName?: string
+  firstName: string
 
-  @IsNotEmpty()
-  firstName?: string
-
-  @IsNotEmpty()
+  @IsOptional()
   photo?: string
 
   @IsNotEmpty()
-  isAdmin?: string
+  isAdmin: string
 
   @IsNotEmpty()
   @IsMongoId()
