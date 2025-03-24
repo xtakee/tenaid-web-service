@@ -1295,7 +1295,7 @@ export class CommunityController {
   @Post('/member-create')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.MEMBER))
-  @ApiOperation({ summary: 'Add a community member' })
+  @ApiOperation({ summary: 'Create a community member' })
   async addCommunityMember(@User() user: string, @ManagedCommunity() community: string, @Body() data: AddMemberRequestDto): Promise<void> {
     return this.communityService.addCommunityMember(community, user, data)
   }

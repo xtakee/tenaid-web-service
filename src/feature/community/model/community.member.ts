@@ -17,6 +17,9 @@ export class CommunityMember {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account?: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  createdBy?: Types.ObjectId
+
   @Prop({ ref: CommunityStreet.name })
   street?: Types.ObjectId
 

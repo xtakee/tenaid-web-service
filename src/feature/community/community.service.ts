@@ -767,8 +767,8 @@ export class CommunityService {
 
     if (!authorizedUser) {
       const communityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
-      if (!communityMember) throw new NotFoundException()
 
+      if (!communityMember) throw new NotFoundException()
       if (communityMember.isAdmin) throw new ForbiddenException()
 
       const account = await this.accountRepository.getOneByEmail(email)
@@ -1241,7 +1241,7 @@ export class CommunityService {
 
     const code = communityData.members.toString().padStart(MAX_MEMBER_CODE_LENGTH, '0')
 
-    const memberInvite = await this.communityRepository.addCommunityMember(community, data, code, account ? (account as any)._id.toString() : null)
+    const memberInvite = await this.communityRepository.addCommunityMember(user, community, data, code, account ? (account as any)._id.toString() : null)
     if (!memberInvite) throw new BadRequestException(REQUEST_INVITE_ERROR)
 
     // send push if account exists

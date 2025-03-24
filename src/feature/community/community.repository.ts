@@ -2452,10 +2452,10 @@ export class CommunityRepository {
    * @param data 
    * @param account 
    */
-  async addCommunityMember(community: string, data: AddMemberRequestDto, code: string, account?: string): Promise<CommunityMember> {
-
+  async addCommunityMember(user: string, community: string, data: AddMemberRequestDto, code: string, account?: string): Promise<CommunityMember> {
     const member: CommunityMember = {
       community: new Types.ObjectId(community),
+      createdBy: new Types.ObjectId(user),
       account: account ? new Types.ObjectId(account) : null,
       street: new Types.ObjectId(data.street),
       apartment: data.apartment,
