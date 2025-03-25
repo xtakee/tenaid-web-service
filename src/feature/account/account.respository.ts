@@ -336,6 +336,33 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   */
+  async getOwnAccountAuthorization(user: string, community: string): Promise<ManagedAccount> {
+    return await this.managedAccountModel.findOne({
+      community: new Types.ObjectId(community),
+      account: new Types.ObjectId(user)
+    }, '_id community isActive permissions createdBy').populate([
+      {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value photo',
+        strictPopulate: false
+      }, {
+        path: 'community',
+        select: '_id name code',
+        strictPopulate: false
+      }, {
+        path: 'account',
+        select: '_id firstName lastName email.value phone country',
+        strictPopulate: false
+      }
+    ])
+  }
+
+
+  /**
+   * 
    * @param community 
    * @param paginate 
    */

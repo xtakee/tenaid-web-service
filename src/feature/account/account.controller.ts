@@ -13,7 +13,7 @@ import { ADD_ON, CLAIM, COMMUNITY_SYSTEM_FEATURES, SYSTEM_FEATURES } from "../au
 import { Auth, BasicAuth } from "../auth/guards/auth.decorator";
 import { MongoAbility } from "@casl/ability";
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto";
-import { isEmail, isMongoId } from "class-validator";
+import { isEmail, isMongoId, MIN } from "class-validator";
 import { ForgotPasswordDto } from "src/feature/account/dto/request/forgot.password.dto";
 import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto";
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto";
@@ -228,6 +228,19 @@ export class AccountController {
   /**
    * 
    * @param id 
+   * @param community 
+   * @returns 
+   */
+  @Get('me/authorization')
+  @ApiOperation({ summary: 'Get Own Account Authorization' })
+  @BasicAuth()
+  async getOwnAcccountAuthorization(@User() user: string, @ManagedCommunity() community: string): Promise<any> {
+    return await this.accountService.getOwnAccountAuthorization(user, community)
+  }
+
+  /**
+   * 
+   * @param id 
    * @returns AccountResponseDto
    */
   @Get('me')
@@ -296,7 +309,6 @@ export class AccountController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.USER_ADMIN))
   async getCommunityAccountRole(@ManagedCommunity() community: string, @Param('role') role: string): Promise<any> {
-    if (!isMongoId(community)) throw new BadRequestException()
     if (!isMongoId(role)) throw new BadRequestException()
 
     return await this.accountService.getCommunityAccountRole(community, role)

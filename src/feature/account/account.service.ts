@@ -262,6 +262,19 @@ export class AccountService {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   */
+  async getOwnAccountAuthorization(user: string, community: string): Promise<ManagedAccount> {
+    const account = await this.accountRepository.getOwnAccountAuthorization(user, community)
+
+    if (account) return account
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
    * @param community 
    * @param paginate 
    * @returns 
