@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsEmail, IsEnum, IsNotEmpty } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, ValidateNested } from "class-validator";
 import { CLAIM, COMMUNITY_SYSTEM_FEATURES } from "src/feature/auth/auth.constants";
 
 export class PermissionDto {
@@ -53,5 +54,7 @@ export class CreateRoleDto {
   @ApiProperty({ type: [PermissionDto] })
   @IsArray()
   @IsNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => PermissionDto)
   permissions: PermissionDto[]
 }
