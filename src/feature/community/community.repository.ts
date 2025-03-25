@@ -384,29 +384,26 @@ export class CommunityRepository {
    * @returns 
    */
   async getCommunityAccessPoints(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    const query: any = {
-      community: new Types.ObjectId(community)
-    }
+    const query: any = { community: new Types.ObjectId(community) }
 
     return await this.paginator.paginate(this.communityAccessPointModel,
-      buildSearchQuery(query, paginate.search),
-      {
-        sort: paginate.sort,
-        limit: paginate.limit,
-        page: paginate.page,
-        select: '_id name description createdBy code createdAt updatedAt isActive',
-        populate: [
-          {
-            path: 'community',
-            select: '_id name description code',
-            strictPopulate: false
-          }, {
-            path: 'createdBy',
-            select: '_id firstName lastName email.value photo',
-            strictPopulate: false
-          }
-        ]
-      }
+      buildSearchQuery(query, paginate.search), {
+      sort: paginate.sort,
+      limit: paginate.limit,
+      page: paginate.page,
+      select: '_id name description createdBy code createdAt updatedAt isActive',
+      populate: [
+        {
+          path: 'community',
+          select: '_id name description code',
+          strictPopulate: false
+        }, {
+          path: 'createdBy',
+          select: '_id firstName lastName email.value photo',
+          strictPopulate: false
+        }
+      ]
+    }
     )
   }
 

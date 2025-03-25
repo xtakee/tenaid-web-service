@@ -31,11 +31,11 @@ export class CommunityAccessPoint {
   @Prop()
   description: string
 
-  @Prop()
-  searchable?: string
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
-const CommunityAccessPointSchema = SchemaFactory.createForClass(Community);
+const CommunityAccessPointSchema = SchemaFactory.createForClass(CommunityAccessPoint);
 CommunityAccessPointSchema.index({ searchable: 'text', code: 'text' })
 
 export { CommunityAccessPointSchema }

@@ -39,7 +39,7 @@ export class CommunityContact {
   searchable?: string[]
 }
 
-const CommunityContactSchema = SchemaFactory.createForClass(CommunityContact);
+const CommunityContactSchema = SchemaFactory.createForClass(CommunityContact)
 CommunityContactSchema.index({ searchable: 'text', code: 'text' })
 
 export { CommunityContactSchema }
