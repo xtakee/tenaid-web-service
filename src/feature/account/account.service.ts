@@ -381,11 +381,15 @@ export class AccountService {
    * @param user 
    * @returns AccountResponseDto
    */
-  async getOwnAccount(user: string): Promise<AccountResponseDto> {
+  async getOwnAccount(user: string, community?: string): Promise<AccountResponseDto> {
     const account = await this.accountRepository.getOneById(user)
-    const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity(user)
+    let primaryManagedCommunity = null
     if (account) {
       const accountDto = this.mapper.map(account)
+
+      if (community)
+        primaryManagedCommunity = await this.communityRepository.getCommunity(community)
+
       if (primaryManagedCommunity) {
         accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
         // add account primary community
@@ -394,6 +398,8 @@ export class AccountService {
           building: primaryManagedCommunity.communitySetup?.building === true,
           member: primaryManagedCommunity.communitySetup?.member === true
         }
+
+        accountDto.authorization = await this.accountRepository.getOwnAccountAuthorization(user, community)
       }
 
       return accountDto

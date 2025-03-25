@@ -318,13 +318,9 @@ export class AccountRepository implements IAccountRepository {
     return await this.managedAccountModel.findOne({
       _id: new Types.ObjectId(role),
       community: new Types.ObjectId(community)
-    }, '_id isActive account community createdBy permissions').populate([{
+    }, '_id isActive account createdBy permissions').populate([{
       path: 'createdBy',
       select: '_id firstName lastName email.value',
-      strictPopulate: false
-    }, {
-      path: 'community',
-      select: '_id name description code',
       strictPopulate: false
     }, {
       path: 'account',
@@ -343,14 +339,10 @@ export class AccountRepository implements IAccountRepository {
     return await this.managedAccountModel.findOne({
       community: new Types.ObjectId(community),
       account: new Types.ObjectId(user)
-    }, '_id community isActive permissions createdBy').populate([
+    }, '_id isActive permissions createdBy').populate([
       {
         path: 'createdBy',
         select: '_id firstName lastName email.value photo',
-        strictPopulate: false
-      }, {
-        path: 'community',
-        select: '_id name code',
         strictPopulate: false
       }, {
         path: 'account',

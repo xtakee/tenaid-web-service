@@ -47,6 +47,7 @@ export class AccountResponseDto {
   identityType: string
   idNumber: string
   dob?: Date
+  authorization?: {}
   flags: DashboardFlagsDto
   kycCompleted?: Boolean
   communityKycAcknowledged?: Boolean
