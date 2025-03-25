@@ -2429,6 +2429,27 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityAuthorizedUsers(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      linkedTo: { $ne: null }
+    }
+
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: MEMBER_COMMUNITIES_QUERY
+    })
+  }
+
+  /**
+   * 
+   * @param community 
    * @param member 
    * @returns 
    */

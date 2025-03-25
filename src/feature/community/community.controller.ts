@@ -164,6 +164,23 @@ export class CommunityController {
   /**
    * 
    * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/authorized-users')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community authorized users' })
+  async getAllCommunityAuthorizedAccess(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto
+  ): Promise<any> {
+    return await this.communityService.getAllCommunityAuthorizedAccess(community, paginate);
+  }
+
+  /**
+   * 
+   * @param community 
    * @param member 
    * @param body 
    * @returns 

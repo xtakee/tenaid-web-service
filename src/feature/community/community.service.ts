@@ -673,6 +673,16 @@ export class CommunityService {
    * 
    * @param community 
    * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityAuthorizedAccess(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityAuthorizedUsers(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
    */
   async getAllCommunityDirectors(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityDirectors(community, paginate)
