@@ -1092,6 +1092,10 @@ export class CommunityRepository {
         }, {
           path: 'community',
           select: '_id name description code'
+        }, {
+          path: 'building',
+          select: '_id buildingNumber type',
+          strictPopulate: false,
         }
       ]
     })
