@@ -113,7 +113,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       // udpate client nodes
       await this.updateClientConnection({
         rooms: rooms,
-        token: data.token,
+        token: data ? data.token : '',
         account: account,
         platform: platform
       })
