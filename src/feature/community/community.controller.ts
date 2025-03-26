@@ -43,6 +43,7 @@ import { MongoAbility } from '@casl/ability';
 import { CLAIM, COMMUNITY_SYSTEM_FEATURES } from '../auth/auth.constants';
 import { CheckPolicies } from '../auth/guards/casl/policies.guard';
 import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
+import { Platform } from 'src/core/decorators/platform';
 
 @Controller({
   version: '1',
@@ -82,24 +83,24 @@ export class CommunityController {
     return await this.communityService.getAllCommunityGuards(community, paginate)
   }
 
-   /**
-   * 
-   * @param user 
-   * @param community 
-   * @param paginate 
-   * @returns 
-   */
-   @Get('/messaging/members')
-   @BasicAuth()
-   @ApiOperation({ summary: 'Get all community messaging members' })
-   @ApiQuery({ name: 'date', required: false, type: Date })
-   async getAllCommunityMessagingMembers(
-     @User() user: string,
-     @PrimaryCommunity() community: string,
-     @Query() paginate: PaginationRequestDto,
-     @Query() date?: DateDto): Promise<PaginatedResult<any>> {
-     return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate, date.date)
-   }
+  /**
+  * 
+  * @param user 
+  * @param community 
+  * @param paginate 
+  * @returns 
+  */
+  @Get('/messaging/members')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community messaging members' })
+  @ApiQuery({ name: 'date', required: false, type: Date })
+  async getAllCommunityMessagingMembers(
+    @User() user: string,
+    @PrimaryCommunity() community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Query() date?: DateDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate, date.date)
+  }
 
   /**
 * 
@@ -980,10 +981,13 @@ export class CommunityController {
   @ApiQuery({ name: 'status', required: false, type: String })
   async getAllCommunityMembers(
     @User() user: string,
+    @Platform() platform: string,
+    @PrimaryCommunity() primaryCommunity: string,
     @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto,
     @Query('status') status?: string): Promise<PaginatedResult<any>> {
-    return await this.communityService.getAllCommunityMembers(user, community, paginate, status)
+    const _community = platform === 'web' ? community : primaryCommunity
+    return await this.communityService.getAllCommunityMembers(user, _community, paginate, status)
   }
 
   /**
