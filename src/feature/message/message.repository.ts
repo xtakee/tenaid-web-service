@@ -571,8 +571,6 @@ export class MessageRepository {
     }, {
       ...this.buildMessage(user, data),
       _id: new Types.ObjectId(data.remoteId),
-      status: data.status === MessageStatus.DELIVERED ? MessageStatus.SENT : data.status,
-      retained: data.status === MessageStatus.DELIVERED ? true : false
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }
