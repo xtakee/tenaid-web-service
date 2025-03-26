@@ -31,6 +31,7 @@ import { CreateCommunityDto } from "./dto/request/create.community.dto";
 import { CommunityResponseDto } from "./dto/response/community.response.dto";
 import { CreateRoleDto, UpdateRoleDto } from "./dto/request/create.role.dto";
 import { ManagedCommunity } from "src/core/decorators/managed.community";
+import { VerifyOtpDto } from "./dto/request/verify.otp";
 
 @Controller({
   version: '1',
@@ -297,6 +298,17 @@ export class AccountController {
   @ApiOperation({ summary: 'Reset Password' })
   async resetPassword(@Body() body: ResetForgotPasswordDto): Promise<void> {
     return await this.accountService.resetPassword(body)
+  }
+
+  /**
+   * 
+   * @param body 
+   * @returns 
+   */
+  @Post('verify-otp')
+  @ApiOperation({ summary: 'Verify forgot password OTP' })
+  async verifyForgotPassworOtp(@Body() body: VerifyOtpDto): Promise<void> {
+    return await this.accountService.verifyForgotPasswordOtp(body)
   }
 
   /**

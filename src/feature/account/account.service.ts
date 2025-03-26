@@ -35,6 +35,7 @@ import { ManagedAccount } from "./model/managed.account"
 import { Account } from "./model/account"
 import { AuthRepository } from "../auth/auth.repository"
 import { JwtService } from "@nestjs/jwt"
+import { VerifyOtpDto } from "./dto/request/verify.otp"
 
 @Injectable()
 export class AccountService {
@@ -517,6 +518,24 @@ export class AccountService {
     }
 
     else throw new UnauthorizedException()
+  }
+
+  /**
+   * 
+   * @param body 
+   * @returns 
+   */
+  async verifyForgotPasswordOtp(data: VerifyOtpDto): Promise<void> {
+
+    try {
+      const key = this.authHelper.decrypt(data.signature)
+      const savedOtp = await this.accountRepository.getOtp(key)
+
+      if (savedOtp === data.otp) return
+
+    } catch (error) { }
+
+    throw new BadRequestException(INVALID_OTP)
   }
 
   /**

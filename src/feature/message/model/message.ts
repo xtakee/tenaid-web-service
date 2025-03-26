@@ -43,6 +43,9 @@ export class Message {
   @Prop()
   body: string
 
+  @Prop({ type: [String] })
+  media?: string[]
+
   @Prop()
   path?: string
 
