@@ -174,11 +174,16 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Get community member authorized users' })
   async getCommunityMemberAuthorizedAccess(
-    @PrimaryCommunity() community: string,
+    @PrimaryCommunity() primaryCommunity: string,
+    @ManagedCommunity() community: string,
     @Param('member') member: string,
+    @Query() paginate: PaginationRequestDto,
+    @Platform() platform: string
   ): Promise<any> {
     if (!isMongoId(member)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberAuthorizedAccess(community, member);
+    const _community = platform === 'web' ? community : primaryCommunity
+  
+    return await this.communityService.getCommunityMemberAuthorizedAccess(_community, member, paginate);
   }
 
   /**

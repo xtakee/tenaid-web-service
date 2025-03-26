@@ -2451,18 +2451,26 @@ export class CommunityRepository {
     })
   }
 
-  /**
-   * 
-   * @param community 
-   * @param member 
-   * @returns 
-   */
-  async getCommunityMemberAuthorizedUsers(community: string, member: string): Promise<CommunityMember[]> {
-    return await this.communityMemberModel.find({
-      linkedTo: new Types.ObjectId(member),
+/**
+ * 
+ * @param community 
+ * @param member 
+ * @param paginate 
+ * @returns 
+ */
+  async getCommunityMemberAuthorizedUsers(community: string, member: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
       community: new Types.ObjectId(community),
-    }, COMMUNITY_MEMBER_PRIMARY_QUERY)
-      .populate(MEMBER_COMMUNITIES_QUERY)
+      linkedTo: new Types.ObjectId(member)
+    }
+
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: MEMBER_COMMUNITIES_QUERY
+    })
   }
 
   /**
