@@ -82,6 +82,25 @@ export class CommunityController {
     return await this.communityService.getAllCommunityGuards(community, paginate)
   }
 
+   /**
+   * 
+   * @param user 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+   @Get('/messaging/members')
+   @BasicAuth()
+   @ApiOperation({ summary: 'Get all community messaging members' })
+   @ApiQuery({ name: 'date', required: false, type: Date })
+   async getAllCommunityMessagingMembers(
+     @User() user: string,
+     @PrimaryCommunity() community: string,
+     @Query() paginate: PaginationRequestDto,
+     @Query() date?: DateDto): Promise<PaginatedResult<any>> {
+     return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate, date.date)
+   }
+
   /**
 * 
 * @param user 
@@ -821,7 +840,6 @@ export class CommunityController {
     return await this.communityService.getCommunityMember(community, member)
   }
 
-
   /**
    * 
    * @param user 
@@ -966,25 +984,6 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto,
     @Query('status') status?: string): Promise<PaginatedResult<any>> {
     return await this.communityService.getAllCommunityMembers(user, community, paginate, status)
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @param paginate 
-   * @returns 
-   */
-  @Get('/messaging/members')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all community messaging members' })
-  @ApiQuery({ name: 'date', required: false, type: Date })
-  async getAllCommunityMessagingMembers(
-    @User() user: string,
-    @PrimaryCommunity() community: string,
-    @Query() paginate: PaginationRequestDto,
-    @Query() date?: DateDto): Promise<PaginatedResult<any>> {
-    return await this.communityService.getAllCommunityMessagingMembers(user, community, paginate, date.date)
   }
 
   /**
