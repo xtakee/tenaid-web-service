@@ -10,7 +10,7 @@ export class WsExceptionHandler implements WsExceptionFilter {
   catch(exception: BadRequestException | WsException, host: ArgumentsHost) {
     const ctx = host.switchToWs()
     const client: Socket = ctx.getClient()
-    const event = ctx.getData().event
+    const data = ctx.getData()
 
     if (!client) return
 
@@ -24,7 +24,7 @@ export class WsExceptionHandler implements WsExceptionFilter {
       message = exception.getError() as string
     }
 
-    client.emit(WS_MESSAGE_ERROR, { message, event })
+    client.emit(WS_MESSAGE_ERROR, { message, data })
     return
   }
 }
