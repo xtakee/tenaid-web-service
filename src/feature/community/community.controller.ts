@@ -165,6 +165,20 @@ export class CommunityController {
   }
 
   /**
+* 
+* @param community 
+* @param paginate 
+* @returns 
+*/
+  @Get('/request/authorized-users')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community dependant requests' })
+  async getCommunityDependantRequests(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getCommunityDependantRequests(community, paginate)
+  }
+
+  /**
    * 
    * @param community 
    * @param member 
@@ -182,7 +196,7 @@ export class CommunityController {
   ): Promise<any> {
     if (!isMongoId(member)) throw new BadRequestException()
     const _community = platform === 'web' ? community : primaryCommunity
-  
+
     return await this.communityService.getCommunityMemberAuthorizedAccess(_community, member, paginate);
   }
 
@@ -464,7 +478,6 @@ export class CommunityController {
     return await this.communityService.createCommunityAnnouncement(user, community, body)
   }
 
-
   /**
    * 
    * @param community 
@@ -495,7 +508,6 @@ export class CommunityController {
     @Query() paginate: PaginationRequestDto): Promise<any> {
     return await this.communityService.getCommunityAnnouncements(community, paginate)
   }
-
 
   /**
 * 
@@ -816,22 +828,6 @@ export class CommunityController {
 
   /**
    * 
-   * @param user 
-   * @param community 
-   * @param request 
-   * @returns 
-   */
-  @Get(':community/request/:request')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get a community join request' })
-  async getCommunityJoinRequest(@Param('community') community: string, @Param('request') request: string): Promise<any> {
-    if (!isMongoId(request)) throw new BadRequestException()
-    if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunintyJoinRequest(community, request)
-  }
-
-  /**
-   * 
    * @param community 
    * @param member 
    * @returns 
@@ -848,22 +844,6 @@ export class CommunityController {
 
   /**
    * 
-   * @param user 
-   * @param community 
-   * @param request 
-   * @returns 
-   */
-  @Get('/request/:request')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
-  @ApiOperation({ summary: 'Get a community join request' })
-  async getManagedCommunityJoinRequest(@ManagedCommunity() community: string, @Param('request') request: string): Promise<any> {
-    if (!isMongoId(request)) throw new BadRequestException()
-    return await this.communityService.getCommunintyJoinRequest(community, request)
-  }
-
-  /**
-   * 
    * @param community 
    * @param paginate 
    * @returns 
@@ -873,8 +853,25 @@ export class CommunityController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @ApiOperation({ summary: 'Get all community join requests' })
   async getCommunityJoinRequests(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.communityService.getCommunintyJoinRequests(community, paginate)
+    return await this.communityService.getCommunityJoinRequests(community, paginate)
   }
+
+  /**
+ * 
+ * @param user 
+ * @param community 
+ * @param request 
+ * @returns 
+ */
+  @Get('/request/:request')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get a community join request' })
+  async getManagedCommunityJoinRequest(@ManagedCommunity() community: string, @Param('request') request: string): Promise<any> {
+    if (!isMongoId(request)) throw new BadRequestException()
+    return await this.communityService.getCommunintyJoinRequest(community, request)
+  }
+
 
   /**
    * 
@@ -888,6 +885,22 @@ export class CommunityController {
   @ApiOperation({ summary: 'Approve/Decline community join request' })
   async setCommunityJoinRequestStatus(@Body() body: CommunityRequestStatusDto, @ManagedCommunity() community: string): Promise<void> {
     await this.communityService.setJoinRequestStatus(community, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param request 
+   * @returns 
+   */
+  @Get(':community/request/:request')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community join request' })
+  async getCommunityJoinRequest(@Param('community') community: string, @Param('request') request: string): Promise<any> {
+    if (!isMongoId(request)) throw new BadRequestException()
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getCommunintyJoinRequest(community, request)
   }
 
   /**
@@ -1193,11 +1206,12 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Update community authorized access user permissions' })
   async updateCommunityAuthorizedUserPermissions(
+    @User() user: string,
     @PrimaryCommunity() community: string,
     @Param('member') member: string,
     @Body() body: CommunityAuthorizedUserPermissionsDto): Promise<void> {
     if (!isMongoId(member)) throw new BadRequestException()
-    return await this.communityService.updateCommunityAuthorizedUserPermissions(community, member, body)
+    return await this.communityService.updateCommunityAuthorizedUserPermissions(user, community, member, body)
   }
 
   /**

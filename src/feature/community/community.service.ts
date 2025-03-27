@@ -874,11 +874,11 @@ export class CommunityService {
    * @param member 
    * @param body 
    */
-  async updateCommunityAuthorizedUserPermissions(community: string, member: string, body: CommunityAuthorizedUserPermissionsDto): Promise<any> {
-    let memberData = await this.communityRepository.getCommunityAuthorizedUser(community, member)
+  async updateCommunityAuthorizedUserPermissions(user: string, community: string, member: string, body: CommunityAuthorizedUserPermissionsDto): Promise<any> {
+    let memberData = await this.communityRepository.getCommunityAuthorizedUser(user, community, member)
 
     if (memberData)
-      return await this.communityRepository.updateCommunityAuthorizedUserPermissions(community, member, body)
+      return await this.communityRepository.updateCommunityAuthorizedUserPermissions(user, community, member, body)
 
     throw new NotFoundException()
   }
@@ -1033,8 +1033,19 @@ export class CommunityService {
    * @param limit 
    * @returns 
    */
-  async getCommunintyJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+  async getCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getCommunityJoinRequests(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+  async getCommunityDependantRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityDependantRequests(community, paginate)
   }
 
   /**

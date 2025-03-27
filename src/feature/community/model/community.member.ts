@@ -32,6 +32,9 @@ export class CommunityMember {
   @Prop()
   comment?: string
 
+  @Prop()
+  requestId?: string
+
   @Prop({ default: 0 })
   authorizedCount?: number
 

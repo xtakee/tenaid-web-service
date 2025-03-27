@@ -181,14 +181,15 @@ const queue = BullModule.registerQueue({
       useFactory: async () => {
         const schema = CommunityMemberSchema
         schema.pre('save', async function () {
-          if (this.isModified('extra.firstName') || this.isModified('extra.lastName') || this.isNew) {
-            this.searchable = searchable(`${this.extra.firstName} ${this.extra.lastName}`)
+          if (this.isNew) {
+            this.searchable = searchable(`${this.code} ${this.extra.firstName} ${this.extra.lastName}`)
+            this.requestId = new AuthHelper().random(5).toUpperCase()
           }
         })
 
         schema.pre('findOneAndUpdate', async function (next) {
           if ((this.getUpdate() as any).firstName || (this.getUpdate() as any).lastName) {
-            (this.getUpdate() as any).searchable = searchable(`${(this.getUpdate() as any).extra.firstName} ${(this.getUpdate() as any).extra.lastName}`)
+            (this.getUpdate() as any).searchable = searchable(`${(this.getUpdate() as any).code} ${(this.getUpdate() as any).extra.firstName} ${(this.getUpdate() as any).extra.lastName}`)
           }
           next()
         })

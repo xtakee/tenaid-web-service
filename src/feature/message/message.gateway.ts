@@ -259,8 +259,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           await this.messageRepository.removeMessageSeenAck(author, message, platform)
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.SEEN)
 
+          const privateRoom = `${account}-${platform}`
           // send delivery status to author
-          this.server.to(author).emit(EVENT_NAME_MESSAGE_SEEN, deliveredMessage)
+          this.server.to(privateRoom).emit(EVENT_NAME_MESSAGE_SEEN, deliveredMessage)
         }
       }
     }
@@ -297,8 +298,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           await this.messageRepository.removeMessageAck(author, message, platform)
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.DELIVERED)
 
+          const privateRoom = `${account}-${platform}`
           // send delivery status to author
-          this.server.to(author).emit(EVENT_NAME_DELIVERY, deliveredMessage)
+          this.server.to(privateRoom).emit(EVENT_NAME_DELIVERY, deliveredMessage)
         }
       }
     }

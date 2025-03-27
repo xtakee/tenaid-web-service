@@ -16,9 +16,4 @@ export class CommunityAuthorizedUserPermissionsDto {
   @IsNotEmpty()
   @IsBoolean()
   canSendMessage: Boolean
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsMongoId()
-  user: string
 }

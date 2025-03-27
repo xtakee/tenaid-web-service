@@ -107,7 +107,7 @@ function getVisitorsCheckinsQuery(page: number, limit: number) {
   }
 }
 
-const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id code memberId street extra createdAt updatedAt isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
+const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id requestId code memberId street extra createdAt updatedAt isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
 const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description kycAcknowledged code members type images logo status isPrimary address'
 
 const MEMBER_COMMUNITIES_QUERY = [{
@@ -481,10 +481,10 @@ export class CommunityRepository {
    * @param member 
    * @param body 
    */
-  async updateCommunityAuthorizedUserPermissions(community: string, member: string, body: CommunityAuthorizedUserPermissionsDto): Promise<any> {
+  async updateCommunityAuthorizedUserPermissions(user: string, community: string, member: string, body: CommunityAuthorizedUserPermissionsDto): Promise<any> {
     return await this.communityMemberModel.findOneAndUpdate({
-      _id: new Types.ObjectId(body.user),
-      linkedTo: new Types.ObjectId(member),
+      _id: new Types.ObjectId(member),
+      account: new Types.ObjectId(user),
       community: new Types.ObjectId(community)
     }, {
       canCreateExit: body.canCreateExit,
@@ -502,9 +502,10 @@ export class CommunityRepository {
    * @param member 
    * @returns 
    */
-  async getCommunityAuthorizedUser(community: string, member: string): Promise<any> {
+  async getCommunityAuthorizedUser(user: string, community: string, member: string): Promise<any> {
     return await this.communityMemberModel.findOne({
-      linkedTo: new Types.ObjectId(member),
+      _id: new Types.ObjectId(member),
+      account: new Types.ObjectId(user),
       community: new Types.ObjectId(community)
     }, COMMUNITY_MEMBER_PRIMARY_QUERY).populate(COMMUNITY_MEMBER_QUERY).exec()
   }
@@ -903,7 +904,7 @@ export class CommunityRepository {
       _id: new Types.ObjectId(request),
       community: new Types.ObjectId(community),
       status: ACCOUNT_STATUS.PENDING
-    }, '_id community street code apartment building extra status createdAt updatedAt')
+    }, COMMUNITY_MEMBER_PRIMARY_QUERY)
       .populate(COMMUNITY_MEMBER_QUERY).exec()
   }
 
@@ -1204,7 +1205,7 @@ export class CommunityRepository {
       query.updatedAt = { $gt: new Date(date) }
 
     return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
-      select: '_id street apartment building status code extra isAdmin updatedAt createdAt',
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
@@ -1240,7 +1241,7 @@ export class CommunityRepository {
     }
 
     return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
-      select: '_id street apartment createdAt updatedAt building status canCreateInvite canSendMessage canCreateExit status code extra isAdmin community',
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
@@ -1801,7 +1802,7 @@ export class CommunityRepository {
         'extra.email.value': email.trim().toLowerCase(),
         status: ACCOUNT_STATUS.INVITED
       },
-      '_id code street isAdmin extra isPrimary point description status community')
+      COMMUNITY_MEMBER_PRIMARY_QUERY)
       .populate(MEMBER_COMMUNITIES_QUERY).exec()
   }
 
@@ -1875,25 +1876,36 @@ export class CommunityRepository {
 
   /**
    * 
-   * @param member 
-   * @returns 
-   */
-  async getMemberRequest(member: string): Promise<any> {
-    return await this.communityMemberModel.findOne(
-      { _id: new Types.ObjectId(member) },
-      '_id code street isAdmin status community')
-      .populate(MEMBER_COMMUNITIES_QUERY).exec()
-  }
-
-  /**
-   * 
    * @param community 
    * @returns 
    */
   async getCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
-      status: ACCOUNT_STATUS.PENDING
+      status: ACCOUNT_STATUS.PENDING,
+      linkedTo: null
+    }
+
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: COMMUNITY_MEMBER_QUERY
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityDependantRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING,
+      linkedTo: { $ne: null }
     }
 
     return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
