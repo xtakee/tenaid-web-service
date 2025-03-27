@@ -296,11 +296,12 @@ export class MessageRepository {
    * @param data 
    * @returns 
    */
-  private buildMessage(user: string, data: MessageRequestDto) {
+  private buildMessage(user: string, data: MessageRequestDto, platform: string) {
     return {
       _id: new Types.ObjectId(data.remoteId),
       messageId: data.messageId,
       room: new Types.ObjectId(data.room),
+      platform: platform,
       repliedTo: data.repliedTo ? new Types.ObjectId(data.repliedTo) : null,
       author: new Types.ObjectId(data.author),
       account: new Types.ObjectId(data.account ? data.account : user),
@@ -344,7 +345,8 @@ export class MessageRepository {
     message: string,
     type: string,
     totalNodes: number,
-    targetNodes: number): Promise<void> {
+    targetNodes: number,
+    platform: string): Promise<void> {
     // create cache message for offline and delivery status
     await this.messageCacheModel.findOneAndUpdate({
       message: new Types.ObjectId(message),
@@ -357,6 +359,7 @@ export class MessageRepository {
       author: new Types.ObjectId(user),
       room: new Types.ObjectId(room),
       reached: 0,
+      platform: platform,
       totalNodes: totalNodes,
       targetNodes: targetNodes,
       targets: [],
@@ -372,7 +375,7 @@ export class MessageRepository {
    * @param targetNodes 
    * @returns 
    */
-  async deleteMessage(user: string, data: MessageRequestDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+  async deleteMessage(user: string, data: MessageRequestDto, targets: number, targetNodes: number, platform: string): Promise<MessageResonseDto> {
     // create cache message for offline and delivery status
     await this.createMessageCache(
       data.community,
@@ -381,7 +384,8 @@ export class MessageRepository {
       data.remoteId,
       MessageCacheType.DELETE_MESSAGE,
       targets,
-      targetNodes
+      targetNodes,
+      platform
     )
 
     return (await this.messageModel.findOneAndUpdate({
@@ -393,7 +397,7 @@ export class MessageRepository {
       deleted: true,
       _id: new Types.ObjectId(data.remoteId),
       deletedBy: new Types.ObjectId(data.deletedBy),
-      ...this.buildMessage(user, data)
+      ...this.buildMessage(user, data, platform)
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)
   }
@@ -406,7 +410,7 @@ export class MessageRepository {
    * @param targetNodes 
    * @returns 
    */
-  async updateMessage(user: string, data: MessageRequestDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+  async updateMessage(user: string, data: MessageRequestDto, targets: number, targetNodes: number, platform: string): Promise<MessageResonseDto> {
     // delete any message cache
     await this.messageCacheModel.deleteMany({
       message: new Types.ObjectId(data.remoteId)
@@ -420,7 +424,8 @@ export class MessageRepository {
       data.remoteId,
       MessageCacheType.UPDATE_MESSAGE,
       targets,
-      targetNodes
+      targetNodes,
+      platform
     )
 
     return (await this.messageModel.findOneAndUpdate({
@@ -429,7 +434,7 @@ export class MessageRepository {
       room: new Types.ObjectId(data.room),
       community: new Types.ObjectId(data.community)
     }, {
-      ...this.buildMessage(user, data),
+      ...this.buildMessage(user, data, platform),
       _id: new Types.ObjectId(data.remoteId),
       status: MessageStatus.SENT,
       edited: true
@@ -445,7 +450,7 @@ export class MessageRepository {
    * @param targetNodes 
    * @returns 
    */
-  async createMessage(user: string, message: MessageRequestDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+  async createMessage(user: string, message: MessageRequestDto, targets: number, targetNodes: number, platform: string): Promise<MessageResonseDto> {
     let messageData: Message = {
       account: new Types.ObjectId(user),
       room: new Types.ObjectId(message.room),
@@ -455,6 +460,7 @@ export class MessageRepository {
       body: message.body,
       path: message.path,
       size: message.size,
+      platform: platform,
       visibility: message.visibility,
       encryption: message.encryption,
       category: message.category ? new Types.ObjectId(message.category) : null,
@@ -474,7 +480,8 @@ export class MessageRepository {
       (messageData as any)._id.toString(),
       MessageCacheType.NEW_MESSAGE,
       targets,
-      targetNodes)
+      targetNodes,
+      platform)
 
     return await this.getMessageById(message.community, (messageData as any)._id.toString())
   }
@@ -533,7 +540,7 @@ export class MessageRepository {
    * @param targetNodes 
    * @returns 
    */
-  async updateMessageReaction(user: string, data: MessageRequestDto, targets: number, targetNodes: number): Promise<MessageResonseDto> {
+  async updateMessageReaction(user: string, data: MessageRequestDto, targets: number, targetNodes: number, platform: string): Promise<MessageResonseDto> {
     const message = await this.messageModel.findOne({
       _id: new Types.ObjectId(data.remoteId),
       community: new Types.ObjectId(data.community)
@@ -562,14 +569,14 @@ export class MessageRepository {
       user,
       data.remoteId,
       MessageCacheType.REACT_MESSAGE,
-      targets, targetNodes
+      targets, targetNodes, platform
     )
 
     return (await this.messageModel.findOneAndUpdate({
       _id: new Types.ObjectId(data.remoteId),
       community: new Types.ObjectId(data.community)
     }, {
-      ...this.buildMessage(user, data),
+      ...this.buildMessage(user, data, platform),
       _id: new Types.ObjectId(data.remoteId),
     }, { new: true, upsert: true })
       .populate(CommunityMessagePopulateQuery).exec() as any)

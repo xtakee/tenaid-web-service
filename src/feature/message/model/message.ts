@@ -78,6 +78,9 @@ export class Message {
 
   @Prop({ type: Date })
   date: Date
+
+  @Prop()
+  platform: string
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)

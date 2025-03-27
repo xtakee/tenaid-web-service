@@ -2271,6 +2271,8 @@ export class CommunityRepository {
         rooms.push(accountCommunity.building.toString())
     }
 
+    rooms.push(user)
+
     return rooms
   }
 

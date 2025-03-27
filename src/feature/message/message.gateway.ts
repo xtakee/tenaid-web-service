@@ -150,12 +150,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const room = message.room
       const account: string = client.data.user.sub
+      const platform: string = client.data.user.platform
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
       const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response = await this.messageRepository.deleteMessage(account, message, totalNodes, targetNodes)
+      const response = await this.messageRepository.deleteMessage(account, message, totalNodes, targetNodes, platform)
       this.server.to(room).emit(EVENT_NAME_DELETE, response)
     }
 
@@ -225,9 +226,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       } else {
         for (const room of rooms) client.join(room) // join all active community rooms
       }
-
-      // join account private room
-      client.join(`${account}-${platform}`)
     }
 
     return message
@@ -259,9 +257,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           await this.messageRepository.removeMessageSeenAck(author, message, platform)
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.SEEN)
 
-          const privateRoom = `${account}-${platform}`
           // send delivery status to author
-          this.server.to(privateRoom).emit(EVENT_NAME_MESSAGE_SEEN, deliveredMessage)
+          this.server.to(author).emit(EVENT_NAME_MESSAGE_SEEN, deliveredMessage)
         }
       }
     }
@@ -298,9 +295,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
           await this.messageRepository.removeMessageAck(author, message, platform)
           const deliveredMessage = await this.messageRepository.setMessageStatus(community, message.message, MessageStatus.DELIVERED)
 
-          const privateRoom = `${account}-${platform}`
           // send delivery status to author
-          this.server.to(privateRoom).emit(EVENT_NAME_DELIVERY, deliveredMessage)
+          this.server.to(author).emit(EVENT_NAME_DELIVERY, deliveredMessage)
         }
       }
     }
@@ -345,12 +341,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const room = message.room
       const account: string = client.data.user.sub
+      const platform: string = client.data.user.platform
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
       const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response = await this.messageRepository.updateMessage(account, message, totalNodes, targetNodes)
+      const response = await this.messageRepository.updateMessage(account, message, totalNodes, targetNodes, platform)
       this.server.to(room).emit(EVENT_NAME_UPDATE, response)
     }
 
@@ -368,12 +365,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       const room = message.room
       const account: string = client.data.user.sub
+      const platform: string = client.data.user.platform
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
       const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response = await this.messageRepository.updateMessageReaction(account, message, totalNodes, targetNodes)
+      const response = await this.messageRepository.updateMessageReaction(account, message, totalNodes, targetNodes, platform)
 
       this.server.to(room).emit(EVENT_NAME_REACTION, response)
     }
@@ -439,7 +437,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
       const targetNodes: number = await this.messageRepository.getTotalMessageEffectiveNodes(room)
 
-      const response: MessageResonseDto = await this.messageRepository.createMessage(account, message, totalNodes, targetNodes)
+      const response: MessageResonseDto = await this.messageRepository.createMessage(account, message, totalNodes, targetNodes, platform)
 
       this.server.to(room).emit(EVENT_NAME, response)
       const sender = response.author.isAdmin ? 'Admin' : `${response.author.extra.firstName} ${response.author.extra.lastName}`

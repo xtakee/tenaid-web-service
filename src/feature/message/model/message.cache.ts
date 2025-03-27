@@ -29,6 +29,9 @@ export class MessageCache {
   @Prop({ default: 0 })
   totalSeen?: number
 
+  @Prop()
+  platform: string
+
   @Prop({ enum: MessageCacheType })
   type: string
 
