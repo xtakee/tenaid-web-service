@@ -1077,7 +1077,8 @@ export class CommunityRepository {
   async getAllCommunityStreetMembers(community: string, street: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityMember>> {
     const query: any = {
       community: new Types.ObjectId(community),
-      street: new Types.ObjectId(street)
+      street: new Types.ObjectId(street),
+      building: { $ne: null }
     }
 
     return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
@@ -1191,6 +1192,7 @@ export class CommunityRepository {
   async getAllCommunityMembersForSecurity(user: string, community: string, paginate: PaginationRequestDto, date?: string): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
+      building: { $ne: null },
       $or: [
         { status: ACCOUNT_STATUS.ACCEPTED },
         { status: ACCOUNT_STATUS.APPROVED }
@@ -1228,6 +1230,7 @@ export class CommunityRepository {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
+      building: { $ne: null },
       isOwner: true
     }
 
@@ -2439,7 +2442,8 @@ export class CommunityRepository {
   async getAllCommunityAuthorizedUsers(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
-      linkedTo: { $ne: null }
+      linkedTo: { $ne: null },
+      status: ACCOUNT_STATUS.APPROVED
     }
 
     return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
@@ -2451,13 +2455,13 @@ export class CommunityRepository {
     })
   }
 
-/**
- * 
- * @param community 
- * @param member 
- * @param paginate 
- * @returns 
- */
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param paginate 
+   * @returns 
+   */
   async getCommunityMemberAuthorizedUsers(community: string, member: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
