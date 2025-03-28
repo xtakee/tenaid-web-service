@@ -336,7 +336,7 @@ export class AccountRepository implements IAccountRepository {
     return await this.managedAccountModel.findOne({
       _id: new Types.ObjectId(role),
       community: new Types.ObjectId(community)
-    }, '_id isActive account createdBy permissions').populate([{
+    }, '_id isActive account createdBy permissions userId').populate([{
       path: 'createdBy',
       select: '_id firstName lastName email.value',
       strictPopulate: false
@@ -382,7 +382,7 @@ export class AccountRepository implements IAccountRepository {
     }
 
     return await this.paginator.paginate(this.managedAccountModel, buildSearchQuery(query, paginate.search), {
-      select: '_id isActive account community createdBy permissions',
+      select: '_id isActive account community createdBy permissions userId',
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
@@ -483,21 +483,6 @@ export class AccountRepository implements IAccountRepository {
     }
 
     return await this.addOnRequestModel.create(addOn)
-  }
-
-  /**
-  * 
-  * @param user 
-  * @returns 
-  */
-  async getOwnManagedAccounts(user: string): Promise<any> {
-    return await this.managedAccountModel.find({ account: new Types.ObjectId(user) }, '_id owner account')
-      .populate({
-        path: 'owner',
-        select: '_id firstName lastName photo email.value',
-        strictPopulate: false
-      }
-      ).exec()
   }
 
   /**

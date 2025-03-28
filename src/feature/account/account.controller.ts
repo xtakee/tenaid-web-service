@@ -218,18 +218,6 @@ export class AccountController {
 
   /**
    * 
-   * @param id 
-   * @returns 
-   */
-  @Get('managed')
-  @ApiOperation({ summary: 'Get Managed Accounts' })
-  @BasicAuth()
-  async getManagedAccounts(@User() id: string): Promise<Role[]> {
-    return await this.accountService.getManagedAccounts(id)
-  }
-
-  /**
-   * 
    * @param user 
    * @returns BankAccountResponseDto
    */

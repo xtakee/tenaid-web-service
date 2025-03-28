@@ -306,25 +306,6 @@ export class AccountService {
 
   /**
    * 
-   * @param user 
-   * @returns 
-   */
-  async getManagedAccounts(user: string): Promise<Role[]> {
-    const accounts = await this.accountRepository.getOwnManagedAccounts(user)
-
-    return accounts.map(response => {
-      return {
-        name: `${response.owner.firstName} ${response.owner.lastName}`,
-        photo: response.owner.photo,
-        email: response.owner.email.value,
-        id: response._id,
-        isOwner: response.owner._id.toString() === user
-      }
-    })
-  }
-
-  /**
-   * 
    * @param data 
    * @param id 
    * @returns 

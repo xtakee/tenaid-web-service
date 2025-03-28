@@ -64,6 +64,7 @@ import { Counter, CounterSchema } from '../core/counter/model/counter.model';
         schema.pre('save', async function () {
           if (this.isNew) {
             this.searchable = searchable(this.name)
+            this.userId = (new AuthHelper()).random(5).toUpperCase()
           }
         })
 

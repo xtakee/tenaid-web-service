@@ -27,6 +27,9 @@ export class ManagedAccount {
   permissions: Permission[]
 
   @Prop()
+  userId?: string
+
+  @Prop()
   email?: string
 
   @Prop()
