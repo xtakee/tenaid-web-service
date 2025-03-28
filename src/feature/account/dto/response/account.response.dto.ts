@@ -51,7 +51,7 @@ export class AccountResponseDto {
   flags: DashboardFlagsDto
   kycCompleted?: Boolean
   communityKycAcknowledged?: Boolean
-  community?: [{}]
+  communities?: [{}]
   communitySetup?: {} = {
     street: false,
     building: false,

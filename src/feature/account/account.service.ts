@@ -400,7 +400,7 @@ export class AccountService {
           member: primaryManagedCommunity.communitySetup?.member === true
         }
 
-        accountDto.community = [{
+        accountDto.communities = [{
           _id: (primaryManagedCommunity as any)._id.toString(),
           name: primaryManagedCommunity.name,
           logo: primaryManagedCommunity.logo,
