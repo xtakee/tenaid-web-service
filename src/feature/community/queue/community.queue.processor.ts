@@ -11,6 +11,7 @@ export const STREET_BUILDINGS_SUMMARY = 'update-street-building-summary'
 export const COMMUNITY_STREETS_SUMMARY = 'update-community-street-summary'
 export const COMMUNITY_BUILDINGS_SUMMARY = 'update-community-building-summary'
 export const COMMUNITY_MEMBERS_SUMMARY = 'update-community-member-summary'
+export const COMMUNITY_DEPENDANT_SUMMARY = 'update-community-dependant-summary'
 
 @Processor('community_worker_queue')
 @Injectable()
@@ -69,6 +70,16 @@ export class CommunityQueueProcessor extends WorkerHost {
           const buildings = await this.communityRepository.getCommunityBuildingsCount(community)
 
           await this.communityRepository.updateCommunityBuildingsSummary(community, buildings)
+
+          return
+        }
+
+        case COMMUNITY_DEPENDANT_SUMMARY: {
+          // update community summary
+          const { community } = job.data
+          const count = await this.communityRepository.getCommunityDependantsCount(community)
+
+          await this.communityRepository.updateCommunityDependantsSummary(community, count)
 
           return
         }

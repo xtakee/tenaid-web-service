@@ -1385,6 +1385,20 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param dependants 
+   */
+  async updateCommunityDependantsSummary(community: string, dependants: number): Promise<void> {
+    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
+      $set: {
+        dependants: dependants,
+        community: new Types.ObjectId(community)
+      }
+    }, { upsert: true, new: true })
+  }
+
+  /**
+   * 
+   * @param community 
    * @param members 
    */
   async updateCommunityMembersSummary(community: string, members: number): Promise<void> {
@@ -1504,6 +1518,17 @@ export class CommunityRepository {
   async getCommunityBuildingsCount(community: string): Promise<number> {
     return await this.communityBuildingModel.countDocuments({
       community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
+ * 
+ * @param community 
+ */
+  async getCommunityDependantsCount(community: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      linkedTo: { $ne: null }
     })
   }
 

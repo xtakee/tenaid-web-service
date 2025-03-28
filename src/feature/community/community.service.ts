@@ -5,7 +5,7 @@ import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
 import { ACCOUNT_STATUS } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_ACCESS_POINT_ERROR, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, DUPLICATE_HOUSE_NUMBER_ERROR, DUPLICATE_RECORD_ERROR, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
+import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, DUPLICATE_HOUSE_NUMBER_ERROR, DUPLICATE_RECORD_ERROR, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
@@ -46,7 +46,7 @@ import { CommunityMember } from './model/community.member';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { BUILDING_MEMBERS_SUMMARY, COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREETS_SUMMARY, STREET_BUILDINGS_SUMMARY, STREET_MEMBERS_SUMMARY } from './queue/community.queue.processor';
+import { BUILDING_MEMBERS_SUMMARY, COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_DEPENDANT_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREETS_SUMMARY, STREET_BUILDINGS_SUMMARY, STREET_MEMBERS_SUMMARY } from './queue/community.queue.processor';
 import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
 import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
 import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper';
@@ -533,6 +533,7 @@ export class CommunityService {
       buildings: 0,
       members: 0,
       visitors: 0,
+      dependants: 0,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -815,6 +816,8 @@ export class CommunityService {
           canSendMessage: body.canSendMessage
         }, code)
 
+        // update community summary
+        await this.updateCommuntitySummary(community, COMMUNITY_DEPENDANT_SUMMARY)
         // send email/push notification to existing account / authorized user
         return await this.communityRepository.getCommunityMember((savedMember as any)._id.toString(), community)
       }
