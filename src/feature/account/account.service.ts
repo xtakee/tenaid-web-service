@@ -400,12 +400,13 @@ export class AccountService {
           member: primaryManagedCommunity.communitySetup?.member === true
         }
 
-        accountDto.community = {
+        accountDto.community = [{
           _id: (primaryManagedCommunity as any)._id.toString(),
           name: primaryManagedCommunity.name,
           logo: primaryManagedCommunity.logo,
-          images: primaryManagedCommunity.images
-        }
+          images: primaryManagedCommunity.images,
+          isPrimary: true
+        }]
 
         accountDto.authorization = await this.accountRepository.getOwnAccountAuthorization(user, community)
       }
