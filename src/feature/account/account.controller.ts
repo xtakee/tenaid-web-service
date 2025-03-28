@@ -32,6 +32,7 @@ import { CommunityResponseDto } from "./dto/response/community.response.dto";
 import { CreateRoleDto, UpdateRoleDto } from "./dto/request/create.role.dto";
 import { ManagedCommunity } from "src/core/decorators/managed.community";
 import { VerifyOtpDto } from "./dto/request/verify.otp";
+import { UpdateProfileDto } from "./dto/request/update.profile";
 
 @Controller({
   version: '1',
@@ -192,6 +193,19 @@ export class AccountController {
   @BasicAuth()
   async updateProfile(@Body() body: AccountProfileDto, @User() id: string): Promise<AccountResponseDto> {
     return await this.accountService.updateProfile(id, body)
+  }
+
+  /**
+   * 
+   * @param body 
+   * @param id 
+   * @returns 
+   */
+  @Patch('profile-information')
+  @ApiOperation({ summary: 'Update profile information' })
+  @BasicAuth()
+  async updateProfileInformation(@Body() body: UpdateProfileDto, @User() id: string): Promise<AccountResponseDto> {
+    return await this.accountService.updateProfileInformation(id, body)
   }
 
   /** */

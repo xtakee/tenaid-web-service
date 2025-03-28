@@ -21,6 +21,7 @@ import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto";
 import { UpdateInfoDto } from "./dto/request/update.info.dto";
 import { buildSearchQuery, PaginationRequestDto } from "../core/dto/pagination.request.dto";
 import { PermissionDto } from "../core/model/permission";
+import { UpdateProfileDto } from "./dto/request/update.profile";
 
 @Injectable()
 export class AccountRepository implements IAccountRepository {
@@ -140,6 +141,23 @@ export class AccountRepository implements IAccountRepository {
       'kyc.profileCompleted': true
     }, { returnDocument: 'after' }).exec()
   }
+
+  /**
+   * 
+   * @param id 
+   * @param data 
+   * @returns 
+   */
+  async updateProfileInformation(id: string, data: UpdateProfileDto): Promise<Account> {
+    return await this.accountModel.findByIdAndUpdate(id, {
+      phone: data.phone,
+      photo: data.photo,
+      country: data.country,
+      firstName: data.firstName,
+      lastName: data.lastName
+    }, { returnDocument: 'after' }).exec()
+  }
+
 
   /**
    * 

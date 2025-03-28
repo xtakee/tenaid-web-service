@@ -38,6 +38,7 @@ import { JwtService } from "@nestjs/jwt"
 import { VerifyOtpDto } from "./dto/request/verify.otp"
 import { E2eeData } from "../e2ee/model/e2ee.data"
 import { platform } from "os"
+import { UpdateProfileDto } from "./dto/request/update.profile"
 
 @Injectable()
 export class AccountService {
@@ -402,6 +403,7 @@ export class AccountService {
           member: primaryManagedCommunity.communitySetup?.member === true
         }
 
+        // get account managed communities
         accountDto.communities = [{
           _id: (primaryManagedCommunity as any)._id.toString(),
           name: primaryManagedCommunity.name,
@@ -450,6 +452,19 @@ export class AccountService {
    */
   async updateProfile(user: string, data: AccountProfileDto): Promise<AccountResponseDto> {
     let account = await this.accountRepository.updateProfile(user, data)
+    if (account) return this.mapper.map(account)
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param data 
+   * @returns 
+   */
+  async updateProfileInformation(user: string, data: UpdateProfileDto): Promise<AccountResponseDto> {
+    let account = await this.accountRepository.updateProfileInformation(user, data)
     if (account) return this.mapper.map(account)
 
     throw new NotFoundException()
