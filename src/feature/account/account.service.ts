@@ -36,6 +36,8 @@ import { Account } from "./model/account"
 import { AuthRepository } from "../auth/auth.repository"
 import { JwtService } from "@nestjs/jwt"
 import { VerifyOtpDto } from "./dto/request/verify.otp"
+import { E2eeData } from "../e2ee/model/e2ee.data"
+import { platform } from "os"
 
 @Injectable()
 export class AccountService {
@@ -382,7 +384,7 @@ export class AccountService {
    * @param user 
    * @returns AccountResponseDto
    */
-  async getOwnAccount(user: string, community?: string): Promise<AccountResponseDto> {
+  async getOwnAccount(user: string, platform: string, community?: string): Promise<AccountResponseDto> {
     const account = await this.accountRepository.getOneById(user)
     let primaryManagedCommunity = null
     if (account) {
@@ -405,7 +407,8 @@ export class AccountService {
           name: primaryManagedCommunity.name,
           logo: primaryManagedCommunity.logo,
           images: primaryManagedCommunity.images,
-          isPrimary: true
+          isPrimary: true,
+          encryption: await this.getCommunityEncryption(user, platform, primaryManagedCommunity.encryption)
         }]
 
         accountDto.authorization = await this.accountRepository.getOwnAccountAuthorization(user, community)
@@ -566,16 +569,37 @@ export class AccountService {
   /**
    * 
    * @param user 
+   * @param platform 
+   * @param encryption 
+   * @returns 
+   */
+  private async getCommunityEncryption(user: string, platform: string, encryption: E2eeData): Promise<E2eeData> {
+    const encKeys = await this.e2eeRepository.getAccountKeys(user, platform)
+
+    if (!encKeys || !encKeys.sharedKey || !encryption) return null
+
+    const keys: EasGcmData = this.authHelper.advanceEncrypt(encryption.enc, encKeys.sharedKey)
+
+    return {
+      enc: keys.enc,
+      iv: keys.iv,
+      tag: keys.tag
+    }
+  }
+
+  /**
+   * 
+   * @param user 
    * @param platfom 
    * @param docs 
    * @returns 
    */
-  private async processAccountCommunityEncryption(user: string, platfom: string, result: any): Promise<any> {
+  private async processAccountCommunityEncryption(user: string, platform: string, result: any): Promise<any> {
 
     if (result.docs.length < 1) return result
 
     // get user shared key
-    const encKeys = await this.e2eeRepository.getAccountKeys(user, platfom)
+    const encKeys = await this.e2eeRepository.getAccountKeys(user, platform)
     if (!encKeys || !encKeys.sharedKey) return result
 
     result.docs = result.docs.map((account) => {

@@ -247,8 +247,8 @@ export class AccountController {
   @Get('me')
   @ApiOperation({ summary: 'Get Own Account Details' })
   @BasicAuth()
-  async getOwnAcccount(@User() id: string, @ManagedCommunity() community: string): Promise<AccountResponseDto> {
-    return await this.accountService.getOwnAccount(id, community)
+  async getOwnAcccount(@User() id: string, @Platform() platform: string, @ManagedCommunity() community: string): Promise<AccountResponseDto> {
+    return await this.accountService.getOwnAccount(id, platform, community)
   }
 
   /**
