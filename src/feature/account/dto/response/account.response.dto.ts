@@ -54,7 +54,8 @@ export class AccountResponseDto {
   communitySetup?: {} = {
     street: false,
     building: false,
-    member: false
+    member: false,
+    details: {}
   }
   primaryAccountType?: string
   accountTypes?: AccType[]
