@@ -397,13 +397,14 @@ export class AccountService {
         accountDto.communitySetup = {
           street: primaryManagedCommunity.communitySetup?.street === true,
           building: primaryManagedCommunity.communitySetup?.building === true,
-          member: primaryManagedCommunity.communitySetup?.member === true,
-          details: {
-            _id: (primaryManagedCommunity as any)._id.toString(),
-            name: primaryManagedCommunity.name,
-            logo: primaryManagedCommunity.logo,
-            images: primaryManagedCommunity.images
-          }
+          member: primaryManagedCommunity.communitySetup?.member === true
+        }
+
+        accountDto.community = {
+          _id: (primaryManagedCommunity as any)._id.toString(),
+          name: primaryManagedCommunity.name,
+          logo: primaryManagedCommunity.logo,
+          images: primaryManagedCommunity.images
         }
 
         accountDto.authorization = await this.accountRepository.getOwnAccountAuthorization(user, community)
