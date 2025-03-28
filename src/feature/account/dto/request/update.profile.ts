@@ -13,7 +13,6 @@ export class UpdateProfileDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsUrl()
   firstName: string
 
   @ApiProperty()
