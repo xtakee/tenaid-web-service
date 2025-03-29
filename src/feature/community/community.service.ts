@@ -142,6 +142,7 @@ export class CommunityService {
       return {
         _id: (data as any)._id,
         name: data.name,
+        community: community,
         description: data.description,
         isReadOnly: data.readOnly
       }

@@ -375,8 +375,8 @@ export class CommunityController {
   * @returns 
   */
   @Get('managed/message/category/')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all managed community message categories' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MESSAGES))
   async getManagedCommunityMessageCategory(@ManagedCommunity() community: string): Promise<MessageCategoryDto[]> {
     return this.communityService.getCommunityMessageCategories(community)
   }
