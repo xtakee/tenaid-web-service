@@ -725,7 +725,13 @@ export class AccountRepository implements IAccountRepository {
    * @param data 
    */
   async setDevicePushToken(user: string, data: DeviceTokenRequestDto): Promise<void> {
-    await this.deviceTokenModel.findOneAndUpdate({ account: new Types.ObjectId(user) }, {
+    await this.deviceTokenModel.findOneAndUpdate({
+      $or: [
+        { account: new Types.ObjectId(user) },
+        { token: data.token }
+      ]
+    }, {
+      account: new Types.ObjectId(user),
       token: data.token,
       device: data.device
     }, { new: true, upsert: true, returnDocument: 'after' }).exec()
