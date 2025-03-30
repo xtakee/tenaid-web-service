@@ -419,7 +419,7 @@ export class CommunityController {
    * @param building 
    * @returns 
    */
-  @Get('/:building/members')
+  @Get('building/:building/members')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
   @ApiOperation({ summary: 'Get all community building members' })
@@ -1116,7 +1116,7 @@ export class CommunityController {
    * @param paginate 
    * @returns 
    */
-  @Get('/:street/member')
+  @Get('/street/:street/member')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @ApiOperation({ summary: 'Get all community street members' })
@@ -1181,18 +1181,6 @@ export class CommunityController {
     @Body() body: CreateCommunityDirectorDto): Promise<CommunityDirectorDto> {
     if (!isMongoId(director)) throw new BadRequestException()
     return await this.communityService.updateCommunityDirector(user, community, director, body)
-  }
-
-  /**
-   * 
-   * @param code 
-   * @returns 
-   */
-  @Get('/:code')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get a community by code' })
-  async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
-    return await this.communityService.getCommunityByCode(code)
   }
 
   /**
@@ -1338,5 +1326,17 @@ export class CommunityController {
   async addCommunityMember(@User() user: string, @ManagedCommunity() community: string, @Body() data: AddMemberRequestDto): Promise<void> {
     return this.communityService.addCommunityMember(community, user, data)
   }
+
+    /**
+   * 
+   * @param code 
+   * @returns 
+   */
+    @Get('/:code')
+    @BasicAuth()
+    @ApiOperation({ summary: 'Get a community by code' })
+    async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
+      return await this.communityService.getCommunityByCode(code)
+    }
 
 }
