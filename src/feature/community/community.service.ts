@@ -490,7 +490,7 @@ export class CommunityService {
   async createCommunityStreet(user: string, community: string, data: CommunityStreetRequestDto): Promise<CommunityPathResponseDto> {
     const communityData = await this.communityRepository.getCommunityByUser(user, community)
 
-    if (community) {
+    if (communityData) {
       data.code = this.authHelper.random(5)
       const street: CommunityStreet = await this.communityRepository.createStreet(user, community, data)
 
