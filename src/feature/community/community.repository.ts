@@ -1080,6 +1080,11 @@ export class CommunityRepository {
     const query: any = {
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(street),
+      $or: [
+        { status: ACCOUNT_STATUS.APPROVED },
+        { status: ACCOUNT_STATUS.ACCEPTED },
+        { status: ACCOUNT_STATUS.INVITED }
+      ],
       building: { $ne: null }
     }
 
@@ -1232,6 +1237,11 @@ export class CommunityRepository {
     const query: any = {
       community: new Types.ObjectId(community),
       account: { $ne: new Types.ObjectId(user) },
+      $or: [
+        { status: ACCOUNT_STATUS.APPROVED },
+        { status: ACCOUNT_STATUS.ACCEPTED },
+        { status: ACCOUNT_STATUS.INVITED }
+      ],
       building: { $ne: null },
       isOwner: true
     }
@@ -2234,7 +2244,8 @@ export class CommunityRepository {
       building: new Types.ObjectId(building),
       $or: [
         { status: ACCOUNT_STATUS.APPROVED },
-        { status: ACCOUNT_STATUS.ACCEPTED }
+        { status: ACCOUNT_STATUS.ACCEPTED },
+        { status: ACCOUNT_STATUS.INVITED }
       ]
     }
 
