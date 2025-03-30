@@ -533,8 +533,10 @@ export class CommunityService {
       streets: 0,
       buildings: 0,
       members: 0,
+      memberRequests: 0,
       visitors: 0,
       dependants: 0,
+      dependantRequests: 0,
       createdAt: new Date(),
       updatedAt: new Date()
     }

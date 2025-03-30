@@ -560,6 +560,7 @@ export class CommunityRepository {
     }).exec()
 
     if (!count || count === 0) member.isPrimary = true
+    else member.isPrimary = false
 
     return await this.communityMemberModel.create(member).then(data => data.populate(MEMBER_COMMUNITIES_QUERY))
   }
@@ -1401,10 +1402,12 @@ export class CommunityRepository {
    * @param community 
    * @param members 
    */
-  async updateCommunityMembersSummary(community: string, members: number): Promise<void> {
+  async updateCommunityMembersSummary(community: string, members: number, memberRequests: number, dependantRequests: number): Promise<void> {
     await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
       $set: {
         members: members,
+        dependantRequests: dependantRequests,
+        memberRequests: memberRequests,
         community: new Types.ObjectId(community)
       }
     }, { upsert: true, new: true })
@@ -1531,6 +1534,33 @@ export class CommunityRepository {
       linkedTo: { $ne: null }
     })
   }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityDependantRequestsCount(community: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING,
+      linkedTo: { $ne: null }
+    })
+  }
+
+  /**
+  * 
+  * @param community 
+  * @returns 
+  */
+  async getCommunityMemberRequestsCount(community: string): Promise<number> {
+    return await this.communityMemberModel.countDocuments({
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING,
+      linkedTo: null
+    })
+  }
+
 
   /**
    * 

@@ -88,8 +88,10 @@ export class CommunityQueueProcessor extends WorkerHost {
           // update community summary
           const { community } = job.data
           const members = await this.communityRepository.getCommunityResidentsCount(community)
+          const memberRequests = await this.communityRepository.getCommunityMemberRequestsCount(community)
+          const dependantRequests = await this.communityRepository.getCommunityDependantRequestsCount(community)
 
-          await this.communityRepository.updateCommunityMembersSummary(community, members)
+          await this.communityRepository.updateCommunityMembersSummary(community, members, memberRequests, dependantRequests)
 
           return
         }

@@ -350,6 +350,28 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param community 
+   * @param role 
+   * @returns 
+   */
+  async getCommunityAccountRoleByEmail(community: string, email: string): Promise<ManagedAccount> {
+    return await this.managedAccountModel.findOne({
+      email: email.trim().toLowerCase(),
+      community: new Types.ObjectId(community)
+    }, '_id isActive account createdBy permissions userId').populate([{
+      path: 'createdBy',
+      select: '_id firstName lastName email.value',
+      strictPopulate: false
+    }, {
+      path: 'account',
+      select: '_id firstName lastName email.value phone country',
+      strictPopulate: false
+    }
+    ])
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    */

@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException,
 import { AccountRepository } from "./account.respository"
 import { AccountCreateDto } from "src/feature/account/dto/request/account.create.dto"
 import { AccountUpdateDto } from "src/feature/account/dto/request/account.update.dto"
-import { AccountResponseDto, Role } from "src/feature/account/dto/response/account.response.dto"
+import { AccountResponseDto } from "src/feature/account/dto/response/account.response.dto"
 import { AccountToDtoMapper } from "./mapper/account.to.dto.mapper"
 import { AddBankAccountDto } from "src/feature/account/dto/request/add.bank.account.dto"
 import { BankAccountResponseDto } from "src/feature/account/dto/response/bank.account.response.dts"
@@ -12,7 +12,7 @@ import { AccountProfileDto } from "src/feature/account/dto/request/account.profi
 import { AddressDto } from "src/feature/core/dto/address.dto"
 import { ACCOUNT_STATUS, ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultCommunityAdminPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants"
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto"
-import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, INVALID_OTP } from "src/core/strings"
+import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, DUPLICATE_RECORD_ERROR, INVALID_OTP } from "src/core/strings"
 import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto"
 import { AuthHelper, EasGcmData } from "src/core/helpers/auth.helper"
 import { Types } from "mongoose"
@@ -233,6 +233,9 @@ export class AccountService {
    * @param body 
    */
   async createCommunityAccountRole(user: string, community: string, body: CreateRoleDto): Promise<ManagedAccount> {
+    const exists = await this.accountRepository.getCommunityAccountRoleByEmail(community, body.email)
+    if (exists) throw new BadRequestException(DUPLICATE_RECORD_ERROR)
+
     let account = await this.accountRepository.getAccountByEmail(body.email)
 
     if (!account) {

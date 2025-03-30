@@ -19,6 +19,12 @@ export class CommunitySummary {
   members?: number
 
   @Prop({ default: 0 })
+  memberRequests?: number
+
+  @Prop({ default: 0 })
+  dependantRequests?: number
+
+  @Prop({ default: 0 })
   dependants?: number
 
   @Prop({ default: 0 })
