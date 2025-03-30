@@ -400,7 +400,7 @@ export class CommunityController {
    * @param street 
    * @returns 
    */
-  @Get('/:street/summary')
+  @Get('street/:street/summary')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.STREET))
   @ApiOperation({ summary: 'Get community street summary' })
@@ -438,7 +438,7 @@ export class CommunityController {
    * @param building 
    * @returns 
    */
-  @Get('/:building/summary')
+  @Get('building/:building/summary')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
   @ApiOperation({ summary: 'Get community building summary' })
