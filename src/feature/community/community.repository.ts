@@ -2660,9 +2660,15 @@ export class CommunityRepository {
 * @param community 
 * @returns 
 */
-  async getCommunityMessageCategories(community: string): Promise<MessageCategory[]> {
-    return this.messageCategoryModel.find({
-      community: new Types.ObjectId(community)
+  async getCommunityMessageCategories(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    const query: any = { community: new Types.ObjectId(community) }
+
+    return await this.paginator.paginate(this.messageCategoryModel, buildSearchQuery(query, paginate.search), {
+      select: '_id name description community readOnly',
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort
     })
   }
 

@@ -136,17 +136,8 @@ export class CommunityService {
 * @param community 
 * @returns 
 */
-  async getCommunityMessageCategories(community: string): Promise<MessageCategoryDto[]> {
-    const categories = await this.communityRepository.getCommunityMessageCategories(community)
-    return categories.map((data) => {
-      return {
-        _id: (data as any)._id,
-        name: data.name,
-        community: community,
-        description: data.description,
-        isReadOnly: data.readOnly
-      }
-    })
+  async getCommunityMessageCategories(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityMessageCategories(community, paginate)
   }
 
   /**

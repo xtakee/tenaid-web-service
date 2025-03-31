@@ -175,7 +175,25 @@ const queue = BullModule.registerQueue({
     MongooseModule.forFeature([{ name: CommunitySummary.name, schema: CommunitySummarySchema }]),
     MongooseModule.forFeature([{ name: BuildingSummary.name, schema: BuildingSummarySchema }]),
     MongooseModule.forFeature([{ name: StreetSummary.name, schema: StreetSummarySchema }]),
-    MongooseModule.forFeature([{ name: MessageCategory.name, schema: MessageCategorySchema }]),
+    MongooseModule.forFeatureAsync([{
+      name: MessageCategory.name,
+      useFactory: async () => {
+        const schema = MessageCategorySchema
+        schema.pre('save', async function () {
+          if (this.isNew) {
+            this.searchable = searchable(this.name)
+          }
+        })
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).name) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
+          }
+          next()
+        })
+        return schema
+      },
+    }]),
     MongooseModule.forFeatureAsync([{
       name: CommunityMember.name,
       useFactory: async () => {

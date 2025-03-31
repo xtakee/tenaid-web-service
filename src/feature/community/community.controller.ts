@@ -364,21 +364,14 @@ export class CommunityController {
   @Get('/message/category')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community message categories' })
-  async getCommunityMessageCategory(@PrimaryCommunity() community: string): Promise<MessageCategoryDto[]> {
-    return this.communityService.getCommunityMessageCategories(community)
-  }
-
-  /**
-  * 
-  * @param user 
-  * @param community 
-  * @returns 
-  */
-  @Get('managed/message/category/')
-  @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MESSAGES))
-  async getManagedCommunityMessageCategory(@ManagedCommunity() community: string): Promise<MessageCategoryDto[]> {
-    return this.communityService.getCommunityMessageCategories(community)
+  async getCommunityMessageCategory(
+    @Platform() platform: string,
+    @ManagedCommunity() community: string,
+    @PrimaryCommunity() primaryCommunity: string,
+    @Query() paginate: PaginationRequestDto
+  ): Promise<PaginatedResult<any>> {
+    const _community = platform === 'web' ? community : primaryCommunity
+    return this.communityService.getCommunityMessageCategories(_community, paginate)
   }
 
   /**
@@ -1327,16 +1320,16 @@ export class CommunityController {
     return this.communityService.addCommunityMember(community, user, data)
   }
 
-    /**
-   * 
-   * @param code 
-   * @returns 
-   */
-    @Get('/:code')
-    @BasicAuth()
-    @ApiOperation({ summary: 'Get a community by code' })
-    async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
-      return await this.communityService.getCommunityByCode(code)
-    }
+  /**
+ * 
+ * @param code 
+ * @returns 
+ */
+  @Get('/:code')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community by code' })
+  async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
+    return await this.communityService.getCommunityByCode(code)
+  }
 
 }

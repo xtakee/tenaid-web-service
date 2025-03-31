@@ -17,6 +17,12 @@ export class MessageCategory {
 
   @Prop({ default: false })
   readOnly: Boolean
+
+  @Prop({ type: [String], index: true })
+  searchable?: string[]
 }
 
-export const MessageCategorySchema = SchemaFactory.createForClass(MessageCategory)
+const MessageCategorySchema = SchemaFactory.createForClass(MessageCategory);
+MessageCategorySchema.index({ searchable: 'text', code: 'text' })
+
+export { MessageCategorySchema }
