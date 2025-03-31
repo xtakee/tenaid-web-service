@@ -1034,6 +1034,17 @@ export class CommunityService {
     return await this.communityRepository.getCommunityJoinRequests(community, paginate)
   }
 
+   /**
+   * 
+   * @param community 
+   * @param page 
+   * @param limit 
+   * @returns 
+   */
+   async getAllCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityJoinRequests(community, paginate)
+  }
+
   /**
    * 
    * @param community 

@@ -1944,6 +1944,26 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
+  async getAllCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING
+    }
+
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: COMMUNITY_MEMBER_QUERY
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
   async getCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
