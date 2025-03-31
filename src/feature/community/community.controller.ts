@@ -336,6 +336,24 @@ export class CommunityController {
   }
 
   /**
+   * 
+   * @param user 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/access')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get all community access logs' })
+  async getAllCommunityAccess(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityAccess(community, paginate);
+  }
+
+  /**
  * 
  * @param user 
  * @param community 

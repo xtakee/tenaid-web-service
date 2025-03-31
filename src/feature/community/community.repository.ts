@@ -43,7 +43,8 @@ import { CommunityGuardResponseDto } from "./dto/response/community.guard.respon
 import { JoinBuildingDto } from "./dto/request/join.building.dto"
 import { BuildingSummary } from "./model/building.summary"
 import { CreateAnnouncementDto } from "./dto/request/create.announcement.dto"
-import { CommunityAnnouncement, CommunityAnnouncementSchema } from "./model/community.announcement"
+import { CommunityAnnouncement } from "./model/community.announcement"
+import { INVITE_STATUS } from "./community.constants"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -69,6 +70,43 @@ function getPaginatedMemberVisitorsQuery(paginate: PaginationRequestDto) {
       select: '_id name description',
       strictPopulate: false,
     }
+  }
+}
+
+function getPaginatedAccessQuery(paginate: PaginationRequestDto) {
+  return {
+    select: '_id community code member accessPoint invite date type',
+    limit: paginate.limit,
+    page: paginate.page,
+    sort: paginate.sort,
+    populate: [{
+      path: 'invite',
+      select: '_id name code reason start end exitOnly terminalCode terminalDate',
+      strictPopulate: false,
+    }, {
+      path: 'accessPoint',
+      select: '_id name',
+      strictPopulate: false,
+    }, {
+      path: 'community',
+      select: '_id name logo',
+      strictPopulate: false,
+    }, {
+      path: 'member',
+      select: '_id street apartment building isOwner extra.firstName extra.lastName extra.email.value extra.photo extra.phone',
+      strictPopulate: false,
+      populate: [{
+        path: 'street',
+        select: '_id name description',
+        strictPopulate: false,
+      }, {
+        path: 'building',
+        select: '_id name description type buildingNumber category',
+        strictPopulate: false,
+      }
+      ]
+    }
+    ]
   }
 }
 
@@ -1651,6 +1689,28 @@ export class CommunityRepository {
         type: { $ne: InviteType.SELF }
       },
       getPaginatedMemberVisitorsQuery(paginate))
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityAccess(
+    community: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    let query: any = {
+      community: new Types.ObjectId(community),
+      $or: [
+        { type: INVITE_STATUS.CHECKIN },
+        { type: INVITE_STATUS.CHECKOUT }
+      ]
+    }
+
+    return await this.paginator.paginate(this.communityCheckInsModel, buildSearchQuery(query),
+      getPaginatedAccessQuery(paginate))
   }
 
   /**

@@ -5,8 +5,8 @@ export enum COMMUNITY_TYPE {
 
 export enum INVITE_STATUS {
   PENDING = 'pending',
-  CHECKIN = 'checked-in',
-  CHECKOUT = 'checked-out',
+  CHECKIN = 'checkIn',
+  CHECKOUT = 'checkOut',
   REVOKED = 'revoked',
   EXPIRED = 'expired'
 }

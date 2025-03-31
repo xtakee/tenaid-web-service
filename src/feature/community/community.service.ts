@@ -475,6 +475,18 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityAccess(
+    community: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getAllCommunityAccess(community, paginate);
+  }
+
+  /**
+   * 
    * @param user 
    * @param data 
    */
@@ -1034,14 +1046,14 @@ export class CommunityService {
     return await this.communityRepository.getCommunityJoinRequests(community, paginate)
   }
 
-   /**
-   * 
-   * @param community 
-   * @param page 
-   * @param limit 
-   * @returns 
-   */
-   async getAllCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+  /**
+  * 
+  * @param community 
+  * @param page 
+  * @param limit 
+  * @returns 
+  */
+  async getAllCommunityJoinRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityRepository.getAllCommunityJoinRequests(community, paginate)
   }
 
