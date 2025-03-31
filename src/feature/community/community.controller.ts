@@ -849,6 +849,21 @@ export class CommunityController {
     return await this.communityService.getCommunityJoinRequests(community, paginate)
   }
 
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/request-inclusive')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community join requests - dependants inclusive' })
+  async getAllCommunityJoinRequests(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getCommunityJoinRequests(community, paginate)
+  }
+
   /**
  * 
  * @param user 
