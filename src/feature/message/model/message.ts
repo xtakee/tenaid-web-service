@@ -1,13 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { HydratedDocument, Types } from "mongoose"
 import { Account } from "src/feature/account/model/account"
-import { Community, E2eeData } from "src/feature/community/model/community"
+import { Community } from "src/feature/community/model/community"
 import { CommunityMember } from "src/feature/community/model/community.member"
 import { MessageStatus } from "../util/message.status"
 import { MessageType } from "../util/message.type"
 import { MessageReaction } from "./message.reaction"
 import { MessageCategory } from "../../community/model/message.category"
 import { MessageVisibility } from "../util/message.visibility"
+import { E2eeDataSchema } from "src/feature/community/model/e2ee.schema"
 
 export type MessageDocument = HydratedDocument<Message>
 
@@ -49,8 +50,8 @@ export class Message {
   @Prop()
   path?: string
 
-  @Prop({ type: E2eeData })
-  encryption?: E2eeData
+  @Prop({ type: E2eeDataSchema })
+  encryption?: E2eeDataSchema
 
   @Prop({ enum: MessageType })
   type: string

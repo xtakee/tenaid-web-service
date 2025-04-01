@@ -26,6 +26,7 @@ import { E2eeModule } from '../e2ee/e2ee.module';
 import { MessageModule } from '../message/message.module';
 import { CounterRepository } from '../core/counter/counter.repository';
 import { Counter, CounterSchema } from '../core/counter/model/counter.model';
+import { E2eeService } from '../e2ee/e2ee.service';
 
 @Global()
 @Module({
@@ -118,7 +119,8 @@ import { Counter, CounterSchema } from '../core/counter/model/counter.model';
     CacheService,
     AdminRepository,
     AccountAdminToDtoMapper,
-    Paginator
+    Paginator,
+    E2eeService
   ],
   controllers: [AccountController],
   exports: [

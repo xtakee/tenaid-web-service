@@ -134,7 +134,11 @@ export class AuthHelper {
    * @returns 
    */
   async isMatch(data: string, hash: string): Promise<Boolean> {
-    return await bcrypt.compare(data, hash)
+    try {
+      return await bcrypt.compare(data, hash)
+    } catch (_) {
+      return false
+    }
   }
 
   /**

@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { CommunityDto } from "src/feature/community/dto/community.dto"
+import { Email } from "src/feature/core/model/email"
 
 export class AccessPointAuthResponseDto {
   account: {
-    id: string
+    _id: string
     name: string
-    description: string
-    community: CommunityDto
+    email: Email
+    community: string
   }
   @ApiProperty()
   authorization: string

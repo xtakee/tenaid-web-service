@@ -4,6 +4,7 @@ import { Account } from "src/feature/account/model/account";
 import { COMMUNITY_TYPE } from "../community.constants";
 import { Address } from "src/feature/core/model/address.model";
 import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
+import { E2eeDataSchema } from "./e2ee.schema";
 
 export type CommunityDocument = HydratedDocument<Community>
 
@@ -31,18 +32,6 @@ export class CommunitySetup {
 
   @Prop({ required: true, default: false })
   member?: boolean
-}
-
-@Schema()
-export class E2eeData {
-  @Prop()
-  enc?: string
-
-  @Prop()
-  iv?: string
-
-  @Prop()
-  tag?: string
 }
 
 @Schema({ timestamps: true })
@@ -89,8 +78,8 @@ export class Community {
   @Prop()
   comment?: string
 
-  @Prop({ type: E2eeData })
-  encryption?: E2eeData
+  @Prop({ type: E2eeDataSchema })
+  encryption?: E2eeDataSchema
 
   @Prop({ type: Boolean, default: false })
   isPrimary?: Boolean

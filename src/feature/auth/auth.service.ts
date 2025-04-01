@@ -14,10 +14,10 @@ import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.ma
 import { INVALID_LOGIN_ERROR } from 'src/core/strings'
 import { CommunityRepository } from '../community/community.repository'
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto'
-import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper'
-import { Community } from '../community/model/community'
 import { E2eeService } from '../e2ee/e2ee.service'
 import { MessageRepository } from '../message/message.repository'
+import { AccessPointAuthRequestDto } from './dto/request/access.point.auth.request.dto'
+import { defaultCommunityGuardPermissions } from './auth.constants'
 
 @Injectable()
 export class AuthService {
@@ -30,7 +30,6 @@ export class AuthService {
     private readonly adminRepository: AdminRepository,
     private readonly adminAccountMapper: AccountAdminToDtoMapper,
     private readonly jwtService: JwtService,
-    private readonly communityMapper: CommunityToDtoMapper,
     private readonly authHelper: AuthHelper,
     private readonly messageRepository: MessageRepository,
     private readonly communityRepository: CommunityRepository
@@ -208,27 +207,37 @@ export class AuthService {
    * @param password 
    * @returns 
    */
-  async signInCommunityAccessPoint(community: string, access: string, password: string): Promise<AccessPointAuthResponseDto> {
-    const accessPoint = await this.communityRepository.getCommunityAccessPoint(community, access)
-    if (accessPoint) {
-      const isMatch = await this.authHelper.isMatch(password, accessPoint.password)
-      if (isMatch) {
-        const payload = { sub: (accessPoint as any).community._id.toString(), sub_0: (accessPoint as any).account }
-        const token = this.jwtService.sign(payload)
+  async signInCommunityAccessPoint(community: string, data: AccessPointAuthRequestDto): Promise<AccessPointAuthResponseDto> {
+    const gaurd = await this.communityRepository.getCommunityGuardByEmail(community, data.email)
+    if (!gaurd) throw new BadRequestException()
 
-        const key = (accessPoint as any)._id.toString()
-        const authorization = this.authHelper.encrypt(key)
-        await this.authRepository.saveAuthToken(key, token)
+    console.log(gaurd)
+    const isMatch = await this.authHelper.isMatch(data.password, gaurd.password)
+    if (isMatch) {
+      const payload = {
+        sub: (gaurd as any)._id,
+        sub_0: community,
+        permissions: defaultCommunityGuardPermissions,
+        primaryCommunity: community,
+        primaryManagedCommunity: community,
+        email: gaurd.email.value,
+        platform: 'mobile'
+      }
 
-        return {
-          account: {
-            id: (accessPoint as any)._id,
-            name: accessPoint.name,
-            description: accessPoint.description,
-            community: this.communityMapper.map(accessPoint.community as Community)
-          },
-          authorization
-        }
+      const token = this.jwtService.sign(payload)
+
+      const key = (gaurd as any)._id.toString()
+      const authorization = this.authHelper.encrypt(key)
+      await this.authRepository.saveAuthToken(key, token)
+
+      return {
+        account: {
+          _id: (gaurd as any)._id,
+          name: gaurd.fullName,
+          community: community,
+          email: gaurd.email
+        },
+        authorization
       }
     }
 

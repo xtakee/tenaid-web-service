@@ -77,6 +77,9 @@ export class Account {
   @Prop({ default: true })
   hasPassword?: Boolean
 
+  @Prop({ default: false })
+  requirePasswordChange?: Boolean
+
   @Prop({ type: DashboardFlags, default: new DashboardFlags() })
   flags?: DashboardFlags
 

@@ -292,6 +292,7 @@ export class AccountRepository implements IAccountRepository {
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
+      requirePasswordChange: data.requirePasswordChange,
       hasPassword: hasPassword,
       country: data.country,
       kyc: {},

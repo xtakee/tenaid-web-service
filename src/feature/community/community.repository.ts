@@ -294,8 +294,9 @@ export class CommunityRepository {
       country: body.country,
       password: body.password,
       secret: body.password,
+      requirePasswordChange: true,
       code: body.code,
-      encPassword: body.enPassword
+      encryptedPassword: body.enPassword
     }
 
     guard = await this.communityGuardModel.create(guard)
@@ -346,12 +347,25 @@ export class CommunityRepository {
   }
 
   /**
+ * 
+ * @param community 
+ * @param guard 
+ * @returns 
+ */
+  async getCommunityGuardById(community: string, guard: string): Promise<any> {
+    return await this.communityGuardModel.findOne({
+      _id: new Types.ObjectId(guard),
+      community: new Types.ObjectId(community),
+    })
+  }
+  
+  /**
    * 
    * @param community 
    * @param email 
    * @returns 
    */
-  async getCommunityGuardByEmail(community: string, email: string): Promise<CommunityGuard> {
+  async getCommunityGuardByEmail(community: string, email: string): Promise<any> {
     return await this.communityGuardModel.findOne({
       community: new Types.ObjectId(community),
       'email.value': email.trim().toLowerCase()

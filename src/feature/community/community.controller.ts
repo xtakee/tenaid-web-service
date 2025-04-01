@@ -66,7 +66,6 @@ export class CommunityController {
     return await this.communityService.getCommunityAccessPoints(community, paginate)
   }
 
-
   /**
    * 
    * @param community 
@@ -1252,8 +1251,8 @@ export class CommunityController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.GUARD))
   @ApiOperation({ summary: 'Create a community security guard' })
-  async createCommunityGuard(@User() user: string, @ManagedCommunity() community: string, @Body() body: CreateCommunityGuardDto): Promise<CommunityGuardResponseDto> {
-    return await this.communityService.createCommunityGuard(user, community, body)
+  async createCommunityGuard(@User() user: string, @Platform() platform: string, @ManagedCommunity() community: string, @Body() body: CreateCommunityGuardDto): Promise<CommunityGuardResponseDto> {
+    return await this.communityService.createCommunityGuard(user, community, body, platform)
   }
 
   /**
@@ -1358,7 +1357,7 @@ export class CommunityController {
  * @param code 
  * @returns 
  */
-  @Get('/:code')
+  @Get('code/:code/search')
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community by code' })
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {

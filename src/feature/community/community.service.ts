@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException,
 import { CommunityRepository } from './community.repository';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
-import { ACCOUNT_STATUS } from '../auth/auth.constants';
+import { ACCOUNT_STATUS, defaultCommunityGuardPermissions } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
 import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, DUPLICATE_HOUSE_NUMBER_ERROR, DUPLICATE_RECORD_ERROR, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
@@ -58,6 +58,7 @@ import { COUNTER_TYPE } from '../core/counter/constants';
 import { CommunityAccessPoint } from './model/community.access.point';
 import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
 import { CommunityAnnouncement } from './model/community.announcement';
+import { E2eeService } from '../e2ee/e2ee.service';
 
 @Injectable()
 export class CommunityService {
@@ -72,6 +73,7 @@ export class CommunityService {
     private readonly visitorsMapper: CommunityVisitorsToDtoMapper,
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
+    private readonly e2eeService: E2eeService,
     private readonly counterRepository: CounterRepository,
     private readonly authHelper: AuthHelper,
     @InjectQueue('community_worker_queue') private readonly communityQueue: Queue,
@@ -237,16 +239,33 @@ export class CommunityService {
    * @param community 
    * @param body 
    */
-  async createCommunityGuard(user: string, community: string, body: CreateCommunityGuardDto): Promise<CommunityGuardResponseDto> {
+  async createCommunityGuard(user: string, community: string, body: CreateCommunityGuardDto, platform: string): Promise<CommunityGuardResponseDto> {
     const exist = await this.communityRepository.getCommunityGuardByEmail(community, body.email)
     if (exist) throw new ForbiddenException(DUPLICATE_RECORD_ERROR)
+
+    const communityData = await this.communityRepository.getCommunity(community)
+    if(!communityData) throw new ForbiddenException()
 
     const counter = await this.counterRepository.getCounter(COUNTER_TYPE.ACCESS_POINT)
     body.code = `#TG${counter}-${this.authHelper.random(3)}`.toString()
 
     body.password = this.authHelper.random(6)
+    communityData.encryption.enc = body.password
 
-    return await this.communityRepository.createCommunityGuard(user, community, body)
+    body.enPassword = await this.e2eeService.encrypt(user, platform, communityData.encryption)
+    console.log(body.password)
+
+    const guard = await this.communityRepository.createCommunityGuard(user, community, body)
+
+    await this.accountRepository.createPermissions(
+      user,
+      (guard as any)._id.toString(),
+      community,
+      guard.fullName,
+      body.email,
+      defaultCommunityGuardPermissions)
+
+    return guard
   }
 
   /**

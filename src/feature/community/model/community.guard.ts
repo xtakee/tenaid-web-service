@@ -3,6 +3,7 @@ import { Community } from "./community"
 import { HydratedDocument, Types } from "mongoose"
 import { Email } from "src/feature/core/model/email.model"
 import { Account } from "src/feature/account/model/account"
+import { E2eeDataSchema } from "./e2ee.schema"
 
 export type CommunityGuardDocument = HydratedDocument<CommunityGuard>
 
@@ -35,11 +36,15 @@ export class CommunityGuard {
   @Prop()
   code: string
 
-  @Prop()
-  encPassword: string
+
+  @Prop({ type: E2eeDataSchema })
+  encryptedPassword?: E2eeDataSchema
 
   @Prop({ default: true })
   isActive?: Boolean
+
+  @Prop({ default: false })
+  requirePasswordChange?: Boolean
 
   @Prop({ type: [String], index: true })
   searchable?: string[]

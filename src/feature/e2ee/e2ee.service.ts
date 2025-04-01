@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { AuthHelper } from 'src/core/helpers/auth.helper';
+import { AuthHelper, EasGcmData } from 'src/core/helpers/auth.helper';
 import { E2eeRepository } from './e2ee.repository';
 import { CreateE2eeKeyDto } from './dto/create.e2ee.key.dto';
+import { E2eeData } from './model/e2ee.data';
 
 @Injectable()
 export class E2eeService {
@@ -29,4 +30,26 @@ export class E2eeService {
 
     return e2eeKeys.publicKey
   }
+
+  /**
+   * 
+   * @param user 
+   * @param platform 
+   * @param encryption 
+   * @returns 
+   */
+  async encrypt(user: string, platform: string, encryption: E2eeData): Promise<E2eeData> {
+    const encKeys = await this.e2eeRepository.getAccountKeys(user, platform)
+
+    if (!encKeys || !encKeys.sharedKey || !encryption) return null
+
+    const keys: EasGcmData = this.authHelper.advanceEncrypt(encryption.enc, encKeys.sharedKey)
+
+    return {
+      enc: keys.enc,
+      iv: keys.iv,
+      tag: keys.tag
+    }
+  }
+
 }

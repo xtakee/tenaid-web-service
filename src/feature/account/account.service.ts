@@ -39,6 +39,7 @@ import { VerifyOtpDto } from "./dto/request/verify.otp"
 import { E2eeData } from "../e2ee/model/e2ee.data"
 import { platform } from "os"
 import { UpdateProfileDto } from "./dto/request/update.profile"
+import { E2eeService } from "../e2ee/e2ee.service"
 
 @Injectable()
 export class AccountService {
@@ -54,6 +55,7 @@ export class AccountService {
     private readonly messageRepository: MessageRepository,
     private readonly bankRepository: BankRepository,
     private readonly jwtService: JwtService,
+    private readonly e2eeService: E2eeService,
     private readonly authRepository: AuthRepository,
     private readonly bankMapper: BankAccountToDtoMapper
   ) { }
@@ -237,12 +239,14 @@ export class AccountService {
     if (exists) throw new BadRequestException(DUPLICATE_RECORD_ERROR)
 
     let account = await this.accountRepository.getAccountByEmail(body.email)
+    const tempPassword = this.authHelper.random(5)
 
     if (!account) {
       // lets create a new account for user
       account = await this.accountRepository.create({
-        password: this.authHelper.random(5),
+        password: tempPassword,
         email: body.email,
+        requirePasswordChange: true,
         country: body.country,
         phone: body.phone,
         firstName: body.firstName,
@@ -250,11 +254,15 @@ export class AccountService {
       }, false)
     }
 
+    // we will send email here
+
     const name = `${body.firstName} ${body.lastName}`
     return await this.accountRepository.createPermissions(user,
       (account as any)._id.toString(),
-      community, name,
-      body.email, body.permissions)
+      community,
+      name,
+      body.email,
+      body.permissions)
   }
 
   /**
@@ -394,7 +402,7 @@ export class AccountService {
           logo: primaryManagedCommunity.logo,
           images: primaryManagedCommunity.images,
           isPrimary: true,
-          encryption: await this.getCommunityEncryption(user, platform, primaryManagedCommunity.encryption)
+          encryption: await this.e2eeService.encrypt(user, platform, primaryManagedCommunity.encryption)
         }]
 
         accountDto.authorization = await this.accountRepository.getOwnAccountAuthorization(user, community)
@@ -563,27 +571,6 @@ export class AccountService {
     }
 
     throw new ForbiddenException()
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param platform 
-   * @param encryption 
-   * @returns 
-   */
-  private async getCommunityEncryption(user: string, platform: string, encryption: E2eeData): Promise<E2eeData> {
-    const encKeys = await this.e2eeRepository.getAccountKeys(user, platform)
-
-    if (!encKeys || !encKeys.sharedKey || !encryption) return null
-
-    const keys: EasGcmData = this.authHelper.advanceEncrypt(encryption.enc, encKeys.sharedKey)
-
-    return {
-      enc: keys.enc,
-      iv: keys.iv,
-      tag: keys.tag
-    }
   }
 
   /**

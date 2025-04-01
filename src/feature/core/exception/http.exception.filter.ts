@@ -21,7 +21,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     ) : 'Internal Server Error'
 
     // log only unknown exceptions
-    if (status >= 500) Sentry.captureException(exception)
+    if (status >= 500 && process.env.NODE_ENV !== 'debug')
+      Sentry.captureException(exception)
 
     response
       .status(status)
@@ -29,7 +30,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message: message,
         timestamp: new Date().toISOString(),
         path: request.url,
-        data: {}
+        data: { error: exception.toString() }
       })
   }
 }
+//a5e6b62cf0d5

@@ -102,6 +102,13 @@ export const defaultManagerPermissions: Permission[] = [
   { authorization: SYSTEM_FEATURES.ACCESS_CONTROL, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] }
 ]
 
+export const defaultCommunityGuardPermissions: Permission[] = [
+  { authorization: COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT, claim: [CLAIM.READ] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.ACCESS_CONTROL, claim: [CLAIM.READ, CLAIM.WRITE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.COMMUNITY, claim: [CLAIM.READ] },
+]
+
 export const defaultCommunityAdminPermissions: Permission[] = [
   { authorization: COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: COMMUNITY_SYSTEM_FEATURES.GUARD, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },

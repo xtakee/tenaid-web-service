@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsEmail, IsNotEmpty } from "class-validator";
+import { E2eeData } from "src/feature/e2ee/model/e2ee.data";
 
 export class CreateCommunityGuardDto {
   @ApiProperty()
@@ -25,6 +26,6 @@ export class CreateCommunityGuardDto {
   isActive: Boolean
 
   password?: string
-  enPassword?: string
+  enPassword?: E2eeData
   code?: string
 }

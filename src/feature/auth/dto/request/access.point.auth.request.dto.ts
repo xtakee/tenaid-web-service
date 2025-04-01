@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsEmail, IsMongoId } from "class-validator"
+import { IsNotEmpty, IsMongoId, IsEmail } from "class-validator"
 
 export class AccessPointAuthRequestDto {
   @ApiProperty()
@@ -9,8 +9,8 @@ export class AccessPointAuthRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsMongoId()
-  guard: string
+  @IsEmail()
+  email: string
 
   @ApiProperty()
   @IsNotEmpty()
