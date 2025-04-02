@@ -891,7 +891,7 @@ export class CommunityController {
   @Get('/access-summary')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
-  @ApiOperation({ summary: 'Get a community requests summary' })
+  @ApiOperation({ summary: 'Get a community access summary' })
   async CommunityJoinRequestsSummary(@ManagedCommunity() community: string): Promise<any> {
     return {
       exits: 12,
