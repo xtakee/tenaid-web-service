@@ -45,7 +45,7 @@ export function getPaginatedAccessQuery(paginate: PaginationRequestDto) {
       strictPopulate: false,
     }, {
       path: 'member',
-      select: '_id street apartment building isOwner extra.firstName extra.lastName extra.email.value extra.photo extra.phone',
+      select: '_id street code apartment building isOwner extra.firstName extra.lastName extra.email.value extra.photo extra.phone',
       strictPopulate: false,
       populate: [{
         path: 'street',
