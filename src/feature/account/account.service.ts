@@ -17,7 +17,7 @@ import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forg
 import { AuthHelper, EasGcmData } from "src/core/helpers/auth.helper"
 import { Types } from "mongoose"
 import { ResetForgotPasswordDto } from "src/feature/account/dto/request/reset.password.dto"
-import { CommunityRepository } from "../community/community.repository"
+import { CommunityRepository } from "../community/repository/community.repository"
 import { PaginatedResult } from "src/core/helpers/paginator"
 import { DeviceTokenRequestDto } from "./dto/request/device.token.request.dto"
 import { UpdateInfoDto } from "./dto/request/update.info.dto"

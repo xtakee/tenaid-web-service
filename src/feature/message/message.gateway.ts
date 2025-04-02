@@ -1,7 +1,7 @@
 import { WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, MessageBody, SubscribeMessage, ConnectedSocket } from "@nestjs/websockets"
 import { Server, Socket } from "socket.io"
 import { WsJwtAuthGuard } from "../auth/guards/jwt.guard/ws.jwt.auth.guard"
-import { CommunityRepository } from "../community/community.repository"
+import { CommunityRepository } from "../community/repository/community.repository"
 import { PushMultipleDto } from "../notification/notification.controller"
 import { MessageResonseDto } from "../community/dto/response/message.response.dto"
 import { NotificationService } from "../notification/notification.service"

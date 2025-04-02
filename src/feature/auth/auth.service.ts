@@ -12,7 +12,7 @@ import { AccountAdminAuthResponseDto } from 'src/feature/admin/dto/response/acco
 import { AccountAdmin } from '../admin/model/account.admin.model'
 import { AccountAdminToDtoMapper } from '../admin/mapper/account.admin.to.dto.mapper'
 import { INVALID_LOGIN_ERROR } from 'src/core/strings'
-import { CommunityRepository } from '../community/community.repository'
+import { CommunityRepository } from '../community/repository/community.repository'
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto'
 import { E2eeService } from '../e2ee/e2ee.service'
 import { MessageRepository } from '../message/message.repository'

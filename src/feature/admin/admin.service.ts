@@ -11,7 +11,7 @@ import { AddOnRequest } from '../account/model/add.on.request';
 import { AccountAdminResponseDto } from 'src/feature/admin/dto/response/account.admin.response.dto';
 import { AccountAdminToDtoMapper } from './mapper/account.admin.to.dto.mapper';
 import { AccountService } from '../account/account.service';
-import { CommunityRepository } from '../community/community.repository';
+import { CommunityRepository } from '../community/repository/community.repository';
 import { REQUEST_APPROVED, REQUEST_DENIED } from 'src/core/strings';
 import { NotificationService, MessageType } from '../notification/notification.service';
 import { PaginationRequestDto } from '../core/dto/pagination.request.dto';

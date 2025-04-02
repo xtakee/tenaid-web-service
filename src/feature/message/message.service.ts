@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommunityRepository } from '../community/community.repository';
+import { CommunityRepository } from '../community/repository/community.repository';
 import { MessageRepository } from './message.repository';
 
 @Injectable()

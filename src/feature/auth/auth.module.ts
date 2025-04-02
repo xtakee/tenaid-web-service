@@ -20,7 +20,7 @@ import { Paginator } from 'src/core/helpers/paginator';
 import { AccountAdmin, AccountAdminSchema } from '../admin/model/account.admin.model';
 import { CodeGenerator } from 'src/core/helpers/code.generator';
 import { CommunityToDtoMapper } from '../community/mapper/community.to.dto.mapper';
-import { CommunityRepository } from '../community/community.repository';
+import { CommunityRepository } from '../community/repository/community.repository';
 import { AddressToDtoMapper } from '../core/mapper/address.to.dto.mapper';
 import { CommunityModule } from '../community/community.module';
 import { E2eeModule } from '../e2ee/e2ee.module';

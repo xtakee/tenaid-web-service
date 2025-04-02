@@ -1,202 +1,53 @@
-import { Injectable, NotFoundException } from "@nestjs/common"
-import { Community } from "./model/community"
+import { Injectable } from "@nestjs/common"
+import { Community } from "../model/community"
 import { InjectModel } from "@nestjs/mongoose"
 import { Model, Types } from "mongoose"
-import { CommunityStreet } from "./model/community.street"
+import { CommunityStreet } from "../model/community.street"
 import { CommunityDto } from "src/feature/community/dto/community.dto"
-import { CommunityMember } from "./model/community.member"
+import { CommunityMember } from "../model/community.member"
 import { CommunityMemberRequestDto } from "src/feature/community/dto/request/community.member.request.dto"
-import { CommunityInvite, InviteType } from "./model/community.invite"
+import { CommunityInvite, InviteType } from "../model/community.invite"
 import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto"
-import { ACCOUNT_STATUS } from "../auth/auth.constants"
+import { ACCOUNT_STATUS } from "../../auth/auth.constants"
 import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto"
-import { CommunityStreetRequestDto } from "./dto/request/community.street.request.dto"
+import { CommunityStreetRequestDto } from "../dto/request/community.street.request.dto"
 import { PaginatedResult, Paginator } from "src/core/helpers/paginator"
-import { MemberAccount } from "./model/member.account"
-import { CommunityAccessPointRequestDto } from "./dto/request/community.access.point.request.dto"
-import { CommunityAccessPoint } from "./model/community.access.point"
-import { CheckInOutVisitorRequestDto } from "./dto/request/check.in.out.visitor.request.dto"
-import { CheckType } from "../core/dto/check.type"
-import { CommunityCheckins } from "./model/community.checkins"
-import { CommunityExitCodeDto } from "./dto/request/community.exit.code.dto"
-import { buildSearchQuery, PaginationRequestDto } from "../core/dto/pagination.request.dto"
-import { AddMemberRequestDto } from "./dto/request/add.member.request.dto"
-import { MessageCategoryDto } from "./dto/request/message.category.dto"
-import { CommunityAuthorizedUserDto } from "./dto/request/community.authorized.user.dto"
-import { CommunityBuilding } from "./model/community.building"
-import { CommunityBuildingDto } from "./dto/request/community.building.dto"
-import { CommunityAuthorizedUserPermissionsDto } from "./dto/request/community.authorized.user.permissions.dto"
-import { CommunityDirector } from "./model/community.director"
-import { CreateCommunityDirectorDto } from "./dto/request/create.community.director.dto"
-import { CommunityRegistration } from "./model/community.registration"
-import { CreateCommunityRegistrationDto } from "./dto/request/create.community.registration.dto"
-import { UpdateCommunityMemberPermissionsDto } from "./dto/request/update.community.member.permissions.dto"
-import { MessageCategory } from "./model/message.category"
-import { UpdateCommunityStreetDto } from "./dto/request/update.community.street.dto"
-import { CommunitySummary } from "./model/community.summary"
-import { StreetSummary } from "./model/street.summary"
-import { CreateCommunityContactDto } from "./dto/request/create.community.contact.dto"
-import { CommunityContact } from "./model/community.contact"
-import { CommunityGuard } from "./model/community.guard"
-import { CreateCommunityGuardDto } from "./dto/request/create.community.guard.dto"
-import { CommunityGuardResponseDto } from "./dto/response/community.guard.response.dto"
-import { JoinBuildingDto } from "./dto/request/join.building.dto"
-import { BuildingSummary } from "./model/building.summary"
-import { CreateAnnouncementDto } from "./dto/request/create.announcement.dto"
-import { CommunityAnnouncement } from "./model/community.announcement"
-import { INVITE_STATUS } from "./community.constants"
+import { MemberAccount } from "../model/member.account"
+import { CommunityAccessPointRequestDto } from "../dto/request/community.access.point.request.dto"
+import { CommunityAccessPoint } from "../model/community.access.point"
+import { CheckInOutVisitorRequestDto } from "../dto/request/check.in.out.visitor.request.dto"
+import { CheckType } from "../../core/dto/check.type"
+import { CommunityCheckins } from "../model/community.checkins"
+import { CommunityExitCodeDto } from "../dto/request/community.exit.code.dto"
+import { buildSearchQuery, PaginationRequestDto } from "../../core/dto/pagination.request.dto"
+import { AddMemberRequestDto } from "../dto/request/add.member.request.dto"
+import { MessageCategoryDto } from "../dto/request/message.category.dto"
+import { CommunityAuthorizedUserDto } from "../dto/request/community.authorized.user.dto"
+import { CommunityBuilding } from "../model/community.building"
+import { CommunityBuildingDto } from "../dto/request/community.building.dto"
+import { CommunityAuthorizedUserPermissionsDto } from "../dto/request/community.authorized.user.permissions.dto"
+import { CommunityDirector } from "../model/community.director"
+import { CreateCommunityDirectorDto } from "../dto/request/create.community.director.dto"
+import { CommunityRegistration } from "../model/community.registration"
+import { CreateCommunityRegistrationDto } from "../dto/request/create.community.registration.dto"
+import { UpdateCommunityMemberPermissionsDto } from "../dto/request/update.community.member.permissions.dto"
+import { MessageCategory } from "../model/message.category"
+import { UpdateCommunityStreetDto } from "../dto/request/update.community.street.dto"
+import { CommunitySummary } from "../model/community.summary"
+import { StreetSummary } from "../model/street.summary"
+import { CreateCommunityContactDto } from "../dto/request/create.community.contact.dto"
+import { CommunityContact } from "../model/community.contact"
+import { CommunityGuard } from "../model/community.guard"
+import { CreateCommunityGuardDto } from "../dto/request/create.community.guard.dto"
+import { CommunityGuardResponseDto } from "../dto/response/community.guard.response.dto"
+import { JoinBuildingDto } from "../dto/request/join.building.dto"
+import { BuildingSummary } from "../model/building.summary"
+import { CreateAnnouncementDto } from "../dto/request/create.announcement.dto"
+import { CommunityAnnouncement } from "../model/community.announcement"
+import { INVITE_STATUS } from "../community.constants"
+import { COMMUNITY_MEMBER_PRIMARY_QUERY, COMMUNITY_MEMBER_QUERY, MEMBER_COMMUNITIES_QUERY, COMMUNITY_BUILDING_QUERY, COMMUNITY_VISITOR_QUERY, getPaginatedCommunityVisitorsQuery, getPaginatedMemberVisitorsQuery, getPaginatedAccessQuery, MEMBER_VISITOR_QUERY, COMMUNITY_SELECT_QUERY, getVisitorsCheckinsQuery } from "./data.query"
 
 const MIN_DIRECTORS_COUNT = 2
-
-const MEMBER_VISITOR_QUERY = {
-  path: 'member',
-  select: '_id account description street building code isAdmin',
-  strictPopulate: false,
-  populate: {
-    path: 'account',
-    select: '_id firstName lastName phone country photo email',
-    strictPopulate: false,
-  }
-}
-
-function getPaginatedMemberVisitorsQuery(paginate: PaginationRequestDto) {
-  return {
-    select: '_id name code exitOnly photo start end status reason street',
-    limit: paginate.limit,
-    page: paginate.page,
-    sort: paginate.sort,
-    populate: {
-      path: 'street',
-      select: '_id name description',
-      strictPopulate: false,
-    }
-  }
-}
-
-function getPaginatedAccessQuery(paginate: PaginationRequestDto) {
-  return {
-    select: '_id community code member accessPoint invite date type',
-    limit: paginate.limit,
-    page: paginate.page,
-    sort: paginate.sort,
-    populate: [{
-      path: 'invite',
-      select: '_id name code reason start end exitOnly terminalCode terminalDate',
-      strictPopulate: false,
-    }, {
-      path: 'accessPoint',
-      select: '_id name',
-      strictPopulate: false,
-    }, {
-      path: 'community',
-      select: '_id name logo',
-      strictPopulate: false,
-    }, {
-      path: 'member',
-      select: '_id street apartment building isOwner extra.firstName extra.lastName extra.email.value extra.photo extra.phone',
-      strictPopulate: false,
-      populate: [{
-        path: 'street',
-        select: '_id name description',
-        strictPopulate: false,
-      }, {
-        path: 'building',
-        select: '_id name description type buildingNumber category',
-        strictPopulate: false,
-      }
-      ]
-    }
-    ]
-  }
-}
-
-function getPaginatedCommunityVisitorsQuery(page: number, limit: number) {
-  return {
-    select: '_id name date code member exitOnly photo start end status reason street',
-    limit: limit,
-    page: page,
-    populate: {
-      path: 'member',
-      select: '_id extra description isAdmin',
-      strictPopulate: false,
-      populate: {
-        path: 'path',
-        select: '_id name description',
-        strictPopulate: false,
-      }
-    }
-  }
-}
-
-function getVisitorsCheckinsQuery(page: number, limit: number) {
-  return {
-    select: '_id code date type accessPoint',
-    limit: limit,
-    page: page,
-    populate: [
-      {
-        path: 'accessPoint',
-        select: '_id name description'
-      }, {
-        path: 'invite',
-        select: '_id name type date start end reason status photo'
-      }
-    ]
-  }
-}
-
-const COMMUNITY_MEMBER_PRIMARY_QUERY = '_id requestId code memberId street extra createdAt updatedAt isAdmin linkedTo relationship isOwner canCreateExit canCreateInvite kycAcknowledged canSendMessage isPrimary building apartment status community'
-const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description kycAcknowledged code members type images logo status isPrimary address'
-
-const MEMBER_COMMUNITIES_QUERY = [{
-  path: 'street',
-  select: '_id name description community'
-}, {
-  path: 'building',
-  select: '_id buildingNumber type'
-}, {
-  path: 'community',
-  select: '_id name code members description kycAcknowledged images type logo address createdAt updatedAt encryption'
-}, {
-  path: 'linkedTo',
-  select: '_id memberId code extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
-  strictPopulate: false
-}]
-
-const COMMUNITY_VISITOR_QUERY = [
-  {
-    path: 'member',
-    select: '_id account description street building code isAdmin',
-    strictPopulate: false,
-    populate: {
-      path: 'account',
-      select: '_id firstName lastName phone country photo email',
-      strictPopulate: false,
-    }
-  }
-]
-
-const COMMUNITY_MEMBER_QUERY = [
-  {
-    path: 'street',
-    select: '_id name description',
-    strictPopulate: false
-  }, {
-    path: 'community',
-    select: '_id name description',
-    strictPopulate: false
-  }, {
-    path: 'building',
-    select: '_id buildingNumber type',
-    strictPopulate: false
-  }, {
-    path: 'linkedTo',
-    select: '_id memberId code extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
-    strictPopulate: false
-  }
-]
-
-const COMMUNITY_BUILDING_QUERY = '_id isActive createdBy updatedAt createdAt community street type contactEmail contactPhone contactPerson contactCountry buildingNumber apartments category name description'
 
 @Injectable()
 export class CommunityRepository {
@@ -358,7 +209,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
     })
   }
-  
+
   /**
    * 
    * @param community 

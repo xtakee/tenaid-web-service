@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq"
 import { Injectable } from "@nestjs/common"
 import { Job } from "bullmq"
-import { CommunityRepository } from "../community.repository"
+import { CommunityRepository } from "../repository/community.repository"
 
 export const BUILDING_MEMBERS_SUMMARY = 'update-building-member-summary'
 

@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CommunityRepository } from './community.repository';
+import { CommunityRepository } from './repository/community.repository';
 import { CommunityDto } from 'src/feature/community/dto/community.dto';
 import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
 import { ACCOUNT_STATUS, defaultCommunityGuardPermissions } from '../auth/auth.constants';
