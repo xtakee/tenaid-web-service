@@ -43,8 +43,8 @@ import { CommunityGuard, CommunityGuardSchema } from './model/community.guard'
 import { CounterRepository } from '../core/counter/counter.repository'
 import { BuildingSummary, BuildingSummarySchema } from './model/building.summary'
 import { CommunityAnnouncement, CommunityAnnouncementSchema } from './model/community.announcement'
-import { E2eeService } from '../e2ee/e2ee.service'
 import { E2eeModule } from '../e2ee/e2ee.module'
+import { MongooseDocumentHelper } from 'src/core/helpers/mongoose.document.helper'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -58,6 +58,7 @@ const queue = BullModule.registerQueue({
     CounterRepository,
     CodeGenerator,
     AuthHelper,
+    MongooseDocumentHelper,
     Paginator,
     EventGateway,
     WsJwtAuthGuard,

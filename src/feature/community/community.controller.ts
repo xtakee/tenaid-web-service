@@ -1,49 +1,49 @@
-import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { CommunityDto } from 'src/feature/community/dto/community.dto';
-import { CommunityService } from './community.service';
-import { Auth, BasicAuth } from '../auth/guards/auth.decorator';
-import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
-import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
-import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
-import { isMongoId } from 'class-validator';
-import { CommunityStreetRequestDto } from './dto/request/community.street.request.dto';
-import { CommunityPathResponseDto } from './dto/response/community.path.response.dto';
-import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto';
-import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto';
-import { PaginatedResult } from 'src/core/helpers/paginator';
-import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto';
-import { DateDto, DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.request.dto';
-import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto';
-import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto';
-import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto';
-import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto';
-import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto';
-import { AddMemberRequestDto } from './dto/request/add.member.request.dto';
-import { DeclineCommunityInviteDto } from './dto/request/decline.community.invite.dto';
-import { MessageCategoryDto } from './dto/request/message.category.dto';
-import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto';
-import { CommunityBuildingDto } from './dto/request/community.building.dto';
-import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto';
-import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto';
-import { CommunityDirectorDto } from './dto/response/community.director.dto';
-import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto';
-import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto';
-import { User } from 'src/core/decorators/user';
-import { Email } from 'src/core/decorators/email';
-import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
-import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
-import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
-import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto';
-import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto';
-import { JoinBuildingDto } from './dto/request/join.building.dto';
-import { ManagedCommunity } from 'src/core/decorators/managed.community';
-import { PrimaryCommunity } from 'src/core/decorators/primary.community';
-import { MongoAbility } from '@casl/ability';
-import { CLAIM, COMMUNITY_SYSTEM_FEATURES } from '../auth/auth.constants';
-import { CheckPolicies } from '../auth/guards/casl/policies.guard';
-import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
-import { Platform } from 'src/core/decorators/platform';
+import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common'
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { CommunityDto } from 'src/feature/community/dto/community.dto'
+import { CommunityService } from './community.service'
+import { Auth, BasicAuth } from '../auth/guards/auth.decorator'
+import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto'
+import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto'
+import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto'
+import { isMongoId } from 'class-validator'
+import { CommunityStreetRequestDto } from './dto/request/community.street.request.dto'
+import { CommunityPathResponseDto } from './dto/response/community.path.response.dto'
+import { CommunityJoinRequestDto } from './dto/request/community.join.request.dto'
+import { AccountCommunityResponseDto } from './dto/response/account.community.response.dto'
+import { PaginatedResult } from 'src/core/helpers/paginator'
+import { CommunityRequestStatusDto } from './dto/request/community.request.status.dto'
+import { DateDto, DateRangeDto, PaginationRequestDto } from '../core/dto/pagination.request.dto'
+import { CommunityAccessPointRequestDto } from './dto/request/community.access.point.request.dto'
+import { CommunityAccessPointResonseDto } from './dto/response/community.access.point.response.dto'
+import { CommunityInviteCodeResponseDto } from './dto/response/community.invite.code.response.dto'
+import { CheckInOutVisitorRequestDto } from './dto/request/check.in.out.visitor.request.dto'
+import { CommunityExitCodeDto } from './dto/request/community.exit.code.dto'
+import { AddMemberRequestDto } from './dto/request/add.member.request.dto'
+import { DeclineCommunityInviteDto } from './dto/request/decline.community.invite.dto'
+import { MessageCategoryDto } from './dto/request/message.category.dto'
+import { CommunityAuthorizedUserDto } from './dto/request/community.authorized.user.dto'
+import { CommunityBuildingDto } from './dto/request/community.building.dto'
+import { CommunityAuthorizedUserPermissionsDto } from './dto/request/community.authorized.user.permissions.dto'
+import { CreateCommunityDirectorDto } from './dto/request/create.community.director.dto'
+import { CommunityDirectorDto } from './dto/response/community.director.dto'
+import { CreateCommunityRegistrationDto } from './dto/request/create.community.registration.dto'
+import { UpdateCommunityMemberPermissionsDto } from './dto/request/update.community.member.permissions.dto'
+import { User } from 'src/core/decorators/user'
+import { Email } from 'src/core/decorators/email'
+import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto'
+import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto'
+import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto'
+import { CreateCommunityGuardDto } from './dto/request/create.community.guard.dto'
+import { CommunityGuardResponseDto } from './dto/response/community.guard.response.dto'
+import { JoinBuildingDto } from './dto/request/join.building.dto'
+import { ManagedCommunity } from 'src/core/decorators/managed.community'
+import { PrimaryCommunity } from 'src/core/decorators/primary.community'
+import { MongoAbility } from '@casl/ability'
+import { CLAIM, COMMUNITY_SYSTEM_FEATURES } from '../auth/auth.constants'
+import { CheckPolicies } from '../auth/guards/casl/policies.guard'
+import { CreateAnnouncementDto } from './dto/request/create.announcement.dto'
+import { Platform } from 'src/core/decorators/platform'
 
 @Controller({
   version: '1',
@@ -160,7 +160,7 @@ export class CommunityController {
     @Query() date: DateRangeDto,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberVisitorsByDate(user, community, date.start, date.end, paginate);
+    return await this.communityService.getCommunityMemberVisitorsByDate(user, community, date.start, date.end, paginate)
   }
 
   /**
@@ -196,7 +196,7 @@ export class CommunityController {
     if (!isMongoId(member)) throw new BadRequestException()
     const _community = platform === 'web' ? community : primaryCommunity
 
-    return await this.communityService.getCommunityMemberAuthorizedAccess(_community, member, paginate);
+    return await this.communityService.getCommunityMemberAuthorizedAccess(_community, member, paginate)
   }
 
   /**
@@ -213,7 +213,7 @@ export class CommunityController {
     @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto
   ): Promise<any> {
-    return await this.communityService.getAllCommunityAuthorizedAccess(community, paginate);
+    return await this.communityService.getAllCommunityAuthorizedAccess(community, paginate)
   }
 
   /**
@@ -233,7 +233,7 @@ export class CommunityController {
     @Body() body: CommunityAuthorizedUserDto
   ): Promise<any> {
     if (!isMongoId(member)) throw new BadRequestException()
-    return await this.communityService.createCommunityMemberAuthorizedAccess(user, community, member, body);
+    return await this.communityService.createCommunityMemberAuthorizedAccess(user, community, member, body)
   }
 
   /**
@@ -253,7 +253,7 @@ export class CommunityController {
     @Body() body: CreateCommunityRegistrationDto
   ): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.createCommunityRegistration(user, community, body);
+    return await this.communityService.createCommunityRegistration(user, community, body)
   }
 
   /**
@@ -275,7 +275,7 @@ export class CommunityController {
   ): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
     if (!isMongoId(registration)) throw new BadRequestException()
-    return await this.communityService.updateCommunityRegistration(user, community, registration, body);
+    return await this.communityService.updateCommunityRegistration(user, community, registration, body)
   }
 
   /**
@@ -295,7 +295,7 @@ export class CommunityController {
   ): Promise<any> {
     if (!isMongoId(community)) throw new BadRequestException()
     if (!isMongoId(registration)) throw new BadRequestException()
-    return await this.communityService.getCommunityRegistration(community, registration);
+    return await this.communityService.getCommunityRegistration(community, registration)
   }
 
   /**
@@ -312,7 +312,7 @@ export class CommunityController {
     @PrimaryCommunity() community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberUpcomingVisitors(user, community, paginate);
+    return await this.communityService.getCommunityMemberUpcomingVisitors(user, community, paginate)
   }
 
   /**
@@ -331,7 +331,7 @@ export class CommunityController {
     @Query('status') status: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate);
+    return await this.communityService.getCommunityMemberVisitorsByStatus(user, community, status, paginate)
   }
 
   /**
@@ -349,7 +349,7 @@ export class CommunityController {
     @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityAccess(community, paginate);
+    return await this.communityService.getAllCommunityAccess(community, paginate)
   }
 
   /**
@@ -400,8 +400,9 @@ export class CommunityController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.COMMUNITY))
   @ApiOperation({ summary: 'Get community summary' })
-  async getCommunitySummary(@ManagedCommunity() community: string): Promise<any> {
-    return await this.communityService.getCommunitySummary(community)
+  @ApiQuery({ name: 'date', required: false, type: String })
+  async getCommunitySummary(@ManagedCommunity() community: string, @Query() date?: DateDto): Promise<any> {
+    return await this.communityService.getCommunitySummary(community, date.date)
   }
 
   /**
@@ -979,7 +980,7 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Search a community' })
   async searchCommunity(@User() user: string, @Query('query') query: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit);
+    return await this.communityService.searchCommunity(user, query, paginate.page, paginate.limit)
   }
 
   /**
@@ -1061,7 +1062,7 @@ export class CommunityController {
   @Get('no-auth/search')
   @ApiOperation({ summary: 'Search a community - No Auth' })
   async searchCommunityNoAuth(@Query('query') query: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.communityService.searchCommunityNoAuth(query, paginate.page, paginate.limit);
+    return await this.communityService.searchCommunityNoAuth(query, paginate.page, paginate.limit)
   }
 
   /**

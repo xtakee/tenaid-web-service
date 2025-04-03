@@ -5,6 +5,9 @@ import { CommunityInvite } from "./community.invite";
 import { CommunityMember } from "./community.member";
 import { CheckType } from "src/feature/core/dto/check.type";
 import { CommunityAccessPoint } from "./community.access.point";
+import { CommunityStreet } from "./community.street";
+import { CommunityBuilding } from "./community.building";
+import { InviteType } from "src/core/enums/invite.type";
 
 export type CommunityCheckinsDocument = HydratedDocument<CommunityCheckins>;
 
@@ -16,11 +19,20 @@ export class CommunityCheckins {
   @Prop({ type: Types.ObjectId, ref: CommunityMember.name })
   member: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: CommunityStreet.name })
+  street?: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: CommunityBuilding.name })
+  building?: Types.ObjectId
+
   @Prop({ type: Types.ObjectId, ref: CommunityAccessPoint.name })
   accessPoint: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityInvite.name })
   invite?: Types.ObjectId
+
+  @Prop({ enum: InviteType })
+  type: string
 
   @Prop()
   code: string
@@ -29,7 +41,7 @@ export class CommunityCheckins {
   date: Date
 
   @Prop({ enum: CheckType })
-  type: string
+  inviteType: string
 
   @Prop({ index: true })
   searchable?: string

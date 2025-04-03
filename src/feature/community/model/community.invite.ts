@@ -4,13 +4,9 @@ import { Community } from "./community";
 import { CommunityMember } from "./community.member";
 import { INVITE_STATUS } from "../community.constants";
 import { Account } from "src/feature/account/model/account";
+import { InviteType } from "src/core/enums/invite.type";
 
 export type CommunityInviteDocument = HydratedDocument<CommunityInvite>;
-export enum InviteType {
-  SINGLE = 'single',
-  EXTENDED = 'extended',
-  SELF = 'self'
-}
 
 @Schema({ timestamps: true })
 export class CommunityInvite {

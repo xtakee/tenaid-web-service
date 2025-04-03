@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsDateString, IsEnum, IsMongoId, IsNotEmpty } from "class-validator";
+import { InviteType } from "src/core/enums/invite.type";
 import { CheckType } from "src/feature/core/dto/check.type";
 
 export class CheckInOutVisitorRequestDto {
@@ -25,4 +26,9 @@ export class CheckInOutVisitorRequestDto {
   @IsNotEmpty()
   @IsEnum(CheckType)
   type: string
+
+  @IsNotEmpty()
+  @IsEnum(InviteType)
+  inviteType: string
+
 }

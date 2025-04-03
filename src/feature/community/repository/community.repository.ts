@@ -6,7 +6,7 @@ import { CommunityStreet } from "../model/community.street"
 import { CommunityDto } from "src/feature/community/dto/community.dto"
 import { CommunityMember } from "../model/community.member"
 import { CommunityMemberRequestDto } from "src/feature/community/dto/request/community.member.request.dto"
-import { CommunityInvite, InviteType } from "../model/community.invite"
+import { CommunityInvite } from "../model/community.invite"
 import { CommunityInviteDto } from "src/feature/community/dto/community.invite.dto"
 import { ACCOUNT_STATUS } from "../../auth/auth.constants"
 import { CommunityInviteRevokeDto } from "src/feature/community/dto/request/community.invite.revoke.dto"
@@ -46,6 +46,8 @@ import { CreateAnnouncementDto } from "../dto/request/create.announcement.dto"
 import { CommunityAnnouncement } from "../model/community.announcement"
 import { INVITE_STATUS } from "../community.constants"
 import { COMMUNITY_MEMBER_PRIMARY_QUERY, COMMUNITY_MEMBER_QUERY, MEMBER_COMMUNITIES_QUERY, COMMUNITY_BUILDING_QUERY, COMMUNITY_VISITOR_QUERY, getPaginatedCommunityVisitorsQuery, getPaginatedMemberVisitorsQuery, getPaginatedAccessQuery, MEMBER_VISITOR_QUERY, COMMUNITY_SELECT_QUERY, getVisitorsCheckinsQuery } from "./data.query"
+import { MongooseDocumentHelper } from "src/core/helpers/mongoose.document.helper"
+import { InviteType } from "src/core/enums/invite.type"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -68,6 +70,7 @@ export class CommunityRepository {
     @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
     @InjectModel(CommunityStreet.name) private readonly communityStreetModel: Model<CommunityStreet>,
     @InjectModel(MessageCategory.name) private readonly messageCategoryModel: Model<MessageCategory>,
+    private readonly mongooseDocumentHelper: MongooseDocumentHelper,
     @InjectModel(CommunityAnnouncement.name) private readonly announcementModel: Model<CommunityAnnouncement>
   ) { }
 
@@ -1271,120 +1274,11 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
-   * @param streets 
    */
-  async updateCommunityStreetsSummary(community: string, streets: number): Promise<void> {
-    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
-      $set: {
-        streets: streets,
-        community: new Types.ObjectId(community)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param buildings 
-   */
-  async updateCommunityBuildingsSummary(community: string, buildings: number): Promise<void> {
-    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
-      $set: {
-        buildings: buildings,
-        community: new Types.ObjectId(community)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param dependants 
-   */
-  async updateCommunityDependantsSummary(community: string, dependants: number): Promise<void> {
-    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
-      $set: {
-        dependants: dependants,
-        community: new Types.ObjectId(community)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param members 
-   */
-  async updateCommunityMembersSummary(community: string, members: number, memberRequests: number, dependantRequests: number): Promise<void> {
-    await this.communitySummayModel.findOneAndUpdate({ community: new Types.ObjectId(community) }, {
-      $set: {
-        members: members,
-        dependantRequests: dependantRequests,
-        memberRequests: memberRequests,
-        community: new Types.ObjectId(community)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param street 
-   * @param members 
-   */
-  async updateCommunityStreetMembersSummary(community: string, street: string, members: number): Promise<void> {
-    await this.streetSummaryModel.findOneAndUpdate({ community: new Types.ObjectId(community), street: new Types.ObjectId(street) }, {
-      $set: {
-        members: members,
-        community: new Types.ObjectId(community),
-        street: new Types.ObjectId(street)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param building 
-   * @param members 
-   */
-  async updateCommunityBuildingMembersSummary(community: string, building: string, members: number): Promise<void> {
-    await this.buildingSummaryModel.findOneAndUpdate({
-      community: new Types.ObjectId(community),
-      street: new Types.ObjectId(building)
-    }, {
-      $set: {
-        members: members,
-        community: new Types.ObjectId(community),
-        building: new Types.ObjectId(building)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param street 
-   * @param buildings 
-   */
-  async updateCommunityStreetBuildingsSummary(community: string, street: string, buildings: number): Promise<void> {
-    await this.streetSummaryModel.findOneAndUpdate({ community: new Types.ObjectId(community), street: new Types.ObjectId(street) }, {
-      $set: {
-        buildings: buildings,
-        community: new Types.ObjectId(community),
-        street: new Types.ObjectId(street)
-      }
-    }, { upsert: true, new: true })
-  }
-
-  /**
-   * 
-   * @param community 
-   */
-  async getCommunityStreetsCount(community: string): Promise<number> {
-    return await this.communityStreetModel.countDocuments({
+  async getCommunityStreetsCount(community: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityStreetModel, {
       community: new Types.ObjectId(community)
-    })
+    }, date)
   }
 
   /**
@@ -1393,11 +1287,47 @@ export class CommunityRepository {
    * @param street 
    * @returns 
    */
-  async getCommunityStreetMembersCount(community: string, street: string): Promise<number> {
-    return await this.communityMemberModel.countDocuments({
+  async getCommunityStreetMembersCount(community: string, street: string, date?: string): Promise<number> {
+    const query: any = {
       community: new Types.ObjectId(community),
-      street: new Types.ObjectId(street)
-    })
+      street: new Types.ObjectId(street),
+      isOwner: true
+    }
+
+    return await this.mongooseDocumentHelper.count(this.communityMemberModel, query, date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @returns 
+   */
+  async getCommunityStreetVisitorsCount(community: string, street: string, date?: string): Promise<number> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street),
+      $or: [{ $ne: InviteType.SELF }]
+    }
+
+    return await this.mongooseDocumentHelper.count(this.communityCheckInsModel, query, date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityBuildingVisitorsCount(community: string, building: string, date?: string): Promise<number> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building),
+      $or: [{ $ne: InviteType.SELF }]
+    }
+
+    return await this.mongooseDocumentHelper.count(this.communityCheckInsModel, query, date)
   }
 
   /**
@@ -1406,11 +1336,11 @@ export class CommunityRepository {
    * @param building 
    * @returns 
    */
-  async getCommunityBuildingMembersCount(community: string, building: string): Promise<number> {
-    return await this.communityMemberModel.countDocuments({
+  async getCommunityBuildingMembersCount(community: string, building: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityMemberModel, {
       community: new Types.ObjectId(community),
       building: new Types.ObjectId(building)
-    })
+    }, date)
   }
 
   /**
@@ -1419,33 +1349,32 @@ export class CommunityRepository {
   * @param street 
   * @returns 
   */
-  async getCommunityStreetBuildingsCount(community: string, street: string): Promise<number> {
-    return await this.communityBuildingModel.countDocuments({
+  async getCommunityStreetBuildingsCount(community: string, street: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityBuildingModel, {
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(street)
-    })
+    }, date)
   }
-
 
   /**
    * 
    * @param community 
    */
-  async getCommunityBuildingsCount(community: string): Promise<number> {
-    return await this.communityBuildingModel.countDocuments({
+  async getCommunityBuildingsCount(community: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityBuildingModel, {
       community: new Types.ObjectId(community)
-    })
+    }, date)
   }
 
   /**
  * 
  * @param community 
  */
-  async getCommunityDependantsCount(community: string): Promise<number> {
-    return await this.communityMemberModel.countDocuments({
+  async getCommunityDependantsCount(community: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityMemberModel, {
       community: new Types.ObjectId(community),
       linkedTo: { $ne: null }
-    })
+    }, date)
   }
 
   /**
@@ -1453,12 +1382,12 @@ export class CommunityRepository {
    * @param community 
    * @returns 
    */
-  async getCommunityDependantRequestsCount(community: string): Promise<number> {
-    return await this.communityMemberModel.countDocuments({
+  async getCommunityDependantRequestsCount(community: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityMemberModel, {
       community: new Types.ObjectId(community),
       status: ACCOUNT_STATUS.PENDING,
       linkedTo: { $ne: null }
-    })
+    }, date)
   }
 
   /**
@@ -1466,12 +1395,12 @@ export class CommunityRepository {
   * @param community 
   * @returns 
   */
-  async getCommunityMemberRequestsCount(community: string): Promise<number> {
-    return await this.communityMemberModel.countDocuments({
+  async getCommunityMemberRequestsCount(community: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityMemberModel, {
       community: new Types.ObjectId(community),
       status: ACCOUNT_STATUS.PENDING,
       linkedTo: null
-    })
+    }, date)
   }
 
 
@@ -1479,15 +1408,29 @@ export class CommunityRepository {
    * 
    * @param community 
    */
-  async getCommunityResidentsCount(community: string): Promise<number> {
-    return await this.communityMemberModel.countDocuments({
+  async getCommunityResidentsCount(community: string, date?: string): Promise<number> {
+    let query: any = {
       community: new Types.ObjectId(community),
       $or: [
         { status: ACCOUNT_STATUS.ACCEPTED },
         { status: ACCOUNT_STATUS.APPROVED }
       ],
       isOwner: true
-    })
+    }
+
+    return await this.mongooseDocumentHelper.count(this.communityMemberModel, query, date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityVisitorsCount(community: string, date?: string): Promise<number> {
+    let query: any = { community: new Types.ObjectId(community) }
+
+    return await this.mongooseDocumentHelper.count(this.communityCheckInsModel, query, date)
   }
 
   /**
@@ -2034,13 +1977,16 @@ export class CommunityRepository {
    * @param data 
    * @param request 
    */
-  async createCheckInOutActivity(community: string, data: CheckInOutVisitorRequestDto, request?: CommunityInvite): Promise<void> {
+  async createCheckInOutActivity(community: string, member: CommunityMember, data: CheckInOutVisitorRequestDto, request?: CommunityInvite): Promise<void> {
     const check: CommunityCheckins = {
       community: new Types.ObjectId(community),
       accessPoint: new Types.ObjectId(data.accessPoint),
       member: new Types.ObjectId(data.member),
       invite: request ? (request as any)._id : null,
       code: data.code,
+      inviteType: data.inviteType,
+      building: member.building,
+      street: member.street,
       date: new Date(data.date),
       type: data.type
     }

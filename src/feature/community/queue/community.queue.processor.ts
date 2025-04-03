@@ -24,77 +24,77 @@ export class CommunityQueueProcessor extends WorkerHost {
     try {
       switch (job.name) {
 
-        case STREET_MEMBERS_SUMMARY: {
-          // update community summary
-          const { community, street } = job.data
-          const members = await this.communityRepository.getCommunityStreetMembersCount(community, street)
+        // case STREET_MEMBERS_SUMMARY: {
+        //   // update community summary
+        //   const { community, street } = job.data
+        //   const members = await this.communityRepository.getCommunityStreetMembersCount(community, street)
 
-          await this.communityRepository.updateCommunityStreetMembersSummary(community, street, members)
+        //   await this.communityRepository.updateCommunityStreetMembersSummary(community, street, members)
 
-          return
-        }
+        //   return
+        // }
 
-        case BUILDING_MEMBERS_SUMMARY: {
-          // update community summary
-          const { community, building } = job.data
-          const members = await this.communityRepository.getCommunityBuildingMembersCount(community, building)
+        // case BUILDING_MEMBERS_SUMMARY: {
+        //   // update community summary
+        //   const { community, building } = job.data
+        //   const members = await this.communityRepository.getCommunityBuildingMembersCount(community, building)
 
-          await this.communityRepository.updateCommunityBuildingMembersSummary(community, building, members)
+        //   await this.communityRepository.updateCommunityBuildingMembersSummary(community, building, members)
 
-          return
-        }
+        //   return
+        // }
 
-        case STREET_BUILDINGS_SUMMARY: {
-          // update community summary
-          const { community, street } = job.data
-          const buildings = await this.communityRepository.getCommunityStreetBuildingsCount(community, street)
+        // case STREET_BUILDINGS_SUMMARY: {
+        //   // update community summary
+        //   const { community, street } = job.data
+        //   const buildings = await this.communityRepository.getCommunityStreetBuildingsCount(community, street)
 
-          await this.communityRepository.updateCommunityStreetBuildingsSummary(community, street, buildings)
+        //   await this.communityRepository.updateCommunityStreetBuildingsSummary(community, street, buildings)
 
-          return
-        }
+        //   return
+        // }
 
-        case COMMUNITY_STREETS_SUMMARY: {
-          // update community summary
-          const { community } = job.data
-          const streets = await this.communityRepository.getCommunityStreetsCount(community)
+        // case COMMUNITY_STREETS_SUMMARY: {
+        //   // update community summary
+        //   const { community } = job.data
+        //   const streets = await this.communityRepository.getCommunityStreetsCount(community)
 
-          await this.communityRepository.updateCommunityStreetsSummary(community, streets)
+        //   await this.communityRepository.updateCommunityStreetsSummary(community, streets)
 
-          return
-        }
+        //   return
+        // }
 
-        case COMMUNITY_BUILDINGS_SUMMARY: {
-          // update community summary
-          const { community } = job.data
-          const buildings = await this.communityRepository.getCommunityBuildingsCount(community)
+        // case COMMUNITY_BUILDINGS_SUMMARY: {
+        //   // update community summary
+        //   const { community } = job.data
+        //   const buildings = await this.communityRepository.getCommunityBuildingsCount(community)
 
-          await this.communityRepository.updateCommunityBuildingsSummary(community, buildings)
+        //   await this.communityRepository.updateCommunityBuildingsSummary(community, buildings)
 
-          return
-        }
+        //   return
+        // }
 
-        case COMMUNITY_DEPENDANT_SUMMARY: {
-          // update community summary
-          const { community } = job.data
-          const count = await this.communityRepository.getCommunityDependantsCount(community)
+        // case COMMUNITY_DEPENDANT_SUMMARY: {
+        //   // update community summary
+        //   const { community } = job.data
+        //   const count = await this.communityRepository.getCommunityDependantsCount(community)
 
-          await this.communityRepository.updateCommunityDependantsSummary(community, count)
+        //   await this.communityRepository.updateCommunityDependantsSummary(community, count)
 
-          return
-        }
+        //   return
+        // }
 
-        case COMMUNITY_MEMBERS_SUMMARY: {
-          // update community summary
-          const { community } = job.data
-          const members = await this.communityRepository.getCommunityResidentsCount(community)
-          const memberRequests = await this.communityRepository.getCommunityMemberRequestsCount(community)
-          const dependantRequests = await this.communityRepository.getCommunityDependantRequestsCount(community)
+        // case COMMUNITY_MEMBERS_SUMMARY: {
+        //   // update community summary
+        //   const { community } = job.data
+        //   const members = await this.communityRepository.getCommunityResidentsCount(community)
+        //   const memberRequests = await this.communityRepository.getCommunityMemberRequestsCount(community)
+        //   const dependantRequests = await this.communityRepository.getCommunityDependantRequestsCount(community)
 
-          await this.communityRepository.updateCommunityMembersSummary(community, members, memberRequests, dependantRequests)
+        //   await this.communityRepository.updateCommunityMembersSummary(community, members, memberRequests, dependantRequests)
 
-          return
-        }
+        //   return
+        // }
       }
     } catch (_) { }
 

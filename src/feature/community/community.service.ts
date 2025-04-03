@@ -46,7 +46,6 @@ import { CommunityMember } from './model/community.member';
 import { UpdateCommunityStreetDto } from './dto/request/update.community.street.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { BUILDING_MEMBERS_SUMMARY, COMMUNITY_BUILDINGS_SUMMARY, COMMUNITY_DEPENDANT_SUMMARY, COMMUNITY_MEMBERS_SUMMARY, COMMUNITY_STREETS_SUMMARY, STREET_BUILDINGS_SUMMARY, STREET_MEMBERS_SUMMARY } from './queue/community.queue.processor';
 import { CreateCommunityContactDto } from './dto/request/create.community.contact.dto';
 import { CommunityContactResponseDto } from './dto/response/community.contact.response.dto';
 import { CommunityContactDtoMapper } from './mapper/community.contact.dto.mapper';
@@ -59,6 +58,7 @@ import { CommunityAccessPoint } from './model/community.access.point';
 import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
 import { CommunityAnnouncement } from './model/community.announcement';
 import { E2eeService } from '../e2ee/e2ee.service';
+import { InviteType } from 'src/core/enums/invite.type';
 
 @Injectable()
 export class CommunityService {
@@ -244,7 +244,7 @@ export class CommunityService {
     if (exist) throw new ForbiddenException(DUPLICATE_RECORD_ERROR)
 
     const communityData = await this.communityRepository.getCommunity(community)
-    if(!communityData) throw new ForbiddenException()
+    if (!communityData) throw new ForbiddenException()
 
     const counter = await this.counterRepository.getCounter(COUNTER_TYPE.ACCESS_POINT)
     body.code = `#TG${counter}-${this.authHelper.random(3)}`.toString()
@@ -516,8 +516,6 @@ export class CommunityService {
       data.code = this.authHelper.random(5)
       const street: CommunityStreet = await this.communityRepository.createStreet(user, community, data)
 
-      // queue summary job
-      await this.updateCommuntitySummary(community, COMMUNITY_STREETS_SUMMARY)
       return this.pathMapper.map(street)
     }
 
@@ -546,19 +544,26 @@ export class CommunityService {
    * 
    * @param community 
    */
-  async getCommunitySummary(community: string): Promise<any> {
-    const data = await this.communityRepository.getCommunitySummary(community)
-
-    if (data) return data
+  async getCommunitySummary(community: string, date?: string): Promise<any> {
+    const [streets, buildings, members, visitors, dependants, memberRequests, dependantRequests] = await
+      Promise.all([
+        this.communityRepository.getCommunityStreetsCount(community, date),
+        this.communityRepository.getCommunityBuildingsCount(community, date),
+        this.communityRepository.getCommunityResidentsCount(community, date),
+        this.communityRepository.getCommunityVisitorsCount(community, date),
+        this.communityRepository.getCommunityDependantsCount(community, date),
+        this.communityRepository.getCommunityMemberRequestsCount(community, date),
+        this.communityRepository.getCommunityDependantRequestsCount(community, date)
+      ])
 
     return {
-      streets: 0,
-      buildings: 0,
-      members: 0,
-      memberRequests: 0,
-      visitors: 0,
-      dependants: 0,
-      dependantRequests: 0,
+      streets,
+      buildings,
+      members,
+      memberRequests,
+      visitors,
+      dependants,
+      dependantRequests,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -570,15 +575,18 @@ export class CommunityService {
    * @param street 
    * @returns 
    */
-  async getCommunityStreetSummary(community: string, street: string): Promise<any> {
-    const data = await this.communityRepository.getCommunityStreetSummary(community, street)
-
-    if (data) return data
+  async getCommunityStreetSummary(community: string, street: string, date?: string): Promise<any> {
+    const [buildings, members, visitors] = await
+      Promise.all([
+        this.communityRepository.getCommunityStreetBuildingsCount(community, street, date),
+        this.communityRepository.getCommunityStreetMembersCount(community, street, date),
+        this.communityRepository.getCommunityStreetVisitorsCount(community, date)
+      ])
 
     return {
-      buildings: 0,
-      members: 0,
-      visitors: 0,
+      buildings,
+      members,
+      visitors,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -590,14 +598,16 @@ export class CommunityService {
    * @param building 
    * @returns 
    */
-  async getCommunityBuildingSummary(community: string, building: string): Promise<any> {
-    const data = await this.communityRepository.getCommunityBuildingSummary(community, building)
-
-    if (data) return data
+  async getCommunityBuildingSummary(community: string, building: string, date?: string): Promise<any> {
+    const [members, visitors] = await
+      Promise.all([
+        this.communityRepository.getCommunityBuildingMembersCount(community, building, date),
+        this.communityRepository.getCommunityBuildingVisitorsCount(community, building, date),
+      ])
 
     return {
-      members: 0,
-      visitors: 0,
+      members,
+      visitors,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -841,8 +851,6 @@ export class CommunityService {
           canSendMessage: body.canSendMessage
         }, code)
 
-        // update community summary
-        await this.updateCommuntitySummary(community, COMMUNITY_DEPENDANT_SUMMARY)
         // send email/push notification to existing account / authorized user
         return await this.communityRepository.getCommunityMember((savedMember as any)._id.toString(), community)
       }
@@ -937,10 +945,6 @@ export class CommunityService {
 
     // check if user is owner
     const result = await this.communityRepository.createCommunityBuilding(user, community, data)
-
-    // queue summary job
-    await this.updateCommuntitySummary(community, COMMUNITY_BUILDINGS_SUMMARY)
-    await this.updateCommuntityStreetSummary(community, data.street, STREET_BUILDINGS_SUMMARY)
 
     return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
   }
@@ -1173,15 +1177,9 @@ export class CommunityService {
           }
         })
 
-      if (data.status === ACCOUNT_STATUS.APPROVED) {
+      if (data.status === ACCOUNT_STATUS.APPROVED)
         await this.accountRepository.setAllDashboardFlagStatus(request.account)
 
-        // update community summary
-        await this.updateCommuntitySummary(id, COMMUNITY_MEMBERS_SUMMARY)
-
-        await this.updateCommuntityStreetSummary(id, request.street._id.toString(), STREET_MEMBERS_SUMMARY)
-        await this.updateCommuntityBuildingSummary(id, request.building._id.toString(), BUILDING_MEMBERS_SUMMARY)
-      }
       else await this.accountRepository.setJoinFlagStatus(request.account, true)
     }
 
@@ -1217,8 +1215,11 @@ export class CommunityService {
    * @param data 
    */
   async checkInOutVisitor(community: string, data: CheckInOutVisitorRequestDto): Promise<void> {
-    const request = await this.communityRepository.getCommunityInviteByCode(community, data.member, data.code)
+    const member = await this.communityRepository.getCommunityMember(community, data.member)
 
+    if (!member) throw new NotFoundException()
+
+    const request = await this.communityRepository.getCommunityInviteByCode(community, data.member, data.code)
     if (request) {
       if (request.status === INVITE_STATUS.PENDING) {
         await this.communityRepository.checkInVisitor(community,
@@ -1226,29 +1227,32 @@ export class CommunityService {
           data.code)
       }
 
-      // send push notification to member
-      const account = request.account.toString()
-      const deviceToken = await this.accountRepository.getDevicePushToken(account)
-      const title: string = data.type === CheckType.CHECK_IN ? 'Checkin successful' : 'Checkout successful'
-      const body = data.type === CheckType.CHECK_IN
-        ? `Your guest ${request.name.trim()}, has checked in successfully`
-        : `Your guest ${request.name.trim()}, has checked out successfully`
+      if (request.type !== InviteType.SELF) {
+        // send push notification to member
+        const account = request.account.toString()
+        const deviceToken = await this.accountRepository.getDevicePushToken(account)
+        const title: string = data.type === CheckType.CHECK_IN ? 'Checkin successful' : 'Checkout successful'
+        const body = data.type === CheckType.CHECK_IN
+          ? `Your guest ${request.name.trim()}, has checked in successfully`
+          : `Your guest ${request.name.trim()}, has checked out successfully`
 
-      if (deviceToken)
-        this.notificationService.pushToDevice({
-          device: deviceToken.token, data: {
-            title: title,
-            type: data.type === CheckType.CHECK_IN
-              ? MessageType.VISITOR_CHECK_IN
-              : MessageType.VISITOR_CHECK_OUT, description: body,
-            link: 'visitor/check-inout',
-            community: community,
-            contentId: (request as any)._id
-          }
-        })
+        if (deviceToken)
+          this.notificationService.pushToDevice({
+            device: deviceToken.token, data: {
+              title: title,
+              type: data.type === CheckType.CHECK_IN
+                ? MessageType.VISITOR_CHECK_IN
+                : MessageType.VISITOR_CHECK_OUT, description: body,
+              link: 'visitor/check-inout',
+              community: community,
+              contentId: (request as any)._id
+            }
+          })
+      }
 
     }
-    await this.communityRepository.createCheckInOutActivity(community, data, request)
+
+    await this.communityRepository.createCheckInOutActivity(community, member, data, request)
   }
 
   /**
