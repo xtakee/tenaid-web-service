@@ -51,7 +51,7 @@ export class AuthController {
    * @param community 
    * @returns 
    */
-  @Post('access-access/:community/login')
+  @Post('access/:community/login')
   @ApiOperation({ summary: 'Login community access point' })
   async loginCommunityAccessPoint(@Body() data: AccessPointAuthRequestDto, @Param('community') community: string): Promise<AccessPointAuthResponseDto> {
     return await this.authService.signInCommunityAccessPoint(community, data)

@@ -201,6 +201,27 @@ export class CommunityRepository {
   }
 
   /**
+   * 
+   * @param community 
+   * @param date 
+   */
+  async getCommunityAccessSummary(community: string, date?: string): Promise<any> {
+    const query: any = { community: new Types.ObjectId(community) }
+    if (date)
+      query.date = { $gte: new Date(date) }
+
+    return await this.communityCheckInsModel.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$type',
+          count: { $sum: 1 }
+        }
+      }
+    ])
+  }
+
+  /**
  * 
  * @param community 
  * @param guard 
@@ -223,42 +244,12 @@ export class CommunityRepository {
     return await this.communityGuardModel.findOne({
       community: new Types.ObjectId(community),
       'email.value': email.trim().toLowerCase()
-    })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @returns 
-   */
-  async getCommunitySummary(community: string): Promise<CommunitySummary> {
-    return await this.communitySummayModel.findOne({ community: new Types.ObjectId(community) })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param street 
-   * @returns 
-   */
-  async getCommunityStreetSummary(community: string, street: string): Promise<StreetSummary> {
-    return await this.streetSummaryModel.findOne({
-      community: new Types.ObjectId(community),
-      street: new Types.ObjectId(street)
-    })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param building 
-   * @returns 
-   */
-  async getCommunityBuildingSummary(community: string, building: string): Promise<StreetSummary> {
-    return await this.buildingSummaryModel.findOne({
-      community: new Types.ObjectId(community),
-      building: new Types.ObjectId(building)
-    })
+    }).populate({
+      path: 'community',
+      select: '_id name code logo description',
+      strictPopulate: false
+    }
+    )
   }
 
   /**
@@ -830,6 +821,19 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param member 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityMemberById(community: string, member: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      _id: new Types.ObjectId(member),
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
+   * 
    * @param community 
    * @param street 
    * @param buildingNumber 
@@ -1324,7 +1328,7 @@ export class CommunityRepository {
     const query: any = {
       community: new Types.ObjectId(community),
       building: new Types.ObjectId(building),
-      $or: [{ $ne: InviteType.SELF }]
+      inviteType: { $ne: InviteType.SELF }
     }
 
     return await this.mongooseDocumentHelper.count(this.communityCheckInsModel, query, date)

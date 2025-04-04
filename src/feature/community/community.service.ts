@@ -1212,10 +1212,28 @@ export class CommunityService {
   /**
    * 
    * @param community 
+   * @param date 
+   */
+  async getCommunityAccessSummary(community: string, date?: string): Promise<any> {
+    const result = await this.communityRepository.getCommunityAccessSummary(community, date)
+    const data: any = result.reduce((acc, item) => {
+      acc[item._id] = item.count
+      return acc
+    }, {})
+
+    data.createdAt = new Date()
+    data.updatedAt = new Date()
+
+    return data
+  }
+
+  /**
+   * 
+   * @param community 
    * @param data 
    */
   async checkInOutVisitor(community: string, data: CheckInOutVisitorRequestDto): Promise<void> {
-    const member = await this.communityRepository.getCommunityMember(community, data.member)
+    const member = await this.communityRepository.getCommunityMemberById(community, data.member)
 
     if (!member) throw new NotFoundException()
 

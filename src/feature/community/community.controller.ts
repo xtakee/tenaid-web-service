@@ -882,6 +882,7 @@ export class CommunityController {
     return await this.communityService.getAllCommunityJoinRequests(community, paginate)
   }
 
+
   /**
 * 
 * @param user 
@@ -893,13 +894,10 @@ export class CommunityController {
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @ApiOperation({ summary: 'Get a community access summary' })
-  async CommunityAccessSummary(@ManagedCommunity() community: string): Promise<any> {
-    return {
-      exits: 12,
-      entry: 10
-    }
+  @ApiQuery({ name: 'date', required: false, type: String })
+  async getCommunityAccessSummary(@ManagedCommunity() community: string, @Query() date?: DateDto): Promise<any> {
+    return this.communityService.getCommunityAccessSummary(community, date.date)
   }
-
 
   /**
  * 
@@ -1003,11 +1001,13 @@ export class CommunityController {
   * @param code 
   * @returns 
   */
-  @Get(':community/invite-code')
+  @Get('/invite-code')
   @BasicAuth()
   @ApiOperation({ summary: 'Get a community invite by code' })
-  async getCommunityInviteByCode(@Param('community') community: string, @Query('code') code: string, @Query('member') member: string): Promise<CommunityInviteCodeResponseDto> {
-    if (!isMongoId(community)) throw new BadRequestException()
+  async getCommunityInviteByCode(
+    @ManagedCommunity() community: string,
+    @Query('code') code: string,
+    @Query('member') member: string): Promise<CommunityInviteCodeResponseDto> {
     if (!isMongoId(member)) throw new BadRequestException()
     return await this.communityService.getCommunityInviteByCode(community, member, code)
   }
@@ -1018,16 +1018,15 @@ export class CommunityController {
  * @param paginate 
  * @returns 
  */
-  @Get(':community/access/members')
+  @Get('/access/members')
   @BasicAuth()
   @ApiOperation({ summary: 'Get all community members for access' })
   @ApiQuery({ name: 'date', required: false, type: String })
   async getAllCommunityMembersForSecurity(
     @User() user: string,
-    @Param('community') community: string,
+    @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto,
     @Query() date?: DateDto): Promise<PaginatedResult<any>> {
-    if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityMembersForSecurity(user, community, paginate, date.date)
   }
 
@@ -1378,7 +1377,6 @@ export class CommunityController {
  * @returns 
  */
   @Get('code/:code/search')
-  @BasicAuth()
   @ApiOperation({ summary: 'Get a community by code' })
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
     return await this.communityService.getCommunityByCode(code)

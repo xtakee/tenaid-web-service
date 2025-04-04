@@ -31,7 +31,7 @@ export class CommunityCheckins {
   @Prop({ type: Types.ObjectId, ref: CommunityInvite.name })
   invite?: Types.ObjectId
 
-  @Prop({ enum: InviteType })
+  @Prop({ enum: CheckType })
   type: string
 
   @Prop()
@@ -40,7 +40,7 @@ export class CommunityCheckins {
   @Prop({ type: Date })
   date: Date
 
-  @Prop({ enum: CheckType })
+  @Prop({ enum: InviteType })
   inviteType: string
 
   @Prop({ index: true })

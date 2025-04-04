@@ -209,9 +209,8 @@ export class AuthService {
    */
   async signInCommunityAccessPoint(community: string, data: AccessPointAuthRequestDto): Promise<AccessPointAuthResponseDto> {
     const gaurd = await this.communityRepository.getCommunityGuardByEmail(community, data.email)
-    if (!gaurd) throw new BadRequestException()
+    if (!gaurd) throw new BadRequestException(INVALID_LOGIN_ERROR)
 
-    console.log(gaurd)
     const isMatch = await this.authHelper.isMatch(data.password, gaurd.password)
     if (isMatch) {
       const payload = {
@@ -234,14 +233,15 @@ export class AuthService {
         account: {
           _id: (gaurd as any)._id,
           name: gaurd.fullName,
-          community: community,
-          email: gaurd.email
+          community: gaurd.community,
+          email: gaurd.email,
+          requirePasswordChange: gaurd.requirePasswordChange
         },
         authorization
       }
     }
 
-    throw new BadRequestException()
+    throw new BadRequestException(INVALID_LOGIN_ERROR)
   }
 
   /**

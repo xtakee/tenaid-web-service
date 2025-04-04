@@ -36,7 +36,6 @@ export class CommunityGuard {
   @Prop()
   code: string
 
-
   @Prop({ type: E2eeDataSchema })
   encryptedPassword?: E2eeDataSchema
 

@@ -34,8 +34,7 @@ async function main() {
   const users = { developer_tenaid: 'developer_2024' }
 
   const document = SwaggerModule.createDocument(app, config)
-  if (process.env.NODE_ENV === ENV.DEV) {
-
+  if (process.env.NODE_ENV === ENV.DEV || process.env.NODE_ENV === ENV.DEBUG) {
     app.use("/docs", basicAuth({ users, challenge: true }))
     app.use("/docs-json", basicAuth({ users, challenge: true }))
 

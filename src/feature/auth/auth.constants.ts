@@ -106,6 +106,8 @@ export const defaultCommunityGuardPermissions: Permission[] = [
   { authorization: COMMUNITY_SYSTEM_FEATURES.ACCESS_POINT, claim: [CLAIM.READ] },
   { authorization: COMMUNITY_SYSTEM_FEATURES.PERSONA, claim: [CLAIM.READ, CLAIM.WRITE, CLAIM.DELETE] },
   { authorization: COMMUNITY_SYSTEM_FEATURES.ACCESS_CONTROL, claim: [CLAIM.READ, CLAIM.WRITE] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS, claim: [CLAIM.READ] },
+  { authorization: COMMUNITY_SYSTEM_FEATURES.MEMBER, claim: [CLAIM.READ] },
   { authorization: COMMUNITY_SYSTEM_FEATURES.COMMUNITY, claim: [CLAIM.READ] },
 ]
 

@@ -7,6 +7,7 @@ export class AccessPointAuthResponseDto {
     name: string
     email: Email
     community: string
+    requirePasswordChange: Boolean
   }
   @ApiProperty()
   authorization: string

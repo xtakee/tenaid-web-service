@@ -30,5 +30,4 @@ export class CheckInOutVisitorRequestDto {
   @IsNotEmpty()
   @IsEnum(InviteType)
   inviteType: string
-
 }
