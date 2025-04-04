@@ -5,7 +5,7 @@ import { CommunityToDtoMapper } from './mapper/community.to.dto.mapper';
 import { ACCOUNT_STATUS, defaultCommunityGuardPermissions } from '../auth/auth.constants';
 import { CommunityInviteDto } from 'src/feature/community/dto/community.invite.dto';
 import { InviteToDtoMapper } from './mapper/invite.to.dto.mapper';
-import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, DUPLICATE_HOUSE_NUMBER_ERROR, DUPLICATE_RECORD_ERROR, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
+import { COMMUNITY_MEMBER_AUTHORIZED_USER_DUPLICATE, DUPLICATE_COMMUNITY_APARTMENT_REQUEST, DUPLICATE_COMMUNITY_JOIN_REQUEST, DUPLICATE_COMMUNITY_MEMBER_REQUEST, DUPLICATE_HOUSE_NUMBER_ERROR, DUPLICATE_RECORD_ERROR, INVALID_ACCESS_TIME, INVALID_COMMUNITY_PATH, REQUEST_APPROVED, REQUEST_APPROVED_BODY, REQUEST_DENIED, REQUEST_INVITE_DUPLICATE, REQUEST_INVITE_ERROR } from 'src/core/strings';
 import { CommunityInviteRevokeDto } from 'src/feature/community/dto/request/community.invite.revoke.dto';
 import { CommunityVisitorsDto } from 'src/feature/community/dto/response/community.visitors.dto';
 import { CommunityVisitorsToDtoMapper } from './mapper/community.visitors.to.dto.mapper';
@@ -1007,6 +1007,8 @@ export class CommunityService {
    * @param data 
    */
   async requestJoin(user: string, data: CommunityJoinRequestDto): Promise<AccountCommunityResponseDto> {
+    const apartment = await this.communityRepository.getCommunityMemberBuildingApartment(data.community, data.building, data.apartment)
+    if (apartment) throw new BadRequestException(DUPLICATE_COMMUNITY_APARTMENT_REQUEST)
 
     const previousRequest = await this.communityRepository.getCommunityMemberRequest(user, data.community)
     if (previousRequest) {
@@ -1031,7 +1033,7 @@ export class CommunityService {
       status: ACCOUNT_STATUS.PENDING,
       isPrimary: data.isPrimary,
       code: '-1',
-      apartment: data.apartment
+      apartment: data.apartment.trim().toUpperCase()
     })
 
     if (request) {

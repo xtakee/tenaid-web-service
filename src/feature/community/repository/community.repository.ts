@@ -222,6 +222,20 @@ export class CommunityRepository {
   }
 
   /**
+   * 
+   * @param community 
+   * @param building 
+   * @param apartment 
+   */
+  async getCommunityMemberBuildingApartment(community: string, building: string, apartment: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building),
+      apartment: apartment.trim().toUpperCase()
+    })
+  }
+
+  /**
  * 
  * @param community 
  * @param guard 
