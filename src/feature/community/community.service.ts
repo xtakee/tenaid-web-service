@@ -1232,7 +1232,7 @@ export class CommunityService {
    * @param community 
    * @param data 
    */
-  async checkInOutVisitor(community: string, data: CheckInOutVisitorRequestDto): Promise<void> {
+  async checkInOutVisitor(user: string, community: string, data: CheckInOutVisitorRequestDto): Promise<void> {
     const member = await this.communityRepository.getCommunityMemberById(community, data.member)
 
     if (!member) throw new NotFoundException()
@@ -1270,7 +1270,7 @@ export class CommunityService {
 
     }
 
-    await this.communityRepository.createCheckInOutActivity(community, member, data, request)
+    await this.communityRepository.createCheckInOutActivity(user, community, member, data, request)
   }
 
   /**

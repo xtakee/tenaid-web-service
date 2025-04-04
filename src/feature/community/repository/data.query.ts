@@ -40,6 +40,10 @@ export function getPaginatedAccessQuery(paginate: PaginationRequestDto) {
       select: '_id name',
       strictPopulate: false,
     }, {
+      path: 'guard',
+      select: '_id fullName email.value phone isActive country',
+      strictPopulate: false,
+    }, {
       path: 'community',
       select: '_id name logo',
       strictPopulate: false,

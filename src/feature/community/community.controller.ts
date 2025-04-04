@@ -1339,8 +1339,8 @@ export class CommunityController {
   @Post('/visitor/check-in-out')
   @BasicAuth()
   @ApiOperation({ summary: 'Check in-out visitor from a community' })
-  async checkInOutVisitor(@ManagedCommunity() community: string, @Body() body: CheckInOutVisitorRequestDto): Promise<void> {
-    return await this.communityService.checkInOutVisitor(community, body)
+  async checkInOutVisitor(@User() user: string, @ManagedCommunity() community: string, @Body() body: CheckInOutVisitorRequestDto): Promise<void> {
+    return await this.communityService.checkInOutVisitor(user, community, body)
   }
 
   /**

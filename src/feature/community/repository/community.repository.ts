@@ -1981,13 +1981,14 @@ export class CommunityRepository {
    * @param data 
    * @param request 
    */
-  async createCheckInOutActivity(community: string, member: CommunityMember, data: CheckInOutVisitorRequestDto, request?: CommunityInvite): Promise<void> {
+  async createCheckInOutActivity(user: string, community: string, member: CommunityMember, data: CheckInOutVisitorRequestDto, request?: CommunityInvite): Promise<void> {
     const check: CommunityCheckins = {
       community: new Types.ObjectId(community),
       accessPoint: new Types.ObjectId(data.accessPoint),
       member: new Types.ObjectId(data.member),
       invite: request ? (request as any)._id : null,
       code: data.code,
+      guard: new Types.ObjectId(user),
       inviteType: data.inviteType,
       building: member.building,
       street: member.street,

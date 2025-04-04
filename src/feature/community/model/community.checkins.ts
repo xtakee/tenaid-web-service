@@ -8,6 +8,7 @@ import { CommunityAccessPoint } from "./community.access.point";
 import { CommunityStreet } from "./community.street";
 import { CommunityBuilding } from "./community.building";
 import { InviteType } from "src/core/enums/invite.type";
+import { CommunityGuard } from "./community.guard";
 
 export type CommunityCheckinsDocument = HydratedDocument<CommunityCheckins>;
 
@@ -30,6 +31,9 @@ export class CommunityCheckins {
 
   @Prop({ type: Types.ObjectId, ref: CommunityInvite.name })
   invite?: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: CommunityGuard.name })
+  guard?: Types.ObjectId
 
   @Prop({ enum: CheckType })
   type: string
