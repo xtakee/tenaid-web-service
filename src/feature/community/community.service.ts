@@ -162,7 +162,7 @@ export class CommunityService {
    * @returns 
    */
   async getCommunityByCode(code: string): Promise<CommunityDto> {
-    const community = await this.communityRepository.getCommunityByCode(code)
+    const community = await this.communityRepository.getCommunityByCode(code.trim().toUpperCase())
     if (community) return this.communityMapper.map(community)
 
     throw new BadRequestException()

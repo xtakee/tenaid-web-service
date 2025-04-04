@@ -1381,5 +1381,4 @@ export class CommunityController {
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
     return await this.communityService.getCommunityByCode(code)
   }
-
 }
