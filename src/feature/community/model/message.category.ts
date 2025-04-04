@@ -15,6 +15,9 @@ export class MessageCategory {
   @Prop()
   description: string
 
+  @Prop()
+  displayName: string
+
   @Prop({ default: false })
   readOnly: Boolean
 

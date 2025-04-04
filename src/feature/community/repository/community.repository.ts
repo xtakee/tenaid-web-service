@@ -2545,6 +2545,7 @@ export class CommunityRepository {
   async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<MessageCategory> {
     const messageGroup: MessageCategory = {
       community: new Types.ObjectId(community),
+      displayName: data.name,
       name: data.name.toLowerCase().replaceAll(' ', ''),
       description: data.description,
       readOnly: data.isReadOnly
@@ -2575,7 +2576,7 @@ export class CommunityRepository {
     const query: any = { community: new Types.ObjectId(community) }
 
     return await this.paginator.paginate(this.messageCategoryModel, buildSearchQuery(query, paginate.search), {
-      select: '_id name description community readOnly',
+      select: '_id name description community displayName readOnly',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort
