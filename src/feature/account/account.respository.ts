@@ -565,7 +565,7 @@ export class AccountRepository implements IAccountRepository {
    * @returns 
    */
   async updatePassword(user: string, password: string): Promise<Account> {
-    return await this.accountModel.findByIdAndUpdate(user, { password: password }, { returnDocument: 'after' })
+    return await this.accountModel.findByIdAndUpdate(user, { password: password, requirePasswordChange: false }, { returnDocument: 'after' })
   }
 
   /**
