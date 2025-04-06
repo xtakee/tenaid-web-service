@@ -1466,4 +1466,20 @@ export class CommunityController {
     if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityStreets(community, paginate)
   }
+
+    /**
+   * 
+   * @param community 
+   * @param building 
+   * @param paginate 
+   * @returns 
+   */
+    @Get('/:community/building/:building/flat')
+    @BasicAuth()
+    @ApiOperation({ summary: 'Get a community building flats/apartments' })
+    async getCommunityBuildingApartments(@Param('community') community: string, @Param('building') building: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+      if (!isMongoId(building)) throw new BadRequestException()
+      if (!isMongoId(community)) throw new BadRequestException()
+      return await this.communityService.getAllCommunityBuildingApartments(community, building, paginate)
+    }
 }
