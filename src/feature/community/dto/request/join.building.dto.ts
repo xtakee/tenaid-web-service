@@ -14,5 +14,6 @@ export class JoinBuildingDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  apartment: number
+  @IsMongoId()
+  apartment: string
 }

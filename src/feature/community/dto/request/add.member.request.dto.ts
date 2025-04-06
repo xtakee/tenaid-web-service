@@ -59,5 +59,6 @@ export class AddMemberRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsMongoId()
   apartment: string
 }

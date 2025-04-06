@@ -145,6 +145,7 @@ const queue = BullModule.registerQueue({
         schema.pre('save', async function () {
           if (this.isNew) {
             this.searchable = searchable(this.name)
+            this.code = new AuthHelper().random(5).toUpperCase()
           }
         })
 

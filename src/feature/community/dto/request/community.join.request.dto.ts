@@ -24,5 +24,6 @@ export class CommunityJoinRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsMongoId()
   apartment: string
 }

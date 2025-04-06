@@ -106,16 +106,23 @@ export const COMMUNITY_SELECT_QUERY = '_id name encryption size kyc description 
 
 export const MEMBER_COMMUNITIES_QUERY = [{
   path: 'street',
-  select: '_id name description community'
+  select: '_id name description community',
+  strictPopulate: false
 }, {
   path: 'building',
-  select: '_id buildingNumber type'
+  select: '_id buildingNumber type',
+  strictPopulate: false
 }, {
   path: 'community',
-  select: '_id name code members description kycAcknowledged images type logo address createdAt updatedAt encryption'
+  select: '_id name code members description kycAcknowledged images type logo address createdAt updatedAt encryption',
+  strictPopulate: false
 }, {
   path: 'linkedTo',
   select: '_id memberId code extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
+  strictPopulate: false
+}, {
+  path: 'apartment',
+  select: '_id code name isActive',
   strictPopulate: false
 }]
 
@@ -148,6 +155,10 @@ export const COMMUNITY_MEMBER_QUERY = [
   }, {
     path: 'linkedTo',
     select: '_id memberId code extra.firstName extra.lastName extra.photo extra.email extra.gender extra.phone, extra.email',
+    strictPopulate: false
+  }, {
+    path: 'apartment',
+    select: '_id code name isActive',
     strictPopulate: false
   }
 ]

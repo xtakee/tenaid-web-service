@@ -816,7 +816,7 @@ export class CommunityService {
       if (!account) {
         body.street = communityMember.street.toString()
         body.building = communityMember.building.toString()
-        body.apartment = communityMember.apartment
+        body.apartment = communityMember.apartment.toString()
         body.isPrimary = true
 
         const savedMember = await this.communityRepository.createCommunityMemberAuthorizedUser(community, member, { ...body }, code)
@@ -835,7 +835,7 @@ export class CommunityService {
           isPrimary: false,
           building: communityMember.building.toString(),
           street: communityMember.street.toString(),
-          apartment: communityMember.apartment,
+          apartment: communityMember.apartment.toString(),
           gender: account.gender,
           country: account.country,
           canCreateExit: body.canCreateExit,

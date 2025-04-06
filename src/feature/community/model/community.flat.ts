@@ -27,6 +27,9 @@ export class CommunityFlat {
   @Prop()
   name: string
 
+  @Prop()
+  code?: string
+
   @Prop({ type: [String], index: true })
   searchable?: string[]
 }

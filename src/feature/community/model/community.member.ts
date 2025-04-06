@@ -23,8 +23,8 @@ export class CommunityMember {
   @Prop({ ref: CommunityStreet.name })
   street?: Types.ObjectId
 
-  @Prop()
-  apartment?: string
+  @Prop({ ref: CommunityStreet.name })
+  apartment: Types.ObjectId
 
   @Prop()
   memberId?: string

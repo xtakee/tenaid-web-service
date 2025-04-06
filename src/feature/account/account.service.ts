@@ -10,7 +10,7 @@ import { BankRepository } from "../bank/bank.repository"
 import { BankAccountToDtoMapper } from "./mapper/bank.account.to.dto.mapper"
 import { AccountProfileDto } from "src/feature/account/dto/request/account.profile.dto"
 import { AddressDto } from "src/feature/core/dto/address.dto"
-import { ACCOUNT_STATUS, ADD_ON, CLAIM, SYSTEM_FEATURES, defaultAgentPermissions, defaultCommunityAdminPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants"
+import { ACCOUNT_STATUS, ADD_ON, defaultCommunityAdminPermissions, defaultManagerPermissions, defaultPermissions } from "../auth/auth.constants"
 import { UpdateBankAccountDto } from "src/feature/account/dto/request/update.bank.account.dto"
 import { DUPLICATE_ACCOUNT_ERROR, DUPLICATE_ADD_ON_REQUEST_ERROR, DUPLICATE_BANK_ERROR, DUPLICATE_RECORD_ERROR, INVALID_OTP } from "src/core/strings"
 import { ForgotPasswordResponseDto } from "src/feature/account/dto/response/forgot.password.response.dto"
@@ -36,8 +36,6 @@ import { Account } from "./model/account"
 import { AuthRepository } from "../auth/auth.repository"
 import { JwtService } from "@nestjs/jwt"
 import { VerifyOtpDto } from "./dto/request/verify.otp"
-import { E2eeData } from "../e2ee/model/e2ee.data"
-import { platform } from "os"
 import { UpdateProfileDto } from "./dto/request/update.profile"
 import { E2eeService } from "../e2ee/e2ee.service"
 
@@ -420,7 +418,11 @@ export class AccountService {
             member: primaryCommunity.communitySetup?.member === true
           }
 
-          let communities: any[] = managedAccounts.map((data) => data.community)
+          let communities: any[] = managedAccounts.map((data) => {
+            const com = data.community
+            com.kycAcknowledged = accountDto.kyc.profileCompleted && com.kycAcknowledged
+            return com
+          })
 
           communities = communities.filter((data) => data._id !== primaryCommunity._id)
           communities = communities.map((data) => {
@@ -631,40 +633,6 @@ export class AccountService {
       }
 
       return account
-    })
-
-    return result
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param platform 
-   * @param result 
-   * @returns 
-   */
-  private async processManagedAccountCommunityEncryption(user: string, platform: string, communities: any[]): Promise<any> {
-
-    if (communities.length < 1) return communities
-
-    // get user shared key
-    const encKeys = await this.e2eeRepository.getAccountKeys(user, platform)
-    if (!encKeys || !encKeys.sharedKey) return communities
-
-    const result = communities.map((community) => {
-      const encKey = community?.encryption?.enc
-      if (encKey) {
-        // encrypt community group key
-        const keys: EasGcmData = this.authHelper.advanceEncrypt(encKey, encKeys.sharedKey)
-
-        community.encryption = {
-          enc: keys.enc,
-          iv: keys.iv,
-          tag: keys.tag
-        }
-      }
-
-      return community
     })
 
     return result

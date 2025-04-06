@@ -48,6 +48,7 @@ import { INVITE_STATUS } from "../community.constants"
 import { COMMUNITY_MEMBER_PRIMARY_QUERY, COMMUNITY_MEMBER_QUERY, MEMBER_COMMUNITIES_QUERY, COMMUNITY_BUILDING_QUERY, COMMUNITY_VISITOR_QUERY, getPaginatedCommunityVisitorsQuery, getPaginatedMemberVisitorsQuery, getPaginatedAccessQuery, MEMBER_VISITOR_QUERY, COMMUNITY_SELECT_QUERY, getVisitorsCheckinsQuery } from "./data.query"
 import { MongooseDocumentHelper } from "src/core/helpers/mongoose.document.helper"
 import { InviteType } from "src/core/enums/invite.type"
+import { CommunityFlat } from "../model/community.flat"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -70,6 +71,7 @@ export class CommunityRepository {
     @InjectModel(CommunityDirector.name) private readonly communityDirectorModel: Model<CommunityDirector>,
     @InjectModel(CommunityStreet.name) private readonly communityStreetModel: Model<CommunityStreet>,
     @InjectModel(MessageCategory.name) private readonly messageCategoryModel: Model<MessageCategory>,
+    @InjectModel(CommunityFlat.name) private readonly communityFlatModel: Model<CommunityFlat>,
     private readonly mongooseDocumentHelper: MongooseDocumentHelper,
     @InjectModel(CommunityAnnouncement.name) private readonly announcementModel: Model<CommunityAnnouncement>
   ) { }
@@ -455,7 +457,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       code: data.code,
       isAdmin: data.isAdmin,
-      apartment: data.apartment,
+      apartment: new Types.ObjectId(data.apartment),
       memberId: data.memberId,
       street: data.street ? new Types.ObjectId(data.street) : null,
       status: data.status,
@@ -485,13 +487,12 @@ export class CommunityRepository {
    * @returns 
    */
   async createCommunityMemberAuthorizedUser(community: string, member: string, data: CommunityAuthorizedUserDto, code: string): Promise<CommunityMember> {
-
     const authorizedUser: CommunityMember = {
       community: new Types.ObjectId(community),
       code: code,
       isAdmin: false,
       isOwner: false,
-      apartment: data.apartment,
+      apartment: new Types.ObjectId(data.apartment),
       street: data.street ? new Types.ObjectId(data.street) : null,
       status: ACCOUNT_STATUS.PENDING,
       linkedTo: new Types.ObjectId(member),
@@ -729,7 +730,7 @@ export class CommunityRepository {
     }, {
       street: new Types.ObjectId(body.street),
       building: new Types.ObjectId(body.building),
-      apartment: body.apartment
+      apartment: new Types.ObjectId(body.apartment)
     }, { returnDocument: 'after' })
   }
 
@@ -896,11 +897,17 @@ export class CommunityRepository {
       }
     }
 
+    const buildingData = await this.communityBuildingModel.create(building)
+    if (!buildingData) return null
+
     await this.communityModel.findByIdAndUpdate(community, {
       'communitySetup.building': true
     }).exec()
 
-    return await this.communityBuildingModel.create(building)
+    // create building flats
+    await this.createCommunityBuildingFlats(user, community, data.street, (buildingData as any)._id.toString(), data.flats)
+
+    return buildingData
   }
 
   /**
@@ -910,8 +917,19 @@ export class CommunityRepository {
    * @param building 
    * @param flats 
    */
-  async createCommunityBuildingFlats(user: string, community: string, building: string, flats: string[]): Promise<void> {
+  async createCommunityBuildingFlats(user: string, community: string, street: string, building: string, flats: string[]): Promise<void> {
+    const data: CommunityFlat[] = flats.map((flat) => {
+      return {
+        community: new Types.ObjectId(community),
+        createdBy: new Types.ObjectId(user),
+        street: new Types.ObjectId(street),
+        building: new Types.ObjectId(building),
+        isActive: true,
+        name: flat.toPascalCaseWithSpaces()
+      }
+    })
 
+    await this.communityFlatModel.insertMany(data, { rawResult: false, ordered: true })
   }
 
   /**
@@ -2490,7 +2508,7 @@ export class CommunityRepository {
       createdBy: new Types.ObjectId(user),
       account: account ? new Types.ObjectId(account) : null,
       street: new Types.ObjectId(data.street),
-      apartment: data.apartment,
+      apartment: new Types.ObjectId(data.apartment),
       building: new Types.ObjectId(data.building),
       isPrimary: account ? false : true,
       canSendMessage: data.canSendMessages,
