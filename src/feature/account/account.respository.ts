@@ -452,6 +452,32 @@ export class AccountRepository implements IAccountRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async setPrimaryManagedAccount(user: string, community: string): Promise<any> {
+    const updateResult = await this.managedAccountModel.updateMany({
+      account: new Types.ObjectId(user)
+    }, { $set: { isPrimary: false } }
+    ).exec()
+
+    if (updateResult) {
+      return await this.managedAccountModel.findOneAndUpdate(
+        {
+          account: new Types.ObjectId(user),
+          community: new Types.ObjectId(community)
+        },
+        { isPrimary: true },
+        { returnDocument: 'after' }
+      ).exec()
+    }
+
+    return null
+  }
+
+  /**
+   * 
    * @param community 
    * @param paginate 
    */

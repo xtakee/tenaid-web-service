@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { CommunityDto } from 'src/feature/community/dto/community.dto'
 import { CommunityService } from './community.service'
@@ -44,6 +44,7 @@ import { CLAIM, COMMUNITY_SYSTEM_FEATURES } from '../auth/auth.constants'
 import { CheckPolicies } from '../auth/guards/casl/policies.guard'
 import { CreateAnnouncementDto } from './dto/request/create.announcement.dto'
 import { Platform } from 'src/core/decorators/platform'
+import { FileInterceptor } from '@nestjs/platform-express'
 
 @Controller({
   version: '1',
@@ -1380,5 +1381,44 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get a community by code' })
   async getCommunityByCode(@Param('code') code: string): Promise<CommunityDto> {
     return await this.communityService.getCommunityByCode(code)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param file 
+   */
+  @Post('street/bulk')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Bulk upload community streets' })
+  async bulkCommunityStreets(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param file 
+   */
+  @Post('building/:street/bulk')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Bulk upload community buildings' })
+  async bulkCommunityBuilding(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+
+  }
+
+  /**
+  * 
+  * @param user 
+  * @param community 
+  * @param file 
+  */
+  @Post('member/:street/bulk')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Bulk upload community members/residents' })
+  async bulkCommunityMembers(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+
   }
 }

@@ -13,6 +13,8 @@ import { AccessPointAuthRequestDto } from './dto/request/access.point.auth.reque
 import { AccessPointAuthResponseDto } from './dto/response/access.point.auth.response.dto';
 import { AccountLogoutRequestDto } from './dto/request/account.logout.request.dto';
 import { PublicKey } from 'src/core/decorators/public.key';
+import { ManagedAccount } from '../account/model/managed.account';
+import { ManagedCommunity } from 'src/core/decorators/managed.community';
 
 @Controller({
   version: '1',
@@ -71,15 +73,16 @@ export class AuthController {
   }
 
   /**
-  * 
-  * @param id 
-  * @returns 
-  */
-  @Post('switch-to/:account')
+   * 
+   * @param community 
+   * @param user 
+   * @returns 
+   */
+  @Post('switch-to/:community')
   @BasicAuth()
-  @ApiOperation({ summary: 'Switch to a registered account' })
-  async switchAccount(@Param('account') account: string, @User() user: string): Promise<AccountAuthResponseDto> {
-    if (!isMongoId(account)) throw new BadRequestException()
-    return await this.authService.signManagedAccount(user, account)
+  @ApiOperation({ summary: 'Switch to a managed community account' })
+  async switchAccount(@Param('community') community: string, @User() user: string): Promise<void> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.authService.signManagedAccount(user, community)
   }
 }

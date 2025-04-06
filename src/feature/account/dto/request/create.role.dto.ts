@@ -17,9 +17,31 @@ export class PermissionDto {
 }
 
 export class UpdateRoleDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  firstName: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  lastName: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  phone: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  country: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  isActive: Boolean
+
   @ApiProperty({ type: [PermissionDto] })
   @IsArray()
   @IsNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => PermissionDto)
   permissions: PermissionDto[]
 }
 

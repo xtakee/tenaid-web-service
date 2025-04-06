@@ -45,6 +45,7 @@ import { BuildingSummary, BuildingSummarySchema } from './model/building.summary
 import { CommunityAnnouncement, CommunityAnnouncementSchema } from './model/community.announcement'
 import { E2eeModule } from '../e2ee/e2ee.module'
 import { MongooseDocumentHelper } from 'src/core/helpers/mongoose.document.helper'
+import { CommunityFlat, CommunityFlatSchema } from './model/community.flat'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -123,6 +124,24 @@ const queue = BullModule.registerQueue({
     MongooseModule.forFeatureAsync([{
       name: CommunityAccessPoint.name, useFactory: async () => {
         const schema = CommunityAccessPointSchema
+        schema.pre('save', async function () {
+          if (this.isNew) {
+            this.searchable = searchable(this.name)
+          }
+        })
+
+        schema.pre('findOneAndUpdate', async function (next) {
+          if ((this.getUpdate() as any).name) {
+            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
+          }
+          next()
+        })
+        return schema
+      },
+    }]),
+    MongooseModule.forFeatureAsync([{
+      name: CommunityFlat.name, useFactory: async () => {
+        const schema = CommunityFlatSchema
         schema.pre('save', async function () {
           if (this.isNew) {
             this.searchable = searchable(this.name)

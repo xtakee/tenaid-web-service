@@ -905,6 +905,17 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @param building 
+   * @param flats 
+   */
+  async createCommunityBuildingFlats(user: string, community: string, building: string, flats: string[]): Promise<void> {
+
+  }
+
+  /**
+   * 
    * @param community 
    * @param building 
    * @returns 

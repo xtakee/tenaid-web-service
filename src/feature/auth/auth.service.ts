@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { AccountRepository } from '../account/account.respository'
 import { Account } from '../account/model/account'
 import { AccountToDtoMapper } from '../account/mapper/account.to.dto.mapper'
@@ -18,6 +18,7 @@ import { E2eeService } from '../e2ee/e2ee.service'
 import { MessageRepository } from '../message/message.repository'
 import { AccessPointAuthRequestDto } from './dto/request/access.point.auth.request.dto'
 import { defaultCommunityGuardPermissions } from './auth.constants'
+import { JwtConstants } from './jwt.constants'
 
 @Injectable()
 export class AuthService {
@@ -58,7 +59,6 @@ export class AuthService {
    * @returns AccountAuthResponseDto
    */
   private async getAuthorizationResponse(account: Account, publicKey: string, platform: string): Promise<AccountAuthResponseDto> {
-
     const dto = this.accountToDtoMapper.map(account)
     const primaryManagedAccount = await this.accountRepository.getAccountPrimaryAuthorization((account as any)._id.toString())
     const primaryMemberCommunity = await this.communityRepository.getAccountPrimaryCommunity((account as any)._id.toString())
@@ -247,35 +247,33 @@ export class AuthService {
    * @param id 
    * @returns 
    */
-  async signManagedAccount(user: string, id: string): Promise<AccountAuthResponseDto> {
-    const permissions = await this.getManageAccountPermissions(id)
-    if (permissions) {
-      if (permissions[0].account !== user) throw new BadRequestException()
+  async signManagedAccount(user: string, community: string): Promise<void> {
+    const permissions = await this.accountRepository.getOwnPermissions(community, user)
+    if (permissions.length > 0) {
+      const platformKey = `${user}-web`
+      let token = await this.authRepository.getAuthToken(platformKey)
+      if (!token) throw new ForbiddenException()
 
-      const account = await this.accountRepository.getOneById(permissions[0].account)
-      const owner = await this.accountRepository.getOneById(permissions[0].owner)
-      if (account && owner) {
-        account.primaryAccountType = owner.primaryAccountType
-        account.accountTypes = owner.accountTypes
+      try {
+        const payload = await this.jwtService.verifyAsync(token, { secret: JwtConstants.Jwt_Secret })
 
-        const dto = this.accountToDtoMapper.map(account)
-        const payload = { sub: (owner as any)._id, sub_0: (account as any)._id, permissions: permissions, email: owner.email.value }
+        // clear all primary accounts
+        await this.communityRepository.setPrimaryCommunity(user, community)
+        await this.accountRepository.setPrimaryManagedAccount(user, community)
 
-        const token = this.jwtService.sign(payload)
+        // update token permissions
+        payload.permissions = permissions
+        payload.primaryManagedCommunity = community
 
-        const key = (account as any)._id.toString()
-        const authorization = this.authHelper.encrypt(key)
-        await this.authRepository.saveAuthToken(key, token)
+        token = this.jwtService.sign(payload)
 
-        return {
-          account: dto,
-          authorization: authorization
-        }
+        await this.authRepository.saveAuthToken(platformKey, token)
+        return
+      } catch (_) {
+
       }
-
-      throw new BadRequestException()
     }
 
-    throw new NotFoundException()
+    throw new ForbiddenException()
   }
 }

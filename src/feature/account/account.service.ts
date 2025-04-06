@@ -432,7 +432,6 @@ export class AccountService {
 
           // get account managed communities
           accountDto.communities = communities
-
           accountDto.permissions = primaryManagedAccount.permissions
         }
 
