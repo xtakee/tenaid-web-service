@@ -47,11 +47,11 @@ export class AccountResponseDto {
   identityType: string
   idNumber: string
   dob?: Date
-  authorization?: {}
+  permissions?: {}
   flags: DashboardFlagsDto
   kycCompleted?: Boolean
   communityKycAcknowledged?: Boolean
-  communities?: [{}]
+  communities?: any[]
   communitySetup?: {} = {
     street: false,
     building: false,

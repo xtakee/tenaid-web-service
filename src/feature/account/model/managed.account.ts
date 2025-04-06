@@ -19,6 +19,9 @@ export class ManagedAccount {
   @Prop({ default: true })
   isActive?: Boolean
 
+  @Prop({ default: false })
+  isPrimary?: Boolean
+
   @Prop({ type: Types.ObjectId, required: true, ref: Account.name })
   createdBy: Types.ObjectId
 

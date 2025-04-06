@@ -186,12 +186,12 @@ export class MessageRepository {
     minLivePeriod.setDate(minLivePeriod.getDate() - days)
 
     // remove messages later than minLivePeriod
-    await this.messageModel.deleteOne({
+    await this.messageModel.deleteMany({
       createdAt: { $lt: minLivePeriod }
     })
 
     // remove message caches later than minLivePeriod
-    await this.messageCacheModel.deleteOne({
+    await this.messageCacheModel.deleteMany({
       createdAt: { $lt: minLivePeriod }
     })
   }

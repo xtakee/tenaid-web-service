@@ -292,6 +292,7 @@ export class AccountRepository implements IAccountRepository {
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
+      hasCommunity: data.hasCommunity,
       requirePasswordChange: data.requirePasswordChange,
       hasPassword: hasPassword,
       country: data.country,
@@ -380,7 +381,7 @@ export class AccountRepository implements IAccountRepository {
     return await this.managedAccountModel.findOne({
       community: new Types.ObjectId(community),
       account: new Types.ObjectId(user)
-    }, '_id isActive permissions createdBy').populate([
+    }, '_id isActive permissions createdBy community isPrimary').populate([
       {
         path: 'createdBy',
         select: '_id firstName lastName email.value photo',
@@ -389,10 +390,65 @@ export class AccountRepository implements IAccountRepository {
         path: 'account',
         select: '_id firstName lastName email.value phone country',
         strictPopulate: false
+      }, {
+        path: 'community',
+        select: '_id name logo isPrimary encryption kycAcknowledged code communitySetup',
+        strictPopulate: false
       }
     ])
   }
 
+  /**
+   * 
+   * @param user 
+   * @returns 
+   */
+  async getAccountPrimaryAuthorization(user: string): Promise<any> {
+    return await this.managedAccountModel.findOne({
+      account: new Types.ObjectId(user),
+      isPrimary: true
+    },
+      '_id isActive permissions createdBy community isPrimary')
+      .populate([
+        {
+          path: 'createdBy',
+          select: '_id firstName lastName email.value photo',
+          strictPopulate: false
+        }, {
+          path: 'account',
+          select: '_id firstName lastName email.value phone country',
+          strictPopulate: false
+        }, {
+          path: 'community',
+          select: '_id name logo isPrimary encryption kycAcknowledged code communitySetup',
+          strictPopulate: false
+        }
+      ])
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   */
+  async getOwnAccountAuthorizations(user: string): Promise<any[]> {
+    return await this.managedAccountModel.find({ account: new Types.ObjectId(user) }, '_id isActive permissions createdBy isPrimary community')
+      .populate([
+        {
+          path: 'createdBy',
+          select: '_id firstName lastName email.value photo',
+          strictPopulate: false
+        }, {
+          path: 'account',
+          select: '_id firstName lastName email.value phone country',
+          strictPopulate: false
+        }, {
+          path: 'community',
+          select: '_id name logo isPrimary encryption kycAcknowledged code communitySetup',
+          strictPopulate: false
+        }
+      ])
+  }
 
   /**
    * 
@@ -695,18 +751,27 @@ export class AccountRepository implements IAccountRepository {
    * @param permissions 
    * @returns 
    */
-  async createPermissions(user: string, account: string, community: string, name: string, email: string, permissions: Permission[]): Promise<ManagedAccount> {
+  async createPermissions(user: string, account: string, community: string, name: string, email: string, isPrimary: Boolean, permissions: Permission[]): Promise<ManagedAccount> {
     const data: ManagedAccount = {
       community: new Types.ObjectId(community),
       account: new Types.ObjectId(account),
       createdBy: new Types.ObjectId(user),
       name: name,
+      isPrimary: isPrimary,
       email: email.trim().toLowerCase(),
       permissions: permissions
     }
 
     const role = await this.managedAccountModel.create(data)
     return await this.getCommunityAccountRole(community, (role as any)._id.toString())
+  }
+
+  /**
+   * 
+   * @param user 
+   */
+  async getPrimaryManagedAccount(user: string): Promise<ManagedAccount> {
+    return await this.managedAccountModel.findOne({ account: new Types.ObjectId(user), isPrimary: true })
   }
 
   /**

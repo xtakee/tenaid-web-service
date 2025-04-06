@@ -203,7 +203,14 @@ export class AccountService {
 
       // create a default admin community member
       await this.communityRepository.createCommunityMember(user, accountDetails, (community as any)._id, member)
-      await this.accountRepository.setCreateFlagStatus(user, false)
+      await this.accountRepository.setHasAccountCommunity(user)
+
+      let isPrimary = false
+
+      // check for existing primary account managed data
+      const managedAccount = await this.accountRepository.getPrimaryManagedAccount(user)
+      if (!managedAccount)
+        isPrimary = true
 
       // add default community admin permissions
       const name = `${account.firstName} ${account.lastName}`
@@ -211,6 +218,7 @@ export class AccountService {
         user, user,
         (community as any)._id.toString(),
         name, account.email.value,
+        isPrimary,
         defaultCommunityAdminPermissions)
 
       await this.communityRepository.createCommunityMessageCategory((community as any)._id, {
@@ -241,6 +249,8 @@ export class AccountService {
     let account = await this.accountRepository.getAccountByEmail(body.email)
     const tempPassword = this.authHelper.random(5)
 
+    let isPrimary = false
+
     if (!account) {
       // lets create a new account for user
       account = await this.accountRepository.create({
@@ -249,9 +259,20 @@ export class AccountService {
         requirePasswordChange: true,
         country: body.country,
         phone: body.phone,
+        hasCommunity: true,
         firstName: body.firstName,
         lastName: body.lastName
       }, false)
+
+      isPrimary = true
+    } else {
+      // set has community flag
+      await this.accountRepository.setHasAccountCommunity((account as any)._id.toString())
+
+      // check for primary managed account data
+      const managedAccount = await this.accountRepository.getPrimaryManagedAccount((account as any)._id.toString())
+      if (!managedAccount)
+        isPrimary = true
     }
 
     // we will send email here
@@ -262,6 +283,7 @@ export class AccountService {
       community,
       name,
       body.email,
+      isPrimary,
       body.permissions)
   }
 
@@ -379,33 +401,41 @@ export class AccountService {
    */
   async getOwnAccount(user: string, platform: string, community?: string): Promise<AccountResponseDto> {
     const account = await this.accountRepository.getOneById(user)
-    let primaryManagedCommunity = null
+
     if (account) {
       const accountDto = this.mapper.map(account)
 
-      if (community)
-        primaryManagedCommunity = await this.communityRepository.getCommunity(community)
+      if (account.hasCommunity === true) {
+        const managedAccounts = await this.accountRepository.getOwnAccountAuthorizations(user)
+        const primaryManagedAccount = managedAccounts.find((data) => data.isPrimary === true)
 
-      if (primaryManagedCommunity) {
-        accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
-        // add account primary community
-        accountDto.communitySetup = {
-          street: primaryManagedCommunity.communitySetup?.street === true,
-          building: primaryManagedCommunity.communitySetup?.building === true,
-          member: primaryManagedCommunity.communitySetup?.member === true
+        if (primaryManagedAccount) {
+          const primaryCommunity = primaryManagedAccount.community
+
+          accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryCommunity.kycAcknowledged
+          // add account primary community
+          accountDto.communitySetup = {
+            street: primaryCommunity.communitySetup?.street === true,
+            building: primaryCommunity.communitySetup?.building === true,
+            member: primaryCommunity.communitySetup?.member === true
+          }
+
+          let communities: any[] = managedAccounts.map((data) => data.community)
+
+          communities = communities.filter((data) => data._id !== primaryCommunity._id)
+          communities = communities.map((data) => {
+            data.encryption = undefined
+            return data
+          })
+          primaryCommunity.encryption = await this.e2eeService.encrypt(user, platform, primaryCommunity.encryption)
+          communities.push(primaryCommunity)
+
+          // get account managed communities
+          accountDto.communities = communities
+
+          accountDto.permissions = primaryManagedAccount.permissions
         }
 
-        // get account managed communities
-        accountDto.communities = [{
-          _id: (primaryManagedCommunity as any)._id.toString(),
-          name: primaryManagedCommunity.name,
-          logo: primaryManagedCommunity.logo,
-          images: primaryManagedCommunity.images,
-          isPrimary: true,
-          encryption: await this.e2eeService.encrypt(user, platform, primaryManagedCommunity.encryption)
-        }]
-
-        accountDto.authorization = await this.accountRepository.getOwnAccountAuthorization(user, community)
       }
 
       return accountDto
@@ -602,6 +632,40 @@ export class AccountService {
       }
 
       return account
+    })
+
+    return result
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param platform 
+   * @param result 
+   * @returns 
+   */
+  private async processManagedAccountCommunityEncryption(user: string, platform: string, communities: any[]): Promise<any> {
+
+    if (communities.length < 1) return communities
+
+    // get user shared key
+    const encKeys = await this.e2eeRepository.getAccountKeys(user, platform)
+    if (!encKeys || !encKeys.sharedKey) return communities
+
+    const result = communities.map((community) => {
+      const encKey = community?.encryption?.enc
+      if (encKey) {
+        // encrypt community group key
+        const keys: EasGcmData = this.authHelper.advanceEncrypt(encKey, encKeys.sharedKey)
+
+        community.encryption = {
+          enc: keys.enc,
+          iv: keys.iv,
+          tag: keys.tag
+        }
+      }
+
+      return community
     })
 
     return result

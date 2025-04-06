@@ -4,6 +4,7 @@ import { IsEmail, IsNotEmpty } from "class-validator"
 export class AccountCreateDto {
 
   requirePasswordChange?: Boolean
+  hasCommunity?: Boolean = false
 
   @IsNotEmpty()
   @ApiProperty()

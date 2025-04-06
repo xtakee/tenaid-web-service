@@ -41,6 +41,10 @@ export class PaginationRequestDto {
   @IsOptional()
   @ApiProperty({ required: false })
   search?: string
+
+  @IsOptional()
+  @ApiProperty({ required: false })
+  status?: string
 }
 
 export class DateRangeDto {

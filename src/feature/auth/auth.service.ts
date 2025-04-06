@@ -60,28 +60,25 @@ export class AuthService {
   private async getAuthorizationResponse(account: Account, publicKey: string, platform: string): Promise<AccountAuthResponseDto> {
 
     const dto = this.accountToDtoMapper.map(account)
-    const primaryManagedCommunity = await this.communityRepository.getAccountPrimaryManagedCommunity((account as any)._id.toString())
+    const primaryManagedAccount = await this.accountRepository.getAccountPrimaryAuthorization((account as any)._id.toString())
     const primaryMemberCommunity = await this.communityRepository.getAccountPrimaryCommunity((account as any)._id.toString())
 
-    if (primaryManagedCommunity) {
-      dto.communityKycAcknowledged = account.kyc.profileCompleted && primaryManagedCommunity.kycAcknowledged
+    if (primaryManagedAccount) {
+      dto.communityKycAcknowledged = account.kyc.profileCompleted && (primaryManagedAccount?.community?.kycAcknowledged === true)
 
       dto.communitySetup = {
-        street: primaryManagedCommunity.communitySetup?.street === true,
-        building: primaryManagedCommunity.communitySetup?.building === true,
-        member: primaryManagedCommunity.communitySetup?.member === true
+        street: primaryManagedAccount.community?.communitySetup?.street === true,
+        building: primaryManagedAccount.community?.communitySetup?.building === true,
+        member: primaryManagedAccount.community?.communitySetup?.member === true
       }
     }
 
-    const primaryAccountId = primaryManagedCommunity ? (primaryManagedCommunity as any)?._id?.toString() : null
-    const permissions = primaryManagedCommunity ?
-      await this.accountRepository.getOwnPermissions(primaryAccountId, (account as any)._id)
-      : []
+    const primaryAccountId = primaryManagedAccount ? primaryManagedAccount.community?._id?.toString() : null
 
     const payload = {
       sub: (account as any)._id,
       sub_0: (account as any)._id,
-      permissions: permissions,
+      permissions: primaryManagedAccount?.permissions,
       primaryMember: primaryMemberCommunity?._id.toString(),
       primaryCommunity: primaryMemberCommunity?.community?.id.toString(),
       primaryManagedCommunity: primaryAccountId,

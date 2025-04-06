@@ -257,14 +257,6 @@ export class CommunityService {
 
     const guard = await this.communityRepository.createCommunityGuard(user, community, body)
 
-    await this.accountRepository.createPermissions(
-      user,
-      (guard as any)._id.toString(),
-      community,
-      guard.fullName,
-      body.email,
-      defaultCommunityGuardPermissions)
-
     return guard
   }
 
