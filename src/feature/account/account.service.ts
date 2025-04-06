@@ -402,6 +402,8 @@ export class AccountService {
 
     if (account) {
       const accountDto = this.mapper.map(account)
+      accountDto.communities = []
+      accountDto.permissions = []
 
       if (account.hasCommunity === true) {
         // get account managed communities
@@ -437,7 +439,6 @@ export class AccountService {
           accountDto.communities = communities
           accountDto.permissions = primaryManagedAccount.permissions
         }
-
       }
 
       return accountDto
