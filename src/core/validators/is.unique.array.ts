@@ -14,8 +14,9 @@ export function IsUniqueArray(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: any[], _args: ValidationArguments) {
           if (!Array.isArray(value)) return false
-          const unique = new Set(value)
-          return unique.size === value.length
+          const lowerCaseValues = value.map(val => val.toLowerCase())
+          const unique = new Set(lowerCaseValues)
+          return lowerCaseValues.length === unique.size
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must contain only unique values`

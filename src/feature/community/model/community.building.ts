@@ -35,7 +35,7 @@ export class CommunityBuilding {
   contactCountry: string
 
   @Prop({ default: 0 })
-  apartments: number
+  apartments?: number
 
   @Prop()
   buildingNumber: string

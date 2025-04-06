@@ -404,6 +404,7 @@ export class AccountService {
       const accountDto = this.mapper.map(account)
 
       if (account.hasCommunity === true) {
+        // get account managed communities
         const managedAccounts = await this.accountRepository.getOwnAccountAuthorizations(user)
         const primaryManagedAccount = managedAccounts.find((data) => data.isPrimary === true)
 
@@ -432,7 +433,7 @@ export class AccountService {
           primaryCommunity.encryption = await this.e2eeService.encrypt(user, platform, primaryCommunity.encryption)
           communities.push(primaryCommunity)
 
-          // get account managed communities
+          // update permissions and managed communities
           accountDto.communities = communities
           accountDto.permissions = primaryManagedAccount.permissions
         }

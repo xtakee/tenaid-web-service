@@ -23,15 +23,11 @@ export class CommunityBuildingDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  buildingNumber: string
+  buildingNumber: String
 
   @ApiProperty()
   @IsNotEmpty()
   contactCountry: string
-
-  @IsOptional()
-  @ApiProperty()
-  apartments?: number = 0
 
   @ApiProperty()
   @IsNotEmpty()

@@ -49,6 +49,9 @@ import { COMMUNITY_MEMBER_PRIMARY_QUERY, COMMUNITY_MEMBER_QUERY, MEMBER_COMMUNIT
 import { MongooseDocumentHelper } from "src/core/helpers/mongoose.document.helper"
 import { InviteType } from "src/core/enums/invite.type"
 import { CommunityFlat } from "../model/community.flat"
+import { toPascalCaseWithSpaces } from "src/core/helpers/pascal.case.with.space"
+import { searchable } from "src/core/util/searchable"
+import { AuthHelper } from "src/core/helpers/auth.helper"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -853,7 +856,7 @@ export class CommunityRepository {
    * @param street 
    * @param buildingNumber 
    */
-  async getCommunityBuilding(community: string, street: string, buildingNumber: string): Promise<any> {
+  async getCommunityBuilding(community: string, street: string, buildingNumber: String): Promise<any> {
     return await this.communityBuildingModel.findOne({
       buildingNumber: buildingNumber.toLowerCase().trim(),
       street: new Types.ObjectId(street),
@@ -884,17 +887,15 @@ export class CommunityRepository {
       createdBy: new Types.ObjectId(user),
       contactPerson: data.contactPerson,
       contactCountry: data.contactCountry,
-      apartments: data.apartments,
+      apartments: data.flats.length,
       name: data.name,
       isActive: true,
       category: data.category,
       description: data.description,
       contactPhone: data.contactPhone,
       type: data.type,
-      buildingNumber: data.buildingNumber.toLowerCase().trim(),
-      contactEmail: {
-        value: data.contactEmail
-      }
+      buildingNumber: toPascalCaseWithSpaces(data.buildingNumber.trim()),
+      contactEmail: { value: data.contactEmail }
     }
 
     const buildingData = await this.communityBuildingModel.create(building)
@@ -919,13 +920,16 @@ export class CommunityRepository {
    */
   async createCommunityBuildingFlats(user: string, community: string, street: string, building: string, flats: string[]): Promise<void> {
     const data: CommunityFlat[] = flats.map((flat) => {
+      const code = (new AuthHelper).random(5).toUpperCase()
       return {
         community: new Types.ObjectId(community),
         createdBy: new Types.ObjectId(user),
         street: new Types.ObjectId(street),
         building: new Types.ObjectId(building),
+        searchable: searchable(flat.replace(' ', '')),
+        code: code,
         isActive: true,
-        name: flat.toPascalCaseWithSpaces()
+        name: toPascalCaseWithSpaces(flat.trim())
       }
     })
 

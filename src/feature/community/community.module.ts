@@ -140,25 +140,6 @@ const queue = BullModule.registerQueue({
       },
     }]),
     MongooseModule.forFeatureAsync([{
-      name: CommunityFlat.name, useFactory: async () => {
-        const schema = CommunityFlatSchema
-        schema.pre('save', async function () {
-          if (this.isNew) {
-            this.searchable = searchable(this.name)
-            this.code = new AuthHelper().random(5).toUpperCase()
-          }
-        })
-
-        schema.pre('findOneAndUpdate', async function (next) {
-          if ((this.getUpdate() as any).name) {
-            (this.getUpdate() as any).searchable = searchable((this.getUpdate() as any).name)
-          }
-          next()
-        })
-        return schema
-      },
-    }]),
-    MongooseModule.forFeatureAsync([{
       name: CommunityContact.name, useFactory: async () => {
         const schema = CommunityContactSchema
         schema.pre('save', async function () {
@@ -195,6 +176,7 @@ const queue = BullModule.registerQueue({
       },
     }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
+    MongooseModule.forFeature([{ name: CommunityFlat.name, schema: CommunityFlatSchema }]),
     MongooseModule.forFeature([{ name: CommunitySummary.name, schema: CommunitySummarySchema }]),
     MongooseModule.forFeature([{ name: BuildingSummary.name, schema: BuildingSummarySchema }]),
     MongooseModule.forFeature([{ name: StreetSummary.name, schema: StreetSummarySchema }]),
