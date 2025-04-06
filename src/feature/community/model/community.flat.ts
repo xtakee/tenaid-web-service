@@ -21,6 +21,9 @@ export class CommunityFlat {
   @Prop({ type: Types.ObjectId, ref: CommunityBuilding.name })
   building: Types.ObjectId
 
+  @Prop({ default: false })
+  isOccupied?: Boolean
+
   @Prop({ default: true })
   isActive?: Boolean
 

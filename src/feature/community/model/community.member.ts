@@ -6,6 +6,7 @@ import { ACCOUNT_STATUS } from "src/feature/auth/auth.constants";
 import { CommunityStreet } from "./community.street";
 import { MemberAccount } from "./member.account";
 import { CommunityBuilding } from "./community.building";
+import { CommunityFlat } from "./community.flat";
 
 export type CommunityMemberDocument = HydratedDocument<CommunityMember>
 
@@ -23,7 +24,7 @@ export class CommunityMember {
   @Prop({ ref: CommunityStreet.name })
   street?: Types.ObjectId
 
-  @Prop({ ref: CommunityStreet.name })
+  @Prop({ ref: CommunityFlat.name })
   apartment: Types.ObjectId
 
   @Prop()

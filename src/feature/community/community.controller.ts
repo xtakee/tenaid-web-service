@@ -741,20 +741,6 @@ export class CommunityController {
   /**
    * 
    * @param community 
-   * @returns 
-   */
-  @Get('/:community/street')
-  @BasicAuth()
-  @ApiOperation({ summary: 'Get all community streets' })
-  async getAllCommunityStreets(@Param('community') community: string,
-    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
-    if (!isMongoId(community)) throw new BadRequestException()
-    return await this.communityService.getAllCommunityStreets(community, paginate)
-  }
-
-  /**
-   * 
-   * @param community 
    * @param body 
    * @returns 
    */
@@ -860,6 +846,52 @@ export class CommunityController {
    * @param paginate 
    * @returns 
    */
+  @Get('/flat')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community flats/apartments' })
+  async getAllCommunityApartments(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getAllCommunityApartments(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/building/:building/flat')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community building flats/apartments' })
+  async getAllCommunityBuildingApartments(@ManagedCommunity() community: string, @Param('building') building: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(building)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityBuildingApartments(community, building, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/street/:street/flat')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community street flats/apartments' })
+  async getAllCommunityStreetApartments(@ManagedCommunity() community: string, @Param('street') street: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(street)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityStreetApartments(community, street, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
   @Get('/request')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
@@ -867,7 +899,6 @@ export class CommunityController {
   async getCommunityJoinRequests(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityService.getCommunityJoinRequests(community, paginate)
   }
-
 
   /**
    * 
@@ -1420,5 +1451,19 @@ export class CommunityController {
   @ApiOperation({ summary: 'Bulk upload community members/residents' })
   async bulkCommunityMembers(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
 
+  }
+
+  /**
+   * 
+   * @param community 
+   * @returns 
+   */
+  @Get('/:community/street')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get all community streets' })
+  async getAllCommunityStreets(@Param('community') community: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityPathResponseDto>> {
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityStreets(community, paginate)
   }
 }

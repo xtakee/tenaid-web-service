@@ -59,6 +59,10 @@ export function getPaginatedAccessQuery(paginate: PaginationRequestDto) {
         path: 'building',
         select: '_id name description type buildingNumber category',
         strictPopulate: false,
+      }, {
+        path: 'apartment',
+        select: '_id name isActive',
+        strictPopulate: false,
       }
       ]
     }
@@ -74,12 +78,7 @@ export function getPaginatedCommunityVisitorsQuery(page: number, limit: number) 
     populate: {
       path: 'member',
       select: '_id extra description isAdmin',
-      strictPopulate: false,
-      populate: {
-        path: 'path',
-        select: '_id name description',
-        strictPopulate: false,
-      }
+      strictPopulate: false
     }
   }
 }
@@ -122,7 +121,7 @@ export const MEMBER_COMMUNITIES_QUERY = [{
   strictPopulate: false
 }, {
   path: 'apartment',
-  select: '_id code name isActive',
+  select: '_id code name isActive isOccupied',
   strictPopulate: false
 }]
 
@@ -158,7 +157,7 @@ export const COMMUNITY_MEMBER_QUERY = [
     strictPopulate: false
   }, {
     path: 'apartment',
-    select: '_id code name isActive',
+    select: '_id code name isActive isOccupied',
     strictPopulate: false
   }
 ]
