@@ -2626,7 +2626,7 @@ export class CommunityRepository {
     const query: any = { community: new Types.ObjectId(community) }
 
     return await this.paginator.paginate(this.communityFlatModel, buildSearchQuery(query, paginate.search), {
-      select: '_id name isActive building street',
+      select: '_id name isActive building street code isOccupied',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
@@ -2657,7 +2657,7 @@ export class CommunityRepository {
     }
 
     return await this.paginator.paginate(this.communityFlatModel, buildSearchQuery(query, paginate.search), {
-      select: '_id name isActive building street isOccupied',
+      select: '_id name isActive building street code isOccupied',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
@@ -2688,7 +2688,7 @@ export class CommunityRepository {
     }
 
     return await this.paginator.paginate(this.communityFlatModel, buildSearchQuery(query, paginate.search), {
-      select: '_id name isActive building street isOccupied',
+      select: '_id name isActive building street code isOccupied',
       limit: paginate.limit,
       page: paginate.page,
       sort: paginate.sort,
@@ -2715,7 +2715,7 @@ export class CommunityRepository {
     return await this.communityFlatModel.findOne({
       community: new Types.ObjectId(community),
       _id: new Types.ObjectId(apartment)
-    }, '_id name isActive building street isOccupied').populate([{
+    }, '_id name isActive building street isOccupied code').populate([{
       path: 'street',
       select: '_id name description',
       strictPopulate: false,
