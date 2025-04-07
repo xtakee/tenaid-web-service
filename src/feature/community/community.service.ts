@@ -59,6 +59,7 @@ import { CreateAnnouncementDto } from './dto/request/create.announcement.dto';
 import { CommunityAnnouncement } from './model/community.announcement';
 import { E2eeService } from '../e2ee/e2ee.service';
 import { InviteType } from 'src/core/enums/invite.type';
+import { CommunityFlat } from './model/community.flat';
 
 @Injectable()
 export class CommunityService {
@@ -1024,6 +1025,17 @@ export class CommunityService {
     return await this.communityRepository.getAllCommunityBuildingApartments(community, building, paginate)
   }
 
+  /**
+   * 
+   * @param community 
+   * @param apartment 
+   */
+  async getCommunityApartment(community: string, apartment: string): Promise<CommunityFlat> {
+    const data = await this.communityRepository.getCommunityApartment(community, apartment)
+    if (data) return data
+
+    throw new NotFoundException()
+  }
 
   /**
    * 

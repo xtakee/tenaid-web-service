@@ -368,8 +368,6 @@ export class CommunityController {
   async createCommunityMessageCategory(@User() user: string,
     @ManagedCommunity() community: string,
     @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
-    if (!isMongoId(community)) throw new BadRequestException()
-
     return await this.communityService.createCommunityMessageCategory(user, community, data)
   }
 
@@ -807,8 +805,6 @@ export class CommunityController {
   @BasicAuth()
   @ApiOperation({ summary: 'Join a community building - Admin only' })
   async joinCommunityBuilding(@User() user: string, @PrimaryCommunity() community: string, @Body() body: JoinBuildingDto): Promise<void> {
-    if (!isMongoId(community)) throw new BadRequestException()
-
     return await this.communityService.joinCommunityBuilding(user, community, body)
   }
 
@@ -852,6 +848,20 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community flats/apartments' })
   async getAllCommunityApartments(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityService.getAllCommunityApartments(community, paginate)
+  }
+
+  /**
+  * 
+  * @param community 
+  * @param paginate 
+  * @returns 
+  */
+  @Get('/flat/:flat')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get a community flat/apartment' })
+  async getCommunityApartment(@ManagedCommunity() community: string, @Param('flat') flat: string,): Promise<any> {
+    return await this.communityService.getCommunityApartment(community, flat)
   }
 
   /**
@@ -1467,19 +1477,19 @@ export class CommunityController {
     return await this.communityService.getAllCommunityStreets(community, paginate)
   }
 
-    /**
-   * 
-   * @param community 
-   * @param building 
-   * @param paginate 
-   * @returns 
-   */
-    @Get('/:community/building/:building/flat')
-    @BasicAuth()
-    @ApiOperation({ summary: 'Get a community building flats/apartments' })
-    async getCommunityBuildingApartments(@Param('community') community: string, @Param('building') building: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-      if (!isMongoId(building)) throw new BadRequestException()
-      if (!isMongoId(community)) throw new BadRequestException()
-      return await this.communityService.getAllCommunityBuildingApartments(community, building, paginate)
-    }
+  /**
+ * 
+ * @param community 
+ * @param building 
+ * @param paginate 
+ * @returns 
+ */
+  @Get('/:community/building/:building/flat')
+  @BasicAuth()
+  @ApiOperation({ summary: 'Get a community building flats/apartments' })
+  async getCommunityBuildingApartments(@Param('community') community: string, @Param('building') building: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(building)) throw new BadRequestException()
+    if (!isMongoId(community)) throw new BadRequestException()
+    return await this.communityService.getAllCommunityBuildingApartments(community, building, paginate)
+  }
 }
