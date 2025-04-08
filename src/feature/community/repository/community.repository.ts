@@ -1050,19 +1050,7 @@ export class CommunityRepository {
       page: paginate.page,
       limit: paginate.limit,
       sort: paginate.sort,
-      populate: [
-        {
-          path: 'street',
-          select: '_id name description'
-        }, {
-          path: 'community',
-          select: '_id name description code'
-        }, {
-          path: 'building',
-          select: '_id buildingNumber type',
-          strictPopulate: false,
-        }
-      ]
+      populate: COMMUNITY_MEMBER_QUERY
     })
   }
 
