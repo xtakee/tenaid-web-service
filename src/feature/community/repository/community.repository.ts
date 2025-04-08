@@ -1562,6 +1562,81 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityStreetAccess(
+    community: string,
+    street: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    let query: any = {
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street),
+      $or: [
+        { type: INVITE_STATUS.CHECKIN },
+        { type: INVITE_STATUS.CHECKOUT }
+      ]
+    }
+
+    return await this.paginator.paginate(this.communityCheckInsModel, buildSearchQuery(query),
+      getPaginatedAccessQuery(paginate))
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityBuildingAccess(
+    community: string,
+    building: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    let query: any = {
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building),
+      $or: [
+        { type: INVITE_STATUS.CHECKIN },
+        { type: INVITE_STATUS.CHECKOUT }
+      ]
+    }
+
+    return await this.paginator.paginate(this.communityCheckInsModel, buildSearchQuery(query),
+      getPaginatedAccessQuery(paginate))
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityMemberAccess(
+    community: string,
+    member: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    let query: any = {
+      community: new Types.ObjectId(community),
+      member: new Types.ObjectId(member),
+      $or: [
+        { type: INVITE_STATUS.CHECKIN },
+        { type: INVITE_STATUS.CHECKOUT }
+      ]
+    }
+
+    return await this.paginator.paginate(this.communityCheckInsModel, buildSearchQuery(query),
+      getPaginatedAccessQuery(paginate))
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @param start 

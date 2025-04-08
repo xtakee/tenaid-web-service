@@ -349,8 +349,64 @@ export class CommunityController {
   async getAllCommunityAccess(
     @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    if (!isMongoId(community)) throw new BadRequestException()
     return await this.communityService.getAllCommunityAccess(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/street/:street/access')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get a community street access logs' })
+  async getCommunityStreetAccess(
+    @ManagedCommunity() community: string,
+    @Param('street') street: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(street)) throw new BadRequestException()
+    return await this.communityService.getCommunityStreetAccess(community, street, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/building/:building/access')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get a community building access logs' })
+  async getCommunityBuildingAccess(
+    @ManagedCommunity() community: string,
+    @Param('building') building: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(building)) throw new BadRequestException()
+    return await this.communityService.getCommunityBuildingAccess(community, building, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param paginate 
+   * @returns 
+   */
+  @Get('/member/:member/access')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get a community member access logs' })
+  async getCommunityMemberAccess(
+    @ManagedCommunity() community: string,
+    @Param('member') member: string,
+    @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    if (!isMongoId(member)) throw new BadRequestException()
+    return await this.communityService.getCommunityBuildingAccess(community, member, paginate)
   }
 
   /**

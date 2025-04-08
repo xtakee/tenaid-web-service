@@ -1041,6 +1041,50 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @param street 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityStreetAccess(
+    community: string,
+    street: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    return await this.communityRepository.getCommunityStreetAccess(community, street, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityBuildingAccess(
+    community: string,
+    building: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityBuildingAccess(community, building, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param member 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityMemberAccess(
+    community: string,
+    member: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityMemberAccess(community, member, paginate)
+  }
+
+
+  /**
+   * 
    * @param user 
    * @param data 
    */
