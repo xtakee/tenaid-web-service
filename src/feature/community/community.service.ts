@@ -635,6 +635,8 @@ export class CommunityService {
    * @returns 
    */
   async joinCommunityBuilding(user: string, community: string, body: JoinBuildingDto): Promise<void> {
+    const apartment = await this.communityRepository.getCommunityMemberBuildingApartment(community, body.building, body.apartment)
+    if (apartment) throw new BadRequestException(DUPLICATE_COMMUNITY_APARTMENT_REQUEST)
     return await this.communityRepository.joinCommunityBuilding(user, community, body)
   }
 
