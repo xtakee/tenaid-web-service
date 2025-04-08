@@ -1356,6 +1356,9 @@ export class CommunityService {
     const member = await this.communityRepository.getCommunityMemberByEmail(community, data.emailAddress)
     if (member) throw new ForbiddenException(REQUEST_INVITE_DUPLICATE)
 
+    const apartment = await this.communityRepository.getCommunityMemberBuildingApartment(community, data.building, data.apartment)
+    if (apartment) throw new BadRequestException(DUPLICATE_COMMUNITY_APARTMENT_REQUEST)
+
     const account = await this.accountRepository.getOneByEmail(data.emailAddress)
 
     const communityData = await this.communityRepository.getNextMemberCode(community)
