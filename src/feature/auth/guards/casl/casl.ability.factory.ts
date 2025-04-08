@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common'
 export class CaslAbilityFactory {
   createForUser(user: AuthUser): MongoAbility {
     return defineAbility((can) => {
+      if (!user.permissions) return null
       user.permissions.forEach((permission) => {
         permission.claim.forEach((claim) => {
           can(claim, permission.authorization)
