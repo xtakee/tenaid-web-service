@@ -1358,7 +1358,7 @@ export class CommunityRepository {
     const query: any = {
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(street),
-      $or: [{ $ne: InviteType.SELF }]
+      inviteType: { $ne: InviteType.SELF }
     }
 
     return await this.mongooseDocumentHelper.count(this.communityCheckInsModel, query, date)
