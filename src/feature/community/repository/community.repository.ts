@@ -1323,6 +1323,46 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityFlatsCount(community: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityFlatModel, {
+      community: new Types.ObjectId(community)
+    }, date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityStreetFlatsCount(community: string, street: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityFlatModel, {
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street)
+    }, date)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param date 
+   * @returns 
+   */
+  async getCommunityBuildingFlatsCount(community: string, building: string, date?: string): Promise<number> {
+    return await this.mongooseDocumentHelper.count(this.communityFlatModel, {
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building)
+    }, date)
+  }
+
+  /**
+   * 
+   * @param community 
    * @param street 
    * @returns 
    */

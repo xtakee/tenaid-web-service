@@ -538,7 +538,7 @@ export class CommunityService {
    * @param community 
    */
   async getCommunitySummary(community: string, date?: string): Promise<any> {
-    const [streets, buildings, members, visitors, dependants, memberRequests, dependantRequests] = await
+    const [streets, buildings, members, visitors, dependants, memberRequests, dependantRequests, flats] = await
       Promise.all([
         this.communityRepository.getCommunityStreetsCount(community, date),
         this.communityRepository.getCommunityBuildingsCount(community, date),
@@ -546,7 +546,8 @@ export class CommunityService {
         this.communityRepository.getCommunityVisitorsCount(community, date),
         this.communityRepository.getCommunityDependantsCount(community, date),
         this.communityRepository.getCommunityMemberRequestsCount(community, date),
-        this.communityRepository.getCommunityDependantRequestsCount(community, date)
+        this.communityRepository.getCommunityDependantRequestsCount(community, date),
+        this.communityRepository.getCommunityFlatsCount(community, date)
       ])
 
     return {
@@ -557,6 +558,7 @@ export class CommunityService {
       visitors,
       dependants,
       dependantRequests,
+      flats,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -569,17 +571,19 @@ export class CommunityService {
    * @returns 
    */
   async getCommunityStreetSummary(community: string, street: string, date?: string): Promise<any> {
-    const [buildings, members, visitors] = await
+    const [buildings, members, visitors, flats] = await
       Promise.all([
         this.communityRepository.getCommunityStreetBuildingsCount(community, street, date),
         this.communityRepository.getCommunityStreetMembersCount(community, street, date),
-        this.communityRepository.getCommunityStreetVisitorsCount(community, date)
+        this.communityRepository.getCommunityStreetVisitorsCount(community, street, date),
+        this.communityRepository.getCommunityStreetFlatsCount(community, street, date)
       ])
 
     return {
       buildings,
       members,
       visitors,
+      flats,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -592,15 +596,17 @@ export class CommunityService {
    * @returns 
    */
   async getCommunityBuildingSummary(community: string, building: string, date?: string): Promise<any> {
-    const [members, visitors] = await
+    const [members, visitors, flats] = await
       Promise.all([
         this.communityRepository.getCommunityBuildingMembersCount(community, building, date),
         this.communityRepository.getCommunityBuildingVisitorsCount(community, building, date),
+        this.communityRepository.getCommunityBuildingFlatsCount(community, building, date)
       ])
 
     return {
       members,
       visitors,
+      flats,
       createdAt: new Date(),
       updatedAt: new Date()
     }
