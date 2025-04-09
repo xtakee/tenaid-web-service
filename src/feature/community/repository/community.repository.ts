@@ -2818,13 +2818,17 @@ export class CommunityRepository {
     return await this.communityFlatModel.findOne({
       community: new Types.ObjectId(community),
       _id: new Types.ObjectId(apartment)
-    }, '_id name isActive building street isOccupied code').populate([{
+    }, '_id name isActive building street isOccupied code updatedAt createdAt createdBy').populate([{
       path: 'street',
       select: '_id name description',
       strictPopulate: false,
     }, {
       path: 'building',
       select: '_id name description type buildingNumber category',
+      strictPopulate: false,
+    }, {
+      path: 'createdBy',
+      select: '_id firstName lastName email.value photo',
       strictPopulate: false,
     }
     ])

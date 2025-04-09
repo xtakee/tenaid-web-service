@@ -157,7 +157,7 @@ export const COMMUNITY_MEMBER_QUERY = [
     strictPopulate: false
   }, {
     path: 'apartment',
-    select: '_id code name isActive isOccupied',
+    select: '_id code name isActive isOccupied createdAt updatedAt',
     strictPopulate: false
   }
 ]
