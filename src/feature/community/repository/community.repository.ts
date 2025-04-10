@@ -1628,6 +1628,32 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param apartment 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityApartmentAccess(
+    community: string,
+    apartment: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+
+    let query: any = {
+      community: new Types.ObjectId(community),
+      apartment: new Types.ObjectId(apartment),
+      $or: [
+        { type: INVITE_STATUS.CHECKIN },
+        { type: INVITE_STATUS.CHECKOUT }
+      ]
+    }
+
+    return await this.paginator.paginate(this.communityCheckInsModel, buildSearchQuery(query),
+      getPaginatedAccessQuery(paginate))
+  }
+
+
+  /**
+   * 
+   * @param community 
    * @param building 
    * @param paginate 
    * @returns 
@@ -1895,6 +1921,22 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
+   * @param apartment 
+   * @returns 
+   */
+  async geCommunityApartmentMember(community: string, apartment: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne(
+      {
+        community: new Types.ObjectId(community),
+        apartment: new Types.ObjectId(apartment)
+      },
+      COMMUNITY_MEMBER_PRIMARY_QUERY)
+      .populate(MEMBER_COMMUNITIES_QUERY).exec()
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @returns 
@@ -2142,6 +2184,7 @@ export class CommunityRepository {
       inviteType: data.inviteType,
       building: member.building,
       street: member.street,
+      apartment: member.apartment,
       date: new Date(data.date),
       type: data.type
     }
@@ -2214,19 +2257,6 @@ export class CommunityRepository {
   async getMemberVisitorsCheckins(community: string, member: string, page: number, limit: number): Promise<any> {
     return await this.paginator.paginate(this.communityCheckInsModel,
       { member: new Types.ObjectId(member), community: new Types.ObjectId(community) },
-      getVisitorsCheckinsQuery(page, limit))
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param page 
-   * @param limit 
-   * @returns 
-   */
-  async getCommunityVisitorsCheckins(community: string, page: number, limit: number): Promise<any> {
-    return await this.paginator.paginate(this.communityCheckInsModel,
-      { community: new Types.ObjectId(community) },
       getVisitorsCheckinsQuery(page, limit))
   }
 

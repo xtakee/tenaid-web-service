@@ -1048,6 +1048,32 @@ export class CommunityService {
   /**
    * 
    * @param community 
+   * @param apartment 
+   */
+  async geCommunityApartmentMember(community: string, apartment: string): Promise<any> {
+    const member = await this.communityRepository.geCommunityApartmentMember(community, apartment)
+    if (member) return member
+
+    throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param apartment 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityApartmentAccess(
+    community: string,
+    apartment: string,
+    paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityRepository.getCommunityApartmentAccess(community, apartment, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
    * @param street 
    * @param paginate 
    * @returns 

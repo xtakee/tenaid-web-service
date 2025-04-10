@@ -9,6 +9,7 @@ import { CommunityStreet } from "./community.street";
 import { CommunityBuilding } from "./community.building";
 import { InviteType } from "src/core/enums/invite.type";
 import { CommunityGuard } from "./community.guard";
+import { CommunityFlat } from "./community.flat";
 
 export type CommunityCheckinsDocument = HydratedDocument<CommunityCheckins>;
 
@@ -25,6 +26,9 @@ export class CommunityCheckins {
 
   @Prop({ type: Types.ObjectId, ref: CommunityBuilding.name })
   building?: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: CommunityFlat.name })
+  apartment?: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityAccessPoint.name })
   accessPoint: Types.ObjectId

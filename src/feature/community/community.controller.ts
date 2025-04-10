@@ -501,6 +501,44 @@ export class CommunityController {
   /**
    * 
    * @param community 
+   * @param paginate 
+   * @param flat 
+   */
+  @Get('/flat/:flat/access')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get a community flat/apartment access logs' })
+  async getCommunityApartmentAccess(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto,
+    @Param('flat') flat: string
+  ): Promise<any> {
+    if (!isMongoId(flat)) throw new BadRequestException()
+    return await this.communityService.getCommunityApartmentAccess(community, flat, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @param flat 
+   * @returns 
+   */
+  @Get('/flat/:flat/member')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get a community flat/apartment member details' })
+  async geCommunityApartmentMember(
+    @ManagedCommunity() community: string,
+    @Param('flat') flat: string
+  ): Promise<any> {
+    if (!isMongoId(flat)) throw new BadRequestException()
+    return await this.communityService.geCommunityApartmentMember(community, flat)
+  }
+
+  /**
+   * 
+   * @param community 
    * @param building 
    * @returns 
    */
