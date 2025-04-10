@@ -50,6 +50,9 @@ export class Message {
   @Prop()
   path?: string
 
+  @Prop()
+  thumbnail?: string
+
   @Prop({ type: E2eeDataSchema })
   encryption?: E2eeDataSchema
 
@@ -73,6 +76,12 @@ export class Message {
 
   @Prop()
   size?: number
+
+  @Prop()
+  height?: number
+
+  @Prop()
+  width?: number
 
   @Prop()
   extension?: string

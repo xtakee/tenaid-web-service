@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsMongoId, IsArray, IsDateString, IsOptional, IsEnum } from "class-validator"
+import { IsNotEmpty, IsMongoId, IsArray, IsDateString, IsOptional, IsEnum, IsBase64, ValidateIf, IsNumber } from "class-validator"
 import { EncryptionData } from "src/feature/e2ee/dto/encryption.data"
 import { MessageType } from "../util/message.type"
 import { ReactionDto } from "./message.reaction.dto"
@@ -59,6 +59,10 @@ export class MessageRequestDto {
   type: string
 
   @IsOptional()
+  @IsBase64()
+  thumbnail?: string
+
+  @IsOptional()
   @IsMongoId()
   repliedTo?: string
 
@@ -66,8 +70,17 @@ export class MessageRequestDto {
   @IsMongoId()
   remoteId?: string
 
-  @IsOptional()
+  @ValidateIf((params) => params.type === MessageType.FILE)
+  @IsNumber()
   size?: number
+
+  @ValidateIf((params) => params.type === MessageType.IMAGE || params.type === MessageType.VIDEO)
+  @IsNumber()
+  width?: number
+
+  @ValidateIf((params) => params.type === MessageType.IMAGE || params.type === MessageType.VIDEO)
+  @IsNumber()
+  height?: number
 
   @IsOptional()
   @IsEnum(MessageStatus)

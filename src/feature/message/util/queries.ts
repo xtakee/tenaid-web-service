@@ -17,4 +17,4 @@ export const CommunityMessagePopulateQuery = [
   }
 ]
 
-export const MessageSelectFields = '_id reactions author recipient messageId building room visibility encryption account street status repliedTo body deleted edited type description name size extension date community category'
+export const MessageSelectFields = '_id reactions author recipient messageId building room visibility encryption account street status repliedTo body deleted edited type description name size width height thumbnail extension date community category'
