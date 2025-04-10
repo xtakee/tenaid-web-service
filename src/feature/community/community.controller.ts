@@ -526,7 +526,7 @@ export class CommunityController {
    */
   @Get('/flat/:flat/member')
   @Auth()
-  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @ApiOperation({ summary: 'Get a community flat/apartment member details' })
   async geCommunityApartmentMember(
     @ManagedCommunity() community: string,
