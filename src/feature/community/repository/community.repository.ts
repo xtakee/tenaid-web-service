@@ -2708,9 +2708,10 @@ export class CommunityRepository {
  * @param community 
  * @param data 
  */
-  async createCommunityMessageCategory(community: string, data: MessageCategoryDto): Promise<MessageCategory> {
+  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<MessageCategory> {
     const messageGroup: MessageCategory = {
       community: new Types.ObjectId(community),
+      createdBy: new Types.ObjectId(user),
       displayName: data.name,
       name: data.name.toLowerCase().replaceAll(' ', ''),
       description: data.description,

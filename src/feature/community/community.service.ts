@@ -119,7 +119,7 @@ export class CommunityService {
     const member: CommunityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
 
     if (member && (member.isAdmin === true || member.extra?.isAdmin === true)) {
-      const category = await this.communityRepository.createCommunityMessageCategory(community, data)
+      const category = await this.communityRepository.createCommunityMessageCategory(user, community, data)
       if (category)
         return {
           id: (category as any)._id,
@@ -254,7 +254,6 @@ export class CommunityService {
     communityData.encryption.enc = body.password
 
     body.enPassword = await this.e2eeService.encrypt(user, platform, communityData.encryption)
-    console.log(body.password)
 
     const guard = await this.communityRepository.createCommunityGuard(user, community, body)
 

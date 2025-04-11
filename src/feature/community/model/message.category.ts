@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
+import { Account } from "src/feature/account/model/account";
 import { Community } from "src/feature/community/model/community";
 
 export type MessageCategoryDocument = HydratedDocument<MessageCategory>
@@ -8,6 +9,9 @@ export type MessageCategoryDocument = HydratedDocument<MessageCategory>
 export class MessageCategory {
   @Prop({ type: Types.ObjectId, ref: Community.name })
   community: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  createdBy: Types.ObjectId
 
   @Prop()
   name: string

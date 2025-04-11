@@ -219,7 +219,7 @@ export class AccountService {
         isPrimary,
         defaultCommunityAdminPermissions)
 
-      await this.communityRepository.createCommunityMessageCategory((community as any)._id, {
+      await this.communityRepository.createCommunityMessageCategory(user, (community as any)._id, {
         name: 'General',
         description: 'General community group chat',
         isReadOnly: false
