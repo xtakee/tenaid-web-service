@@ -306,6 +306,8 @@ export class MessageRepository {
       messageId: data.messageId,
       room: new Types.ObjectId(data.room),
       platform: platform,
+      width: data.width,
+      height: data.height,
       repliedTo: data.repliedTo ? new Types.ObjectId(data.repliedTo) : null,
       author: new Types.ObjectId(data.author),
       account: new Types.ObjectId(data.account ? data.account : user),
