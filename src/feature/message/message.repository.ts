@@ -466,6 +466,8 @@ export class MessageRepository {
       body: message.body,
       path: message.path,
       size: message.size,
+      width: message.width,
+      height: message.height,
       platform: platform,
       visibility: message.visibility,
       encryption: message.encryption,
