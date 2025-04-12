@@ -11,7 +11,7 @@ export const CommunityMessagePopulateQuery = [
     path: 'community',
     select: '_id name',
     strictPopulate: false
-  }, {
+  },{
     path: 'account',
     select: '_id firstName lastName email.value photo',
     strictPopulate: false
@@ -21,7 +21,8 @@ export const CommunityMessagePopulateQuery = [
     strictPopulate: false
   }, {
     path: 'reactions.users',
-    select: 'extra.firstName extra.lastName extra.photo  isAdmin isOwner',
+    model: 'CommunityMember',
+    select: { _id: 1, 'extra.firstName': 1, 'extra.lastName': 1, 'extra.photo': 1, isAdmin: 1 },
     strictPopulate: false
   }
 ]
