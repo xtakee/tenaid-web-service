@@ -406,7 +406,7 @@ export class CommunityController {
     @Param('member') member: string,
     @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     if (!isMongoId(member)) throw new BadRequestException()
-    return await this.communityService.getCommunityBuildingAccess(community, member, paginate)
+    return await this.communityService.getCommunityMemberAccess(community, member, paginate)
   }
 
   /**
