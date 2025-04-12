@@ -55,7 +55,7 @@ export class MessageRepository {
       { $count: 'sum' },
     ])
 
-    return result ? result[0].sum : 0
+    return (result && result.length > 0) ? result[0].sum : 0
   }
 
   /**
@@ -555,13 +555,15 @@ export class MessageRepository {
     if (message) {
       messageReactions = this.removeOrAddMessageReaction(message.reactions, data.reaction)
     } else {
-      messageReactions = this.removeOrAddMessageReaction(data.reactions.map((reaction) => {
+      const reactions = data.reactions.map((reaction) => {
         return {
           reaction: reaction.reaction,
           count: reaction.count,
           users: reaction.users.map((user: string) => new Types.ObjectId(user))
         }
-      }), data.reaction)
+      })
+
+      messageReactions = this.removeOrAddMessageReaction(reactions, data.reaction)
     }
 
     data.reactions = messageReactions
@@ -720,7 +722,7 @@ export class MessageRepository {
       { $count: 'sum' },
     ])
 
-    return result[0].sum
+    return (result && result.length > 0) ? result[0].sum : 0
   }
 
   /**
@@ -742,7 +744,7 @@ export class MessageRepository {
       { $count: 'sum' },
     ])
 
-    return result[0].sum
+    return (result && result.length > 0) ? result[0].sum : 0
   }
 
 }

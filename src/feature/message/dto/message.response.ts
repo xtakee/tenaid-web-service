@@ -21,6 +21,7 @@ export class MessageResonseDto {
   account?: string
   messageId: string
   repliedTo: string | null
+  reactions: any[]
   body: string
   visibility: string
   category?: string
