@@ -69,12 +69,8 @@ export class MessageRepository {
    */
   async updateMessageNodesConnection(rooms: string[], account: string, token: string, platform: string): Promise<MessageNode> {
     return await this.messageNodeModel.findOneAndUpdate({
-      $or: [
-        {
-          account: new Types.ObjectId(account),
-          platform: platform
-        }, { token: token }
-      ]
+      account: new Types.ObjectId(account),
+      platform: platform
     }, {
       status: 'online',
       rooms: rooms.map(id => new Types.ObjectId(id)),
