@@ -7,12 +7,21 @@ export const CommunityMessagePopulateQuery = [
   {
     path: 'deletedBy',
     select: '_id isAdmin extra.firstName extra.lastName extra.photo'
-  }, { path: 'community', select: '_id name' },
-  { path: 'category', select: '_id name description community readOnly', strictPopulate: false },
-  {
+  }, {
+    path: 'community',
+    select: '_id name',
+    strictPopulate: false
+  }, {
+    path: 'account',
+    select: '_id firstName lastName email.value photo',
+    strictPopulate: false
+  }, {
+    path: 'category',
+    select: '_id name description community readOnly',
+    strictPopulate: false
+  }, {
     path: 'reactions.users',
-    model: 'CommunityMember',
-    select: { _id: 1, 'extra.firstName': 1, 'extra.lastName': 1, 'extra.photo': 1, isAdmin: 1 },
+    select: 'extra.firstName extra.lastName extra.photo  isAdmin isOwner',
     strictPopulate: false
   }
 ]
