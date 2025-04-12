@@ -15,6 +15,8 @@ import { AccountLogoutRequestDto } from './dto/request/account.logout.request.dt
 import { PublicKey } from 'src/core/decorators/public.key';
 import { ManagedAccount } from '../account/model/managed.account';
 import { ManagedCommunity } from 'src/core/decorators/managed.community';
+import { Platform } from 'src/core/decorators/platform';
+import { platform } from 'os';
 
 @Controller({
   version: '1',
@@ -68,8 +70,8 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Logout of a registered account' })
-  async logout(@User() id: string, @Body() body: AccountLogoutRequestDto): Promise<void> {
-    return await this.authService.logout(id, body.platform)
+  async logout(@User() id: string, @Platform() platform: string): Promise<void> {
+    return await this.authService.logout(id, platform)
   }
 
   /**
