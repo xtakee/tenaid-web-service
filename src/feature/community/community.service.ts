@@ -171,6 +171,15 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @returns 
+   */
+  async getCommunityAccessOverview(community: string): Promise<any> {
+    return await this.communityRepository.getCommunityAccessOverview(community)
+  }
+
+  /**
+   * 
    * @param user 
    * @param data 
    */

@@ -52,6 +52,7 @@ import { CommunityFlat } from "../model/community.flat"
 import { toPascalCaseWithSpaces } from "src/core/helpers/pascal.case.with.space"
 import { searchable } from "src/core/util/searchable"
 import { AuthHelper } from "src/core/helpers/auth.helper"
+import { Months } from "src/core/util/months"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -1942,6 +1943,62 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       idempotentReference: idempotentReference
     })
+  }
+
+  /**
+   * 
+   * @param community 
+   */
+  async getCommunityAccessOverview(community: string): Promise<any> {
+    const year = new Date().getFullYear()
+
+    const overview = await this.communityCheckInsModel.aggregate([
+      {
+        $match: {
+          community: new Types.ObjectId(community),
+          createdAt: {
+            $gte: new Date(`${year}-01-01`),
+            $lt: new Date(`${year + 1}-01-01`)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { month: { $month: '$createdAt' } },
+          checkin: {
+            $sum: {
+              $cond: [{ $eq: ['$type', CheckType.CHECK_IN] }, 1, 0]
+            }
+          },
+          checkout: {
+            $sum: {
+              $cond: [{ $eq: ['$type', CheckType.CHECK_OUT] }, 1, 0]
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          month: '$_id.month',
+          checkin: 1,
+          checkout: 1
+        }
+      }
+    ])
+
+    const monthlySummary = {}
+
+    for (let i = 1; i <= 12; i++) {
+      const monthName = Months[i - 1];
+      const found = overview.find(r => r.month === i);
+      monthlySummary[monthName] = {
+        checkin: found?.checkin || 0,
+        checkout: found?.checkout || 0
+      }
+    }
+
+    return monthlySummary
   }
 
   /**

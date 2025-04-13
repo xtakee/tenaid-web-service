@@ -520,6 +520,18 @@ export class CommunityController {
   /**
    * 
    * @param community 
+   */
+  @Get('/access/overview')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Get a community access overview' })
+  async getCommunityAccessOverview(@ManagedCommunity() community: string): Promise<any> {
+    return await this.communityService.getCommunityAccessOverview(community)
+  }
+
+  /**
+   * 
+   * @param community 
    * @param paginate 
    * @param flat 
    * @returns 
