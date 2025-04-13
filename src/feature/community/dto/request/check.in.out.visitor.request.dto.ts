@@ -20,6 +20,10 @@ export class CheckInOutVisitorRequestDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  idempotentReference: string
+
+  @ApiProperty()
+  @IsNotEmpty()
   @IsDateString()
   date: string
 

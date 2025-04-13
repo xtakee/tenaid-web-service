@@ -175,6 +175,10 @@ export class CommunityService {
    * @param data 
    */
   async invite(user: string, data: CommunityInviteDto): Promise<CommunityInviteDto> {
+    // check for duplicate record
+    const duplicate = await this.communityRepository.getMemberInviteByIdempotentReference(data.community, data.idempotentReference)
+    if (duplicate) return this.inviteMapper.map(duplicate)
+
     const invite = await this.communityRepository.inviteVisitor(user, data)
 
     const checkType = data.exitOnly === true
@@ -1348,6 +1352,10 @@ export class CommunityService {
    * @param data 
    */
   async checkInOutVisitor(user: string, community: string, data: CheckInOutVisitorRequestDto): Promise<void> {
+    // check duplicate record
+    const duplicate = await this.communityRepository.getAccessByIdempotentReference(community, data.idempotentReference)
+    if (duplicate) return
+
     const member = await this.communityRepository.getCommunityMemberById(community, data.member)
 
     if (!member) throw new NotFoundException()

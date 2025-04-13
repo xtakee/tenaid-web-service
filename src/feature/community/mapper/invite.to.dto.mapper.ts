@@ -6,11 +6,11 @@ import { CodeGenerator } from "src/core/helpers/code.generator";
 
 @Injectable()
 export class InviteToDtoMapper implements Mapper<CommunityInvite, CommunityInviteDto> {
-  constructor(private readonly codeGen: CodeGenerator) { }
-
+  
   map(from: CommunityInvite): CommunityInviteDto {
     return {
       id: (from as any)._id,
+      idempotentReference: undefined,
       name: from.name,
       date: from.date.toISOString(),
       type: from.type,

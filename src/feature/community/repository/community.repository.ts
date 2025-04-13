@@ -1922,6 +1922,31 @@ export class CommunityRepository {
   /**
    * 
    * @param community 
+   * @param idempotentReference 
+   */
+  async getMemberInviteByIdempotentReference(community: string, idempotentReference: string): Promise<CommunityInvite> {
+    return await this.communityInviteModel.findOne({
+      community: new Types.ObjectId(community),
+      idempotentReference: idempotentReference
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param idempotentReference 
+   * @returns 
+   */
+  async getAccessByIdempotentReference(community: string, idempotentReference: string): Promise<CommunityInvite> {
+    return await this.communityCheckInsModel.findOne({
+      community: new Types.ObjectId(community),
+      idempotentReference: idempotentReference
+    })
+  }
+
+  /**
+   * 
+   * @param community 
    * @param apartment 
    * @returns 
    */
@@ -2180,6 +2205,7 @@ export class CommunityRepository {
       member: new Types.ObjectId(data.member),
       invite: request ? (request as any)._id : null,
       code: data.code,
+      idempotentReference: data.idempotentReference,
       guard: new Types.ObjectId(user),
       inviteType: data.inviteType,
       building: member.building,

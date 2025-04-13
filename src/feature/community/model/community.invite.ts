@@ -22,6 +22,9 @@ export class CommunityInvite {
   @Prop()
   name: string
 
+  @Prop()
+  idempotentReference?: string
+
   @Prop({ type: Date })
   date: Date
 

@@ -56,6 +56,10 @@ export class CommunityInviteDto {
   member: string
 
   @ApiProperty()
+  @IsNotEmpty()
+  idempotentReference: string
+
+  @ApiProperty()
   photo?: string
 
   @ApiProperty()

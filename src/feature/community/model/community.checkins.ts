@@ -43,6 +43,9 @@ export class CommunityCheckins {
   type: string
 
   @Prop()
+  idempotentReference?: string
+
+  @Prop()
   code: string
 
   @Prop({ type: Date })
