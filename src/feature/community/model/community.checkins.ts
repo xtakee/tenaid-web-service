@@ -22,13 +22,13 @@ export class CommunityCheckins {
   member: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityStreet.name })
-  street?: Types.ObjectId
+  street: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityBuilding.name })
-  building?: Types.ObjectId
+  building: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityFlat.name })
-  apartment?: Types.ObjectId
+  apartment: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityAccessPoint.name })
   accessPoint: Types.ObjectId

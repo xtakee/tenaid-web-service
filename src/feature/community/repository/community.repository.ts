@@ -1987,18 +1987,37 @@ export class CommunityRepository {
       }
     ])
 
-    const monthlySummary = {}
+    const result = {}
 
-    for (let i = 1; i <= 12; i++) {
-      const monthName = Months[i - 1];
-      const found = overview.find(r => r.month === i);
-      monthlySummary[monthName] = {
-        checkin: found?.checkin || 0,
-        checkout: found?.checkout || 0
+    // Turn the aggregation result into a map of month index → { checkin, checkout }
+    const monthMap = new Map(overview.map(item => [item.month, item]))
+    let totalCheckin = 0
+    let totalCheckout = 0
+
+    // Populate all months, filling in 0s if not present
+    Months.forEach((name, index) => {
+      const data = monthMap.get(index + 1);
+      const checkin = data?.checkin ?? 0;
+      const checkout = data?.checkout ?? 0;
+
+      totalCheckin += checkin;
+      totalCheckout += checkout;
+
+      result[name.toLowerCase()] = {
+        checkin,
+        checkout
       }
+    })
+
+    // Add totals at the end
+    result['totals'] = {
+      totalCheckin,
+      totalCheckout,
+      total: totalCheckin + totalCheckout
     }
 
-    return monthlySummary
+    return result
+
   }
 
   /**
