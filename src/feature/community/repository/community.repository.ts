@@ -767,6 +767,7 @@ export class CommunityRepository {
       account: new Types.ObjectId(user),
       exitOnly: data.exitOnly,
       reason: data.reason,
+      idempotentReference: data.idempotentReference,
       name: data.name,
       type: data.type,
       date: new Date(data.date),
