@@ -60,6 +60,7 @@ import { CommunityAnnouncement } from './model/community.announcement';
 import { E2eeService } from '../e2ee/e2ee.service';
 import { InviteType } from 'src/core/enums/invite.type';
 import { CommunityFlat } from './model/community.flat';
+import { CreateCommunityFlatDto } from './dto/request/create.community.flat';
 
 @Injectable()
 export class CommunityService {
@@ -1184,6 +1185,34 @@ export class CommunityService {
     }
 
     throw new NotFoundException()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getCommunityRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.getCommunityRequests(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param street 
+   * @param building 
+   * @param name 
+   */
+  async createCommunityApartment(user: string, community: string, body: CreateCommunityFlatDto): Promise<CommunityFlat> {
+    const apartment = await this.communityRepository.getCommunityBuildingApartmentByName(community, body.building, body.name)
+    if (apartment) throw new BadRequestException(DUPLICATE_RECORD_ERROR)
+
+    const building = await this.communityRepository.getOneCommunityBuildingById(community, body.building)
+    if (!building) throw new NotFoundException()
+
+    return await this.communityRepository.createCommunityApartment(user, community, building.street.toString(), body.building, body.name)
   }
 
   /**

@@ -940,6 +940,31 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @param street 
+   * @param building 
+   * @param name 
+   */
+  async createCommunityApartment(user: string, community: string, street: string, building: string, name: string): Promise<CommunityFlat> {
+    const code = (new AuthHelper).random(5).toUpperCase()
+    const data: CommunityFlat = {
+      community: new Types.ObjectId(community),
+      createdBy: new Types.ObjectId(user),
+      street: new Types.ObjectId(street),
+      building: new Types.ObjectId(building),
+      searchable: searchable(name.replace(' ', '')),
+      code: code,
+      isActive: true,
+      name: toPascalCaseWithSpaces(name.trim())
+    }
+
+    const flat = await this.communityFlatModel.create(data)
+    return await this.getCommunityApartment(community, (flat as any)._id.toString())
+  }
+
+  /**
+   * 
    * @param community 
    * @param building 
    * @returns 
@@ -960,6 +985,19 @@ export class CommunityRepository {
       select: '_id name description code'
     }
     ]).exec()
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @returns 
+   */
+  async getOneCommunityBuildingById(community: string, building: string): Promise<any> {
+    return await this.communityBuildingModel.findOne({
+      _id: new Types.ObjectId(building),
+      community: new Types.ObjectId(community)
+    })
   }
 
   /**
@@ -2152,6 +2190,27 @@ export class CommunityRepository {
    * @param paginate 
    * @returns 
    */
+  async getCommunityRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      status: ACCOUNT_STATUS.PENDING
+    }
+
+    return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
+      select: COMMUNITY_MEMBER_PRIMARY_QUERY,
+      limit: paginate.limit,
+      page: paginate.page,
+      sort: paginate.sort,
+      populate: COMMUNITY_MEMBER_QUERY
+    })
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
   async getCommunityDependantRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     const query: any = {
       community: new Types.ObjectId(community),
@@ -2966,6 +3025,21 @@ export class CommunityRepository {
       strictPopulate: false,
     }
     ])
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param building 
+   * @param name 
+   * @returns 
+   */
+  async getCommunityBuildingApartmentByName(community: string, building: string, name: string): Promise<CommunityFlat> {
+    return await this.communityFlatModel.findOne({
+      community: new Types.ObjectId(community),
+      building: new Types.ObjectId(building),
+      name: toPascalCaseWithSpaces(name.trim())
+    })
   }
 
   /**

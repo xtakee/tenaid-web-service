@@ -45,6 +45,7 @@ import { CheckPolicies } from '../auth/guards/casl/policies.guard'
 import { CreateAnnouncementDto } from './dto/request/create.announcement.dto'
 import { Platform } from 'src/core/decorators/platform'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { CreateCommunityFlatDto } from './dto/request/create.community.flat'
 
 @Controller({
   version: '1',
@@ -496,6 +497,24 @@ export class CommunityController {
     if (!isMongoId(building)) throw new BadRequestException()
 
     return await this.communityService.getCommunityBuildingMembers(community, building, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param body 
+   * @returns 
+   */
+  @Post('/flat')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.VISITOR_ACCESS))
+  @ApiOperation({ summary: 'Create a community flat/apartment' })
+  async createCommunityApartment(
+    @User() user: string,
+    @ManagedCommunity() community: string,
+    @Body() body: CreateCommunityFlatDto
+  ): Promise<any> {
+    return await this.communityService.createCommunityApartment(user, community, body)
   }
 
   /**
@@ -1014,6 +1033,20 @@ export class CommunityController {
   @ApiOperation({ summary: 'Get all community join requests' })
   async getCommunityJoinRequests(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
     return await this.communityService.getCommunityJoinRequests(community, paginate)
+  }
+
+  /**
+ * 
+ * @param community 
+ * @param paginate 
+ * @returns 
+ */
+  @Get('/request/inclusive')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.MEMBER))
+  @ApiOperation({ summary: 'Get all community member/dependant requests' })
+  async getCommunityAllRequests(@ManagedCommunity() community: string, @Query() paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
+    return await this.communityService.getCommunityRequests(community, paginate)
   }
 
   /**
