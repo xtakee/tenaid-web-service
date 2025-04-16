@@ -1555,6 +1555,8 @@ export class CommunityController {
    * @param file 
    */
   @Post('street/bulk')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.STREET))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community streets' })
   async bulkCommunityStreets(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
@@ -1568,6 +1570,8 @@ export class CommunityController {
    * @param file 
    */
   @Post('building/:street/bulk')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.BUILDING))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community buildings' })
   async bulkCommunityBuilding(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
@@ -1581,6 +1585,8 @@ export class CommunityController {
   * @param file 
   */
   @Post('member/:street/bulk')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community members/residents' })
   async bulkCommunityMembers(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {

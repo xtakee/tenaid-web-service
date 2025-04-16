@@ -444,7 +444,7 @@ export class AccountRepository implements IAccountRepository {
           strictPopulate: false
         }, {
           path: 'community',
-          select: '_id name logo isPrimary encryption kycAcknowledged code communitySetup',
+          select: '_id name logo isPrimary encryption kycAcknowledged kyc code communitySetup',
           strictPopulate: false
         }
       ])

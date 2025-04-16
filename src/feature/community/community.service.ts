@@ -1230,6 +1230,18 @@ export class CommunityService {
   /**
    * 
    * @param community 
+   * @param file 
+   */
+  async bulkCommunityStreets(community: string, file: Express.Multer.File): Promise<void> {
+    const fileExtension = file.originalname.split('.').pop()
+    if (fileExtension !== 'csv') throw new BadRequestException('Invalid file type. File must be in .csv format')
+
+    
+  }
+
+  /**
+   * 
+   * @param community 
    * @param page 
    * @param limit 
    * @returns 
