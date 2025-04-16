@@ -1189,16 +1189,6 @@ export class CommunityService {
 
   /**
    * 
-   * @param community 
-   * @param paginate 
-   * @returns 
-   */
-  async getCommunityRequests(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<any>> {
-    return await this.getCommunityRequests(community, paginate)
-  }
-
-  /**
-   * 
    * @param user 
    * @param community 
    * @param street 
