@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsEmail, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { BUILDING_CATEGORY, BUILDING_TYPE } from "src/core/enums/building.type";
+import { BUILDING_CATEGORY } from "src/core/enums/building.type";
 import { IsUniqueArray } from "src/core/validators/is.unique.array";
 
 export class CommunityBuildingDto {
@@ -29,10 +29,10 @@ export class CommunityBuildingDto {
   @IsNotEmpty()
   contactCountry: string
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(BUILDING_TYPE)
-  type: string
+  // @ApiProperty()
+  // @IsNotEmpty()
+  // @IsEnum(BUILDING_TYPE)
+  // type: string
 
   @ApiProperty()
   @IsNotEmpty()

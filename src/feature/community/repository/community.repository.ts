@@ -895,7 +895,6 @@ export class CommunityRepository {
       category: data.category,
       description: data.description,
       contactPhone: data.contactPhone,
-      type: data.type,
       buildingNumber: toPascalCaseWithSpaces(data.buildingNumber.trim()),
       contactEmail: { value: data.contactEmail }
     }
