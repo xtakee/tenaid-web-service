@@ -65,6 +65,9 @@ import { CsvFileValidator } from 'src/core/helpers/csv.file.validator';
 import { BulkBuildingDto } from './dto/request/bulk.building.dto';
 import { BulkUploadResponseDto } from './dto/response/bulk.insert.response.dto';
 import { capitalizeFirstLetter } from 'src/core/helpers/capitalize.first.letter';
+import { toPascalCaseWithSpaces } from 'src/core/helpers/pascal.case.with.space';
+import { searchable } from 'src/core/util/searchable';
+import { CommunityDraft, DraftType } from './model/community.draft';
 
 @Injectable()
 export class CommunityService {
@@ -1257,6 +1260,15 @@ export class CommunityService {
 
   /**
    * 
+   * @param community 
+   * @param paginate 
+   */
+  async getAllCommunityDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
+    return await this.communityRepository.getAllCommunityDrafts(community, paginate)
+  }
+
+  /**
+   * 
    * @param user 
    * @param community 
    * @param file 
@@ -1267,27 +1279,68 @@ export class CommunityService {
 
     const validation = await this.csvValidator.validate<BulkBuildingDto>(file.buffer, BulkBuildingDto)
 
-    const buildings = validation.valid.map((building) => {
-      building.buildingNumber = building.buildingNumber.trim()
-      return building
-    })
+    let result: any
 
-    const result = await this.communityRepository.bulkCommunityBuilding(user, community, street, buildings)
-    const saved = await this.communityRepository.getCommunityBuildingsByNumbers(community, street, buildings.map((data) => data.buildingNumber))
+    if (validation.valid.length > 0) {
+      const buildings = validation.valid.map((building) => {
+        building.buildingNumber = building.buildingNumber.trim()
+        return building
+      })
 
-    // process flats
-    const flats = saved.map((data) => {
-      const uploaded = buildings.find((doc) => doc.buildingNumber === data.buildingNumber)
+      result = await this.communityRepository.bulkCommunityBuilding(user, community, street, buildings)
+      const saved = await this.communityRepository.getCommunityBuildingsByNumbers(community, street, buildings.map((data) => data.buildingNumber))
 
-      if (uploaded) {
+      const allFlats: CommunityFlat[] = []
 
+      // process flats
+      for (const building of saved) {
+        const uploaded = buildings.find((doc) => doc.buildingNumber === building.buildingNumber)
+
+        if (uploaded) {
+          const flats = uploaded.flats.split(',').map((fl) => {
+            const apartment = toPascalCaseWithSpaces(fl.trim())
+
+            const flat: CommunityFlat = {
+              community: new Types.ObjectId(community),
+              createdBy: new Types.ObjectId(user),
+              street: new Types.ObjectId(street),
+              building: (building as any)._id,
+              searchable: searchable(apartment.replace(' ', '')),
+              code: (new AuthHelper).random(5).toUpperCase(),
+              isActive: true,
+              name: apartment
+            }
+
+            return flat
+          })
+
+          allFlats.push(...flats)
+        }
       }
-    })
+
+      await this.communityRepository.bulkCommunityBuildingFlats(allFlats)
+    }
+
+    if (validation.invalid.length > 0) {
+      // create drafts from failed entries
+      const drafts: CommunityDraft[] = validation.invalid.map((data) => {
+        return {
+          community: new Types.ObjectId(community),
+          street: new Types.ObjectId(street),
+          createdBy: new Types.ObjectId(user),
+          identifier: data.buildingNumber,
+          searchable: searchable(data.buildingNumber),
+          type: DraftType.BUILDING,
+          data: { ...data.data }
+        }
+      })
+      await this.communityRepository.createCommunityBulkDraft(drafts)
+    }
 
     return {
       errorEntries: validation.invalid.length,
-      inserted: result.insertedCount,
-      updated: result.modifiedCount
+      inserted: result?.upsertedCount || 0,
+      updated: result?.modifiedCount || 0
     }
   }
 

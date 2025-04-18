@@ -6,7 +6,7 @@ import { CommunityStreet } from "./community.street"
 
 export type CommunityFlatDocument = HydratedDocument<CommunityDraft>
 
-enum DraftType {
+export enum DraftType {
   BUILDING = 'building',
   RESIDENT = 'resident'
 }
@@ -27,6 +27,9 @@ export class CommunityDraft {
 
   @Prop({ enum: DraftType })
   type: string
+
+  @Prop({ enum: DraftType })
+  identifier: string
 
 
   @Prop({ type: [String], index: true })

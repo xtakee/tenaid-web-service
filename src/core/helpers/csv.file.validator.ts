@@ -13,6 +13,7 @@ export class CsvFileValidator {
       Readable.from(buffer)
         .pipe(csv())
         .on('data', (data) => {
+
           // Remove keys with empty string headers (e.g. from trailing commas)
           Object.keys(data).forEach((key) => {
             if (key.trim() === '') {

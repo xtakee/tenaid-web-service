@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, ValidateIf } from "class-validator";
 import { BUILDING_CATEGORY } from "src/core/enums/building.type";
-import { IsUniqueArray } from "src/core/validators/is.unique.array";
+import { IsCommaSeparatedUnique } from "src/core/validators/is.coma.separated.unique";
 
 export class BulkBuildingDto {
   @ApiProperty()
@@ -42,7 +42,6 @@ export class BulkBuildingDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsArray()
-  @IsUniqueArray()
-  flats: string[]
+  @IsCommaSeparatedUnique({message: 'Flats must be unique and not empty'})
+  flats: string
 }

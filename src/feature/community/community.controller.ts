@@ -1268,6 +1268,23 @@ export class CommunityController {
   }
 
   /**
+ * 
+ * @param community 
+ * @param paginate 
+ * @returns 
+ */
+  @Get('/building/draft')
+  @ApiOperation({ summary: 'Get all community building drafts' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
+  async getCommunityDrafts(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto
+  ): Promise<PaginatedResult<any>> {
+    return await this.communityService.getAllCommunityDrafts(community, paginate)
+  }
+
+  /**
    * 
    * @param community 
    * @param building 
@@ -1577,6 +1594,7 @@ export class CommunityController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.BUILDING))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community buildings' })
+  @SingleFileUpload()
   async bulkCommunityBuilding(
     @User() user: string,
     @ManagedCommunity() community: string,

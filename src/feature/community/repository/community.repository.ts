@@ -52,6 +52,7 @@ import { AuthHelper } from "src/core/helpers/auth.helper"
 import { Months } from "src/core/util/months"
 import { BulkBuildingDto } from "../dto/request/bulk.building.dto"
 import { capitalizeFirstLetter } from "src/core/helpers/capitalize.first.letter"
+import { CommunityDraft, DraftType } from "../model/community.draft"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -61,6 +62,7 @@ export class CommunityRepository {
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
     @InjectModel(CommunityGuard.name) private readonly communityGuardModel: Model<CommunityGuard>,
+    @InjectModel(CommunityDraft.name) private readonly communityDraftModel: Model<CommunityDraft>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityContact.name) private readonly communityContactModel: Model<CommunityContact>,
@@ -3018,7 +3020,10 @@ export class CommunityRepository {
   async bulkCommunityStreets(user: string, community: string, streets: CommunityStreetRequestDto[]): Promise<any> {
     const operations = streets.map((entry) => ({
       updateOne: {
-        filter: { name: entry.name },
+        filter: {
+          community: new Types.ObjectId(community),
+          name: capitalizeFirstLetter(entry.name)
+        },
         update: {
           $set: {
             name: capitalizeFirstLetter(entry.name),
@@ -3038,6 +3043,75 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @param identifier 
+   * @param data 
+   */
+  async createCommunityBulkDraft(data: CommunityDraft[]): Promise<void> {
+    const operations = data.map((entry) => ({
+      updateOne: {
+        filter: {
+          community: entry.community,
+          identifier: entry.identifier,
+          type: entry.type,
+        },
+        update: { $set: entry },
+        upsert: true,
+      },
+    }))
+
+    await this.communityDraftModel.bulkWrite(operations)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   */
+  async getAllCommunityDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      type: DraftType.BUILDING
+    }
+
+    return await this.paginator.paginate(this.communityDraftModel,
+      buildSearchQuery(query, paginate.search), {
+      sort: paginate.sort,
+      limit: paginate.limit,
+      page: paginate.page,
+      select: '_id street identifier createdBy data createdAt updatedAt',
+      populate: {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value photo',
+        strictPopulate: false
+      }
+    }
+    )
+  }
+
+  /**
+ * 
+ * @param flats 
+ */
+  async bulkCommunityBuildingFlats(flats: CommunityFlat[]): Promise<void> {
+    const operations = flats.map((entry) => ({
+      updateOne: {
+        filter: {
+          community: entry.community,
+          building: entry.building,
+          name: entry.name,
+        },
+        update: { $set: entry },
+        upsert: true,
+      },
+    }))
+
+    await this.communityFlatModel.bulkWrite(operations)
+  }
+
+  /**
+   * 
    * @param community 
    * @param street 
    * @param buildings 
@@ -3047,19 +3121,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       street: new Types.ObjectId(street),
       buildingNumber: { $in: buildings }
-    }, '_id buildingNumber street').lean()
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param community 
-   * @param building 
-   * @param street 
-   * @param flats 
-   */
-  async bulkCommunityBuildingApartments(user: string, community: string, building: string, street: string, flats: string[]): Promise<void> {
-
+    }, '_id buildingNumber').lean()
   }
 
   /**
@@ -3072,7 +3134,7 @@ export class CommunityRepository {
     const operations = buildings.map((entry) => ({
       updateOne: {
         filter: {
-          name: entry.buildingNumber.trim(),
+          buildingNumber: entry.buildingNumber,
           community: new Types.ObjectId(community),
           street: new Types.ObjectId(street)
         },
@@ -3083,9 +3145,11 @@ export class CommunityRepository {
             createdBy: new Types.ObjectId(user),
             searchable: searchable(`${entry.buildingNumber}${entry.name}`),
             description: entry.description,
+            buildingNumber: entry.buildingNumber,
             category: entry.category.trim().toLowerCase(),
             street: new Types.ObjectId(street),
             contactEmail: { value: entry.contactEmail },
+            contactPerson: capitalizeFirstLetter(entry.contactName),
             contactPhone: entry.contactPhone,
             contactCountry: entry.contactCountry,
           }
