@@ -1235,7 +1235,7 @@ export class CommunityService {
    * @param file 
    */
   async bulkCommunityStreets(user: string, community: string, file: Express.Multer.File): Promise<void> {
-    const validFormats = ['csv', 'xls', 'xlt']
+    const validFormats = ['csv']
     if (!file || !validFormats.includes(file.originalname.split('.').pop())) throw new BadRequestException('Invalid file type. File must be in .csv format')
 
     const validation = await this.csvValidator.validate<CommunityStreetRequestDto>(file.buffer, CommunityStreetRequestDto)
