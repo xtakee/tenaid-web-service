@@ -3025,7 +3025,7 @@ export class CommunityRepository {
    * @param community 
    * @param streets 
    */
-  async bulkCommunityStreets(community: string, streets: CommunityStreetRequestDto[]): Promise<void> {
+  async bulkCommunityStreets(user: string, community: string, streets: CommunityStreetRequestDto[]): Promise<void> {
     const operations = streets.map((entry) => ({
       updateOne: {
         filter: { name: entry.name },
@@ -3033,6 +3033,7 @@ export class CommunityRepository {
           $set: {
             name: entry.name,
             community: new Types.ObjectId(community),
+            createdBy: new Types.ObjectId(user),
             searchable: searchable(entry.name.trim().replace(' ', '')),
             description: entry.description
           }

@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { FileUploadResponseDto } from 'src/feature/file/dto/response/file.response.dto'
 import { CloudinaryService } from 'src/services/cloudinary/cloudinary.service'
 import { BasicAuth } from '../auth/guards/auth.decorator'
+import { SingleFileUpload } from 'src/core/decorators/single.file.upload'
 
 @Controller({
   path: 'file',
@@ -21,6 +22,7 @@ export class FileController {
    */
   @Post('upload/single')
   @ApiOperation({ summary: 'Upload a single document/image' })
+  @SingleFileUpload()
   @BasicAuth()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<FileUploadResponseDto> {

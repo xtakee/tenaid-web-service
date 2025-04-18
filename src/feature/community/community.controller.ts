@@ -46,6 +46,7 @@ import { CreateAnnouncementDto } from './dto/request/create.announcement.dto'
 import { Platform } from 'src/core/decorators/platform'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { CreateCommunityFlatDto } from './dto/request/create.community.flat'
+import { SingleFileUpload } from 'src/core/decorators/single.file.upload'
 
 @Controller({
   version: '1',
@@ -1559,8 +1560,9 @@ export class CommunityController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.STREET))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community streets' })
+  @SingleFileUpload()
   async bulkCommunityStreets(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-    return this.communityService.bulkCommunityStreets(community, file)
+    return this.communityService.bulkCommunityStreets(user, community, file)
   }
 
   /**
