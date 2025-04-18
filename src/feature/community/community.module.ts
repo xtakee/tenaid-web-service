@@ -46,6 +46,7 @@ import { CommunityAnnouncement, CommunityAnnouncementSchema } from './model/comm
 import { E2eeModule } from '../e2ee/e2ee.module'
 import { MongooseDocumentHelper } from 'src/core/helpers/mongoose.document.helper'
 import { CommunityFlat, CommunityFlatSchema } from './model/community.flat'
+import { CsvFileValidator } from 'src/core/helpers/csv.file.validator'
 
 const queue = BullModule.registerQueue({
   name: 'community_worker_queue',
@@ -58,6 +59,7 @@ const queue = BullModule.registerQueue({
     CommunityToDtoMapper,
     CounterRepository,
     CodeGenerator,
+    CsvFileValidator,
     AuthHelper,
     MongooseDocumentHelper,
     Paginator,

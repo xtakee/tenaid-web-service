@@ -3022,6 +3022,30 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param community 
+   * @param streets 
+   */
+  async bulkCommunityStreets(community: string, streets: CommunityStreetRequestDto[]): Promise<void> {
+    const operations = streets.map((entry) => ({
+      updateOne: {
+        filter: { name: entry.name },
+        update: {
+          $set: {
+            name: entry.name,
+            community: new Types.ObjectId(community),
+            searchable: searchable(entry.name.trim().replace(' ', '')),
+            description: entry.description
+          }
+        },
+        upsert: true,
+      },
+    }))
+
+    await this.communityStreetModel.bulkWrite(operations)
+  }
+
+  /**
+   * 
    * @param user 
    * @param email 
    * @param member 

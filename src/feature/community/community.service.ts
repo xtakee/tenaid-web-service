@@ -61,6 +61,7 @@ import { E2eeService } from '../e2ee/e2ee.service';
 import { InviteType } from 'src/core/enums/invite.type';
 import { CommunityFlat } from './model/community.flat';
 import { CreateCommunityFlatDto } from './dto/request/create.community.flat';
+import { CsvFileValidator } from 'src/core/helpers/csv.file.validator';
 
 @Injectable()
 export class CommunityService {
@@ -76,6 +77,7 @@ export class CommunityService {
     private readonly communityMapper: CommunityToDtoMapper,
     private readonly eventGateway: EventGateway,
     private readonly e2eeService: E2eeService,
+    private readonly csvValidator: CsvFileValidator,
     private readonly counterRepository: CounterRepository,
     private readonly authHelper: AuthHelper,
     @InjectQueue('community_worker_queue') private readonly communityQueue: Queue,
@@ -1233,10 +1235,12 @@ export class CommunityService {
    * @param file 
    */
   async bulkCommunityStreets(community: string, file: Express.Multer.File): Promise<void> {
-    const fileExtension = file.originalname.split('.').pop()
-    if (fileExtension !== 'csv') throw new BadRequestException('Invalid file type. File must be in .csv format')
+    const validFormats = ['csv', 'xls', 'xlt']
+    if (!file || !validFormats.includes(file.originalname.split('.').pop())) throw new BadRequestException('Invalid file type. File must be in .csv format')
 
-    
+    const validation = await this.csvValidator.validate<CommunityStreetRequestDto>(file.buffer, CommunityStreetRequestDto)
+
+    await this.communityRepository.bulkCommunityStreets(community, validation.valid)
   }
 
   /**

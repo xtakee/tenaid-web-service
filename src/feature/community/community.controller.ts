@@ -1560,7 +1560,7 @@ export class CommunityController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community streets' })
   async bulkCommunityStreets(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-
+    return this.communityService.bulkCommunityStreets(community, file)
   }
 
   /**
