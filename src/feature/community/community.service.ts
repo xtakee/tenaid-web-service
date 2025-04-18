@@ -62,6 +62,9 @@ import { InviteType } from 'src/core/enums/invite.type';
 import { CommunityFlat } from './model/community.flat';
 import { CreateCommunityFlatDto } from './dto/request/create.community.flat';
 import { CsvFileValidator } from 'src/core/helpers/csv.file.validator';
+import { BulkBuildingDto } from './dto/request/bulk.building.dto';
+import { BulkUploadResponseDto } from './dto/response/bulk.insert.response.dto';
+import { capitalizeFirstLetter } from 'src/core/helpers/capitalize.first.letter';
 
 @Injectable()
 export class CommunityService {
@@ -521,7 +524,7 @@ export class CommunityService {
     const communityData = await this.communityRepository.getCommunityByUser(user, community)
 
     if (communityData) {
-      data.code = this.authHelper.random(5)
+      data.code = this.authHelper.random(5).toUpperCase()
       const street: CommunityStreet = await this.communityRepository.createStreet(user, community, data)
 
       return this.pathMapper.map(street)
@@ -1234,13 +1237,58 @@ export class CommunityService {
    * @param community 
    * @param file 
    */
-  async bulkCommunityStreets(user: string, community: string, file: Express.Multer.File): Promise<void> {
+  async bulkCommunityStreets(user: string, community: string, file: Express.Multer.File): Promise<BulkUploadResponseDto> {
     const validFormats = ['csv']
     if (!file || !validFormats.includes(file.originalname.split('.').pop())) throw new BadRequestException('Invalid file type. File must be in .csv format')
 
     const validation = await this.csvValidator.validate<CommunityStreetRequestDto>(file.buffer, CommunityStreetRequestDto)
 
-    await this.communityRepository.bulkCommunityStreets(user, community, validation.valid)
+    const result = await this.communityRepository.bulkCommunityStreets(user, community, validation.valid.map((street) => {
+      street.name = capitalizeFirstLetter(street.name)
+      return street
+    }))
+
+    return {
+      errorEntries: validation.invalid.length,
+      inserted: result.insertedCount,
+      updated: result.modifiedCount
+    }
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param file 
+   */
+  async bulkCommunityBuilding(user: string, community: string, street: string, file: Express.Multer.File): Promise<BulkUploadResponseDto> {
+    const validFormats = ['csv']
+    if (!file || !validFormats.includes(file.originalname.split('.').pop())) throw new BadRequestException('Invalid file type. File must be in .csv format')
+
+    const validation = await this.csvValidator.validate<BulkBuildingDto>(file.buffer, BulkBuildingDto)
+
+    const buildings = validation.valid.map((building) => {
+      building.buildingNumber = building.buildingNumber.trim()
+      return building
+    })
+
+    const result = await this.communityRepository.bulkCommunityBuilding(user, community, street, buildings)
+    const saved = await this.communityRepository.getCommunityBuildingsByNumbers(community, street, buildings.map((data) => data.buildingNumber))
+
+    // process flats
+    const flats = saved.map((data) => {
+      const uploaded = buildings.find((doc) => doc.buildingNumber === data.buildingNumber)
+
+      if (uploaded) {
+
+      }
+    })
+
+    return {
+      errorEntries: validation.invalid.length,
+      inserted: result.insertedCount,
+      updated: result.modifiedCount
+    }
   }
 
   /**

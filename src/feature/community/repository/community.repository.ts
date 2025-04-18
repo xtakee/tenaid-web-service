@@ -33,15 +33,12 @@ import { CreateCommunityRegistrationDto } from "../dto/request/create.community.
 import { UpdateCommunityMemberPermissionsDto } from "../dto/request/update.community.member.permissions.dto"
 import { MessageCategory } from "../model/message.category"
 import { UpdateCommunityStreetDto } from "../dto/request/update.community.street.dto"
-import { CommunitySummary } from "../model/community.summary"
-import { StreetSummary } from "../model/street.summary"
 import { CreateCommunityContactDto } from "../dto/request/create.community.contact.dto"
 import { CommunityContact } from "../model/community.contact"
 import { CommunityGuard } from "../model/community.guard"
 import { CreateCommunityGuardDto } from "../dto/request/create.community.guard.dto"
 import { CommunityGuardResponseDto } from "../dto/response/community.guard.response.dto"
 import { JoinBuildingDto } from "../dto/request/join.building.dto"
-import { BuildingSummary } from "../model/building.summary"
 import { CreateAnnouncementDto } from "../dto/request/create.announcement.dto"
 import { CommunityAnnouncement } from "../model/community.announcement"
 import { INVITE_STATUS } from "../community.constants"
@@ -53,6 +50,8 @@ import { toPascalCaseWithSpaces } from "src/core/helpers/pascal.case.with.space"
 import { searchable } from "src/core/util/searchable"
 import { AuthHelper } from "src/core/helpers/auth.helper"
 import { Months } from "src/core/util/months"
+import { BulkBuildingDto } from "../dto/request/bulk.building.dto"
+import { capitalizeFirstLetter } from "src/core/helpers/capitalize.first.letter"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -61,10 +60,7 @@ export class CommunityRepository {
   constructor(
     @InjectModel(Community.name) private readonly communityModel: Model<Community>,
     private readonly paginator: Paginator,
-    @InjectModel(CommunitySummary.name) private readonly communitySummayModel: Model<CommunitySummary>,
     @InjectModel(CommunityGuard.name) private readonly communityGuardModel: Model<CommunityGuard>,
-    @InjectModel(StreetSummary.name) private readonly streetSummaryModel: Model<StreetSummary>,
-    @InjectModel(BuildingSummary.name) private readonly buildingSummaryModel: Model<BuildingSummary>,
     @InjectModel(CommunityBuilding.name) private readonly communityBuildingModel: Model<CommunityBuilding>,
     @InjectModel(CommunityAccessPoint.name) private readonly communityAccessPointModel: Model<CommunityAccessPoint>,
     @InjectModel(CommunityContact.name) private readonly communityContactModel: Model<CommunityContact>,
@@ -107,13 +103,7 @@ export class CommunityRepository {
       account: new Types.ObjectId(user)
     }
 
-    const result = await this.communityModel.create(community)
-
-    // create summary record
-    const summary: CommunitySummary = { community: (result as any)._id }
-    await this.communitySummayModel.create(summary)
-
-    return result
+    return await this.communityModel.create(community)
   }
 
   /**
@@ -438,7 +428,7 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       account: new Types.ObjectId(user),
       createdBy: new Types.ObjectId(user),
-      name: data.name,
+      name: capitalizeFirstLetter(data.name),
       code: data.code,
       description: data.description
     })
@@ -895,7 +885,7 @@ export class CommunityRepository {
       category: data.category,
       description: data.description,
       contactPhone: data.contactPhone,
-      buildingNumber: toPascalCaseWithSpaces(data.buildingNumber.trim()),
+      buildingNumber: data.buildingNumber.trim(),
       contactEmail: { value: data.contactEmail }
     }
 
@@ -3025,14 +3015,15 @@ export class CommunityRepository {
    * @param community 
    * @param streets 
    */
-  async bulkCommunityStreets(user: string, community: string, streets: CommunityStreetRequestDto[]): Promise<void> {
+  async bulkCommunityStreets(user: string, community: string, streets: CommunityStreetRequestDto[]): Promise<any> {
     const operations = streets.map((entry) => ({
       updateOne: {
         filter: { name: entry.name },
         update: {
           $set: {
-            name: entry.name,
+            name: capitalizeFirstLetter(entry.name),
             community: new Types.ObjectId(community),
+            code: (new AuthHelper()).random(5).toUpperCase(),
             createdBy: new Types.ObjectId(user),
             searchable: searchable(entry.name.trim().replace(' ', '')),
             description: entry.description
@@ -3042,7 +3033,68 @@ export class CommunityRepository {
       },
     }))
 
-    await this.communityStreetModel.bulkWrite(operations)
+    return await this.communityStreetModel.bulkWrite(operations)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param street 
+   * @param buildings 
+   */
+  async getCommunityBuildingsByNumbers(community: string, street: string, buildings: string[]): Promise<CommunityBuilding[]> {
+    return await this.communityBuildingModel.find({
+      community: new Types.ObjectId(community),
+      street: new Types.ObjectId(street),
+      buildingNumber: { $in: buildings }
+    }, '_id buildingNumber street').lean()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param building 
+   * @param street 
+   * @param flats 
+   */
+  async bulkCommunityBuildingApartments(user: string, community: string, building: string, street: string, flats: string[]): Promise<void> {
+
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param buildings 
+   */
+  async bulkCommunityBuilding(user: string, community: string, street: string, buildings: BulkBuildingDto[]): Promise<any> {
+    const operations = buildings.map((entry) => ({
+      updateOne: {
+        filter: {
+          name: entry.buildingNumber.trim(),
+          community: new Types.ObjectId(community),
+          street: new Types.ObjectId(street)
+        },
+        update: {
+          $set: {
+            name: entry.name,
+            community: new Types.ObjectId(community),
+            createdBy: new Types.ObjectId(user),
+            searchable: searchable(`${entry.buildingNumber}${entry.name}`),
+            description: entry.description,
+            category: entry.category.trim().toLowerCase(),
+            street: new Types.ObjectId(street),
+            contactEmail: { value: entry.contactEmail },
+            contactPhone: entry.contactPhone,
+            contactCountry: entry.contactCountry,
+          }
+        },
+        upsert: true,
+      },
+    }))
+
+    return await this.communityBuildingModel.bulkWrite(operations)
   }
 
   /**

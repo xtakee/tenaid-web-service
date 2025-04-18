@@ -47,6 +47,7 @@ import { Platform } from 'src/core/decorators/platform'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { CreateCommunityFlatDto } from './dto/request/create.community.flat'
 import { SingleFileUpload } from 'src/core/decorators/single.file.upload'
+import { BulkUploadResponseDto } from './dto/response/bulk.insert.response.dto'
 
 @Controller({
   version: '1',
@@ -1561,8 +1562,8 @@ export class CommunityController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community streets' })
   @SingleFileUpload()
-  async bulkCommunityStreets(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-    return this.communityService.bulkCommunityStreets(user, community, file)
+  async bulkCommunityStreets(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<BulkUploadResponseDto> {
+    return await this.communityService.bulkCommunityStreets(user, community, file)
   }
 
   /**
@@ -1576,8 +1577,13 @@ export class CommunityController {
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.BUILDING))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community buildings' })
-  async bulkCommunityBuilding(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-
+  async bulkCommunityBuilding(
+    @User() user: string,
+    @ManagedCommunity() community: string,
+    @Param('street') street: string,
+    @UploadedFile() file: Express.Multer.File): Promise<BulkUploadResponseDto> {
+    if (!isMongoId(street)) throw new BadRequestException()
+    return await this.communityService.bulkCommunityBuilding(user, community, street, file)
   }
 
   /**

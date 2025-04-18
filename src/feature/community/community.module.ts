@@ -36,12 +36,9 @@ import { CommunityRegistration, CommunityRegistrationSchema } from './model/comm
 import { BullModule } from '@nestjs/bullmq'
 import { CommunityQueueProcessor } from './queue/community.queue.processor'
 import { MessageCategory, MessageCategorySchema } from './model/message.category'
-import { CommunitySummary, CommunitySummarySchema } from './model/community.summary'
-import { StreetSummary, StreetSummarySchema } from './model/street.summary'
 import { CommunityContact, CommunityContactSchema } from './model/community.contact'
 import { CommunityGuard, CommunityGuardSchema } from './model/community.guard'
 import { CounterRepository } from '../core/counter/counter.repository'
-import { BuildingSummary, BuildingSummarySchema } from './model/building.summary'
 import { CommunityAnnouncement, CommunityAnnouncementSchema } from './model/community.announcement'
 import { E2eeModule } from '../e2ee/e2ee.module'
 import { MongooseDocumentHelper } from 'src/core/helpers/mongoose.document.helper'
@@ -179,9 +176,6 @@ const queue = BullModule.registerQueue({
     }]),
     MongooseModule.forFeature([{ name: CommunityCheckins.name, schema: CommunityCheckinsSchema }]),
     MongooseModule.forFeature([{ name: CommunityFlat.name, schema: CommunityFlatSchema }]),
-    MongooseModule.forFeature([{ name: CommunitySummary.name, schema: CommunitySummarySchema }]),
-    MongooseModule.forFeature([{ name: BuildingSummary.name, schema: BuildingSummarySchema }]),
-    MongooseModule.forFeature([{ name: StreetSummary.name, schema: StreetSummarySchema }]),
     MongooseModule.forFeatureAsync([{
       name: MessageCategory.name,
       useFactory: async () => {

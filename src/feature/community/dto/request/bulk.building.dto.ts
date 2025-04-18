@@ -1,32 +1,48 @@
-import { IsEmail, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
-import { BUILDING_TYPE, BUILDING_CATEGORY } from "src/core/enums/building.type"
+import { ApiProperty } from "@nestjs/swagger";
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, ValidateIf } from "class-validator";
+import { BUILDING_CATEGORY } from "src/core/enums/building.type";
+import { IsUniqueArray } from "src/core/validators/is.unique.array";
 
 export class BulkBuildingDto {
-  @IsNotEmpty()
-  name: string = ''
-
-  @IsOptional()
-  description?: string = ''
-
-  @IsNotEmpty()
-  @IsString()
-  buildingNumber: string
-
-  @IsOptional()
-  @IsNumber()
-  apartments?: number = 0
-
+  @ApiProperty()
   @IsNotEmpty()
   @IsEnum(BUILDING_CATEGORY)
   category: string
 
-  @IsNotEmpty()
-  contactPerson: string
+  @IsOptional()
+  @ApiProperty()
+  @ValidateIf((params) => params.type === BUILDING_CATEGORY.BUSINESS)
+  name?: string
 
+  @IsOptional()
+  @ApiProperty()
+  @ValidateIf((params) => params.type === BUILDING_CATEGORY.BUSINESS)
+  description?: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  buildingNumber: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  contactCountry: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  contactName: string
+
+  @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
   contactEmail: string
 
+  @ApiProperty()
   @IsNotEmpty()
   contactPhone: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsArray()
+  @IsUniqueArray()
+  flats: string[]
 }
