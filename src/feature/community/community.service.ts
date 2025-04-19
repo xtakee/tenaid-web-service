@@ -1294,7 +1294,7 @@ export class CommunityService {
       return {
         community: new Types.ObjectId(community),
         createdBy: new Types.ObjectId(user),
-        identifier: data.email.trim().toLowerCase(),
+        identifier: data.email?.trim().toLowerCase(),
         searchable: searchable(`${data.firstName}${data.lastName}`),
         type: DraftType.RESIDENT,
         data: { ...data }
