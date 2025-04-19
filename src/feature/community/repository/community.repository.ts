@@ -3141,6 +3141,7 @@ export class CommunityRepository {
         update: {
           $set: {
             name: entry.name,
+            apartments: entry.flats.split(',').length,
             community: new Types.ObjectId(community),
             createdBy: new Types.ObjectId(user),
             searchable: searchable(`${entry.buildingNumber}${entry.name}`),
