@@ -1,10 +1,13 @@
-import { BadRequestException, Controller, Post, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common'
+import { BadRequestException, Controller, Get, NotFoundException, Param, Post, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { FileUploadResponseDto } from 'src/feature/file/dto/response/file.response.dto'
 import { CloudinaryService } from 'src/services/cloudinary/cloudinary.service'
 import { BasicAuth } from '../auth/guards/auth.decorator'
 import { SingleFileUpload } from 'src/core/decorators/single.file.upload'
+import { createReadStream, existsSync } from 'fs'
+import { Response } from 'express'
+import { join } from 'path'
 
 @Controller({
   path: 'file',
@@ -67,5 +70,25 @@ export class FileController {
     return secureUrls.map(ur => {
       return { url: ur }
     })
+  }
+
+  /**
+   * 
+   * @param filename 
+   * @param res 
+   */
+  @Get('/:filename')
+  @ApiOperation({ summary: 'Download a single document/image' })
+  @BasicAuth()
+  downloadFile(@Param('filename') filename: string, @Res() res: Response) {
+    const filePath = join(process.cwd(), 'public', filename)
+    const fileStream = createReadStream(filePath)
+
+    if (!existsSync(filePath)) throw new NotFoundException()
+
+    res.set('Content-Type', 'application/octet-stream')
+    res.set('Content-Disposition', `attachment filename="${filename}"`)
+
+    fileStream.pipe(res)
   }
 }

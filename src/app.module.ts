@@ -24,9 +24,15 @@ import { UtilityModule } from './feature/utility/utility.module'
 import { BillingModule } from './feature/billing/billing.module'
 import { E2eeModule } from './feature/e2ee/e2ee.module'
 import { MessageModule } from './feature/message/message.module'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { join } from 'path'
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // folder to expose
+      serveRoot: '/public', // URL prefix
+    }),
     SentryModule.forRoot(),
     AccountModule,
     ThrottlerModule.forRoot([{
