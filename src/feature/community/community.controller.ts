@@ -393,6 +393,23 @@ export class CommunityController {
     return await this.communityService.getCommunityBuildingAccess(community, building, paginate)
   }
 
+    /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+    @Get('/member/draft')
+    @ApiOperation({ summary: 'Get all community members drafts' })
+    @Auth()
+    @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
+    async getCommunityMemberDrafts(
+      @ManagedCommunity() community: string,
+      @Query() paginate: PaginationRequestDto
+    ): Promise<PaginatedResult<any>> {
+      return await this.communityService.getAllCommunityMemberDrafts(community, paginate)
+    }
+
   /**
    * 
    * @param community 
@@ -1274,14 +1291,14 @@ export class CommunityController {
  * @returns 
  */
   @Get('/building/draft')
-  @ApiOperation({ summary: 'Get all community building drafts' })
+  @ApiOperation({ summary: 'Get all community buildings drafts' })
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
-  async getCommunityDrafts(
+  async getCommunityBuildingDrafts(
     @ManagedCommunity() community: string,
     @Query() paginate: PaginationRequestDto
   ): Promise<PaginatedResult<any>> {
-    return await this.communityService.getAllCommunityDrafts(community, paginate)
+    return await this.communityService.getAllCommunityBuildingDrafts(community, paginate)
   }
 
   /**
@@ -1610,13 +1627,14 @@ export class CommunityController {
   * @param community 
   * @param file 
   */
-  @Post('member/:street/bulk')
+  @Post('member/bulk')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk upload community members/residents' })
-  async bulkCommunityMembers(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-
+  @SingleFileUpload()
+  async bulkCommunityMembers(@User() user: string, @ManagedCommunity() community: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
+    return await this.communityService.bulkCommunityMembers(user, community, file)
   }
 
   /**

@@ -17,7 +17,7 @@ export class CommunityDraft {
   community: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: CommunityStreet.name })
-  street: Types.ObjectId
+  street?: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: Account.name })
   createdBy: Types.ObjectId

@@ -68,6 +68,7 @@ import { capitalizeFirstLetter } from 'src/core/helpers/capitalize.first.letter'
 import { toPascalCaseWithSpaces } from 'src/core/helpers/pascal.case.with.space';
 import { searchable } from 'src/core/util/searchable';
 import { CommunityDraft, DraftType } from './model/community.draft';
+import { BulkMemberDto } from './dto/request/bulk.member.dto';
 
 @Injectable()
 export class CommunityService {
@@ -1263,8 +1264,49 @@ export class CommunityService {
    * @param community 
    * @param paginate 
    */
-  async getAllCommunityDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
-    return await this.communityRepository.getAllCommunityDrafts(community, paginate)
+  async getAllCommunityBuildingDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
+    return await this.communityRepository.getAllCommunityBuildingDrafts(community, paginate)
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
+  async getAllCommunityMemberDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
+    return await this.communityRepository.getAllCommunityMemberDrafts(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param file 
+   */
+  async bulkCommunityMembers(user: string, community: string, file: Express.Multer.File): Promise<BulkUploadResponseDto> {
+    const validFormats = ['csv']
+    if (!file || !validFormats.includes(file.originalname.split('.').pop())) throw new BadRequestException('Invalid file type. File must be in .csv format')
+
+    const validation = await this.csvValidator.validate<BulkMemberDto>(file.buffer, BulkMemberDto)
+
+    const drafts: CommunityDraft[] = validation.combined.map((data) => {
+      return {
+        community: new Types.ObjectId(community),
+        createdBy: new Types.ObjectId(user),
+        identifier: data.email.trim().toLowerCase(),
+        searchable: searchable(`${data.firstName}${data.lastName}`),
+        type: DraftType.RESIDENT,
+        data: { ...data }
+      }
+    })
+    await this.communityRepository.createCommunityBulkDraft(drafts)
+
+    return {
+      errorEntries: validation.combined.length,
+      inserted: 0,
+      updated: 0
+    }
   }
 
   /**
@@ -1331,7 +1373,7 @@ export class CommunityService {
           identifier: data.buildingNumber,
           searchable: searchable(data.buildingNumber),
           type: DraftType.BUILDING,
-          data: { ...data.data }
+          data: { ...data }
         }
       })
       await this.communityRepository.createCommunityBulkDraft(drafts)

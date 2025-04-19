@@ -6,7 +6,7 @@ import { Injectable } from "@nestjs/common"
 
 @Injectable()
 export class CsvFileValidator {
-  async validate<T extends Object>(buffer: Buffer, dtoClass: new () => T): Promise<{ valid: T[], invalid: any[] }> {
+  async validate<T extends Object>(buffer: Buffer, dtoClass: new () => T): Promise<{ valid: T[], invalid: T[], combined: T[] }> {
     const rows: any[] = []
 
     return new Promise((resolve, reject) => {
@@ -44,13 +44,13 @@ export class CsvFileValidator {
             const errors = await validate(instance)
 
             if (errors.length > 0) {
-              invalid.push({ data: instance, errors })
+              invalid.push(instance)
             } else {
               valid.push(instance)
             }
           }
 
-          resolve({ valid, invalid })
+          resolve({ valid, invalid, combined: [...valid, ...invalid] })
         })
         .on('error', (error) => reject(error))
     })

@@ -8,6 +8,11 @@ export class CommunityBuildingDto {
   @IsMongoId()
   _id?: string
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsMongoId()
+  draft?: string
+
   @ApiProperty()
   @IsNotEmpty()
   @IsEnum(BUILDING_CATEGORY)

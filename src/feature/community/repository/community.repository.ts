@@ -3069,10 +3069,31 @@ export class CommunityRepository {
    * @param community 
    * @param paginate 
    */
-  async getAllCommunityDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
+  async getAllCommunityBuildingDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
     const query: any = {
       community: new Types.ObjectId(community),
       type: DraftType.BUILDING
+    }
+
+    return await this.paginator.paginate(this.communityDraftModel,
+      buildSearchQuery(query, paginate.search), {
+      sort: paginate.sort,
+      limit: paginate.limit,
+      page: paginate.page,
+      select: '_id street identifier createdBy data createdAt updatedAt',
+      populate: {
+        path: 'createdBy',
+        select: '_id firstName lastName email.value photo',
+        strictPopulate: false
+      }
+    }
+    )
+  }
+
+  async getAllCommunityMemberDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
+    const query: any = {
+      community: new Types.ObjectId(community),
+      type: DraftType.RESIDENT
     }
 
     return await this.paginator.paginate(this.communityDraftModel,
