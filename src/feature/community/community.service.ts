@@ -972,6 +972,11 @@ export class CommunityService {
     // check if user is owner
     const result = await this.communityRepository.createCommunityBuilding(user, community, data)
 
+    if (data.draft) {
+      // remove building draft data
+      await this.communityRepository.deleteCommunityBuildingDraft(community, data.draft)
+    }
+
     return await this.communityRepository.getCommunityBuildingById(community, (result as any)._id)
   }
 
@@ -1655,6 +1660,11 @@ export class CommunityService {
 
     const memberInvite = await this.communityRepository.addCommunityMember(user, community, data, code, account ? (account as any)._id.toString() : null)
     if (!memberInvite) throw new BadRequestException(REQUEST_INVITE_ERROR)
+
+    if (data.draft) {
+      // remove building draft data
+      await this.communityRepository.deleteCommunityBuildingDraft(community, data.draft)
+    }
 
     // send push if account exists
     if (account) {

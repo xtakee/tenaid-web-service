@@ -1588,7 +1588,7 @@ export class CommunityController {
    * @param data 
    * @returns 
    */
-  @Post('/member-create')
+  @Post('/member')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.MEMBER))
   @ApiOperation({ summary: 'Create a community member' })

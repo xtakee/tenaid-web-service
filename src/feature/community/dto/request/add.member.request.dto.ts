@@ -4,6 +4,11 @@ import { GENDER } from "src/feature/auth/auth.constants";
 
 export class AddMemberRequestDto {
 
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsMongoId()
+  draft?: string
+
   @ApiProperty()
   @IsNotEmpty()
   firstName: string

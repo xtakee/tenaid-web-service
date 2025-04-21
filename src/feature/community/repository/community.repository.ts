@@ -2839,6 +2839,18 @@ export class CommunityRepository {
   }
 
   /**
+   * 
+   * @param community 
+   * @param draft 
+   */
+  async deleteCommunityBuildingDraft(community: string, draft: string): Promise<void> {
+    await this.communityDraftModel.deleteOne({
+      community: new Types.ObjectId(community),
+      _id: new Types.ObjectId(draft)
+    })
+  }
+
+  /**
  * 
  * @param community 
  * @param data 
