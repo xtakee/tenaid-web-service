@@ -4,6 +4,7 @@ import { IsNotEmpty } from "class-validator"
 export class MessageCategoryDto {
 
   id?: string
+  displayName?: string
   community?: string
 
   @ApiProperty()

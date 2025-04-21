@@ -137,6 +137,8 @@ export class CommunityService {
         return {
           id: (category as any)._id,
           name: category.name,
+          community: category.community?.toString(),
+          displayName: category.displayName,
           description: category.description,
           isReadOnly: category.readOnly
         }
@@ -160,6 +162,8 @@ export class CommunityService {
     if (result) return {
       id: (category as any)._id,
       name: result.name,
+      community: community,
+      displayName: result.displayName,
       description: result.description,
       isReadOnly: result.readOnly
     }
