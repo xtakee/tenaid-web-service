@@ -1989,7 +1989,7 @@ export class CommunityRepository {
       {
         $match: {
           community: new Types.ObjectId(community),
-          createdAt: {
+          date: {
             $gte: new Date(`${year}-01-01`),
             $lt: new Date(`${year + 1}-01-01`)
           }
@@ -1997,7 +1997,7 @@ export class CommunityRepository {
       },
       {
         $group: {
-          _id: { month: { $month: '$createdAt' } },
+          _id: { month: { $month: '$date' } },
           checkin: {
             $sum: {
               $cond: [{ $eq: ['$type', CheckType.CHECK_IN] }, 1, 0]
