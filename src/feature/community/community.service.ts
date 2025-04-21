@@ -100,7 +100,7 @@ export class CommunityService {
   * @param community 
   * @param data 
   */
-  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<MessageCategoryDto> {
+  async createCommunityMessageCategory(user: string, community: string, data: MessageCategoryDto): Promise<{}> {
     const member: CommunityMember = await this.communityRepository.getApprovedCommunityMember(user, community)
 
     if (member && (member.isAdmin === true || member.extra?.isAdmin === true)) {
@@ -112,7 +112,7 @@ export class CommunityService {
           community: category.community?.toString(),
           displayName: category.displayName,
           description: category.description,
-          isReadOnly: category.readOnly
+          readOnly: category.readOnly
         }
 
       else throw new BadRequestException()
@@ -129,7 +129,7 @@ export class CommunityService {
    * @param data 
    * @returns 
    */
-  async updateCommunityMessageCategory(user: string, community: string, category: string, data: UpdateMessageCategory): Promise<MessageCategoryDto> {
+  async updateCommunityMessageCategory(user: string, community: string, category: string, data: UpdateMessageCategory): Promise<{}> {
     const result = await this.communityRepository.updateCommunityMessageCategory(user, community, category, data)
     if (result) return {
       _id: (result as any)._id,
@@ -137,7 +137,7 @@ export class CommunityService {
       community: community,
       displayName: result.displayName,
       description: result.description,
-      isReadOnly: result.readOnly
+      readOnly: result.readOnly
     }
 
     throw new NotFoundException()

@@ -6,6 +6,7 @@ export class MessageCategoryDto {
   _id?: string
   displayName?: string
   community?: string
+  readOnly?: Boolean
 
   @ApiProperty()
   @IsNotEmpty()
