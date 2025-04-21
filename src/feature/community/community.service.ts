@@ -95,34 +95,6 @@ export class CommunityService {
   ) { }
 
   /**
-   * 
-   * @param community 
-   */
-  private async updateCommuntitySummary(community: string, action: string): Promise<void> {
-    await this.communityQueue.add(action, { community })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param street 
-   * @param action 
-   */
-  private async updateCommuntityStreetSummary(community: string, street: string, action: string): Promise<void> {
-    await this.communityQueue.add(action, { community, street })
-  }
-
-  /**
-   * 
-   * @param community 
-   * @param building 
-   * @param action 
-   */
-  private async updateCommuntityBuildingSummary(community: string, building: string, action: string): Promise<void> {
-    await this.communityQueue.add(action, { community, building })
-  }
-
-  /**
   * 
   * @param user 
   * @param community 
@@ -135,7 +107,7 @@ export class CommunityService {
       const category = await this.communityRepository.createCommunityMessageCategory(user, community, data)
       if (category)
         return {
-          id: (category as any)._id,
+          _id: (category as any)._id,
           name: category.name,
           community: category.community?.toString(),
           displayName: category.displayName,
@@ -160,7 +132,7 @@ export class CommunityService {
   async updateCommunityMessageCategory(user: string, community: string, category: string, data: UpdateMessageCategory): Promise<MessageCategoryDto> {
     const result = await this.communityRepository.updateCommunityMessageCategory(user, community, category, data)
     if (result) return {
-      id: (result as any)._id,
+      _id: (result as any)._id,
       name: result.name,
       community: community,
       displayName: result.displayName,

@@ -3,7 +3,7 @@ import { IsNotEmpty } from "class-validator"
 
 export class MessageCategoryDto {
 
-  id?: string
+  _id?: string
   displayName?: string
   community?: string
 
