@@ -71,6 +71,7 @@ import { CommunityDraft, DraftType } from './model/community.draft';
 import { BulkMemberDto } from './dto/request/bulk.member.dto';
 import { UpdateCommunityBuildingDto } from './dto/request/update.community.building.dto';
 import { CommunityBuilding } from './model/community.building';
+import { UpdateMessageCategory } from './dto/request/update.message.category';
 
 @Injectable()
 export class CommunityService {
@@ -144,6 +145,26 @@ export class CommunityService {
     }
 
     else throw new BadRequestException()
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param category 
+   * @param data 
+   * @returns 
+   */
+  async updateCommunityMessageCategory(user: string, community: string, category: string, data: UpdateMessageCategory): Promise<MessageCategoryDto> {
+    const result = await this.communityRepository.updateCommunityMessageCategory(user, community, category, data)
+    if (result) return {
+      id: (category as any)._id,
+      name: result.name,
+      description: result.description,
+      isReadOnly: result.readOnly
+    }
+
+    throw new NotFoundException()
   }
 
   /**

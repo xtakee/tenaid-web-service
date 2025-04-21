@@ -49,6 +49,7 @@ import { CreateCommunityFlatDto } from './dto/request/create.community.flat'
 import { SingleFileUpload } from 'src/core/decorators/single.file.upload'
 import { BulkUploadResponseDto } from './dto/response/bulk.insert.response.dto'
 import { UpdateCommunityBuildingDto } from './dto/request/update.community.building.dto'
+import { UpdateMessageCategory } from './dto/request/update.message.category'
 
 @Controller({
   version: '1',
@@ -446,6 +447,26 @@ export class CommunityController {
     @ManagedCommunity() community: string,
     @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
     return await this.communityService.createCommunityMessageCategory(user, community, data)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param category 
+   * @param data 
+   * @returns 
+   */
+  @Patch('/message/category/:category')
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.MESSAGES))
+  @ApiOperation({ summary: 'Update a community message category' })
+  async updateCommunityMessageCategory(@User() user: string,
+    @ManagedCommunity() community: string,
+    @Param('category') category: string,
+    @Body() data: UpdateMessageCategory): Promise<MessageCategoryDto> {
+    if (!isMongoId(category)) throw new BadRequestException()
+    return await this.communityService.updateCommunityMessageCategory(user, community, category, data)
   }
 
   /**

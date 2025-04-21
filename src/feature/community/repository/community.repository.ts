@@ -54,6 +54,7 @@ import { BulkBuildingDto } from "../dto/request/bulk.building.dto"
 import { capitalizeFirstLetter } from "src/core/helpers/capitalize.first.letter"
 import { CommunityDraft, DraftType } from "../model/community.draft"
 import { UpdateCommunityBuildingDto } from "../dto/request/update.community.building.dto"
+import { UpdateMessageCategory } from "../dto/request/update.message.category"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -2848,6 +2849,26 @@ export class CommunityRepository {
       community: new Types.ObjectId(community),
       _id: new Types.ObjectId(draft)
     })
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param category 
+   * @param data 
+   */
+  async updateCommunityMessageCategory(user: string, community: string, category: string, data: UpdateMessageCategory): Promise<MessageCategory> {
+    return await this.messageCategoryModel.findOneAndUpdate({
+      _id: new Types.ObjectId(category),
+      community: new Types.ObjectId(community)
+    }, {
+      name: data.name.toLowerCase().replaceAll(' ', ''),
+      description: data.description,
+      updatedBy: new Types.ObjectId(user),
+      readOnly: data.isReadOnly,
+      displayName: data.name,
+    }, { returnDocument: 'after' })
   }
 
   /**
