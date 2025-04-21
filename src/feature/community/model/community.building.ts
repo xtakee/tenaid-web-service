@@ -16,6 +16,9 @@ export class CommunityBuilding {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   createdBy: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  updatedBy?: Types.ObjectId
+
   @Prop({ type: Types.ObjectId, ref: CommunityStreet.name })
   street: Types.ObjectId
 

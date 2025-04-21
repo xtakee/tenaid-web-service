@@ -92,3 +92,11 @@ export class FileController {
     fileStream.pipe(res)
   }
 }
+//FGBNTGWL
+//869279
+//67f2b1ba4865f59ee10284ae
+//0001
+
+//86927900013
+
+//MFL IOG EN

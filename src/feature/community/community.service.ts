@@ -69,6 +69,8 @@ import { toPascalCaseWithSpaces } from 'src/core/helpers/pascal.case.with.space'
 import { searchable } from 'src/core/util/searchable';
 import { CommunityDraft, DraftType } from './model/community.draft';
 import { BulkMemberDto } from './dto/request/bulk.member.dto';
+import { UpdateCommunityBuildingDto } from './dto/request/update.community.building.dto';
+import { CommunityBuilding } from './model/community.building';
 
 @Injectable()
 export class CommunityService {
@@ -545,11 +547,12 @@ export class CommunityService {
    * @param data 
    */
   async updateCommunityStreet(
+    user: string,
     community: string,
     street: string,
     data: UpdateCommunityStreetDto): Promise<CommunityPathResponseDto> {
 
-    const saved = await this.communityRepository.updateCommunityStreet(community, street, data)
+    const saved = await this.communityRepository.updateCommunityStreet(user, community, street, data)
     if (saved) return this.pathMapper.map(saved)
 
     throw new NotFoundException()
@@ -1276,6 +1279,20 @@ export class CommunityService {
    */
   async getAllCommunityMemberDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
     return await this.communityRepository.getAllCommunityMemberDrafts(community, paginate)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   */
+  async updateCommunityBuilding(user: string, community: string, building: string, data: UpdateCommunityBuildingDto): Promise<CommunityBuilding> {
+    const result = await this.communityRepository.updateCommunityBuilding(user, community, building, data)
+
+    if (result) return result
+
+    throw new NotFoundException()
   }
 
   /**

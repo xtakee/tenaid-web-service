@@ -39,6 +39,9 @@ export class Community {
   @Prop({ type: Types.ObjectId, ref: Account.name })
   account: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: Account.name })
+  updatedBy?: Types.ObjectId
+
   @Prop({ index: true })
   name: string
 

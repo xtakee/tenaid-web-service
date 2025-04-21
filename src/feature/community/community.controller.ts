@@ -48,6 +48,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { CreateCommunityFlatDto } from './dto/request/create.community.flat'
 import { SingleFileUpload } from 'src/core/decorators/single.file.upload'
 import { BulkUploadResponseDto } from './dto/response/bulk.insert.response.dto'
+import { UpdateCommunityBuildingDto } from './dto/request/update.community.building.dto'
 
 @Controller({
   version: '1',
@@ -393,22 +394,22 @@ export class CommunityController {
     return await this.communityService.getCommunityBuildingAccess(community, building, paginate)
   }
 
-    /**
-   * 
-   * @param community 
-   * @param paginate 
-   * @returns 
-   */
-    @Get('/member/draft')
-    @ApiOperation({ summary: 'Get all community members drafts' })
-    @Auth()
-    @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
-    async getCommunityMemberDrafts(
-      @ManagedCommunity() community: string,
-      @Query() paginate: PaginationRequestDto
-    ): Promise<PaginatedResult<any>> {
-      return await this.communityService.getAllCommunityMemberDrafts(community, paginate)
-    }
+  /**
+ * 
+ * @param community 
+ * @param paginate 
+ * @returns 
+ */
+  @Get('/member/draft')
+  @ApiOperation({ summary: 'Get all community members drafts' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.READ, COMMUNITY_SYSTEM_FEATURES.BUILDING))
+  async getCommunityMemberDrafts(
+    @ManagedCommunity() community: string,
+    @Query() paginate: PaginationRequestDto
+  ): Promise<PaginatedResult<any>> {
+    return await this.communityService.getAllCommunityMemberDrafts(community, paginate)
+  }
 
   /**
    * 
@@ -857,13 +858,14 @@ export class CommunityController {
   @Patch('/street/:street')
   @Auth()
   @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.STREET))
-  @ApiOperation({ summary: 'Upate a community street' })
+  @ApiOperation({ summary: 'Update a community street' })
   async updateCommunityStreet(
+    @User() user: string,
     @ManagedCommunity() community: string,
     @Param('street') street: string,
     @Body() body: UpdateCommunityStreetDto): Promise<CommunityPathResponseDto> {
     if (!isMongoId(street)) throw new BadRequestException()
-    return await this.communityService.updateCommunityStreet(community, street, body)
+    return await this.communityService.updateCommunityStreet(user, community, street, body)
   }
 
   /**
@@ -1265,6 +1267,27 @@ export class CommunityController {
     @ManagedCommunity() community: string,
     @Body() body: CommunityBuildingDto): Promise<any> {
     return await this.communityService.createCommunityBuilding(user, community, body)
+  }
+
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param building 
+   * @param body 
+   * @returns 
+   */
+  @Patch('/building/:building')
+  @ApiOperation({ summary: 'Update a community building' })
+  @Auth()
+  @CheckPolicies((ability: MongoAbility) => ability.can(CLAIM.WRITE, COMMUNITY_SYSTEM_FEATURES.BUILDING))
+  async updateCommunityBuilding(
+    @User() user: string,
+    @ManagedCommunity() community: string,
+    @Param('building') building: string,
+    @Body() body: UpdateCommunityBuildingDto): Promise<any> {
+    if (!isMongoId(building)) throw new BadRequestException()
+    return await this.communityService.updateCommunityBuilding(user, community, building, body)
   }
 
   /**

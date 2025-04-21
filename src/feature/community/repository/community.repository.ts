@@ -53,6 +53,7 @@ import { Months } from "src/core/util/months"
 import { BulkBuildingDto } from "../dto/request/bulk.building.dto"
 import { capitalizeFirstLetter } from "src/core/helpers/capitalize.first.letter"
 import { CommunityDraft, DraftType } from "../model/community.draft"
+import { UpdateCommunityBuildingDto } from "../dto/request/update.community.building.dto"
 
 const MIN_DIRECTORS_COUNT = 2
 
@@ -1275,6 +1276,7 @@ export class CommunityRepository {
    * @param data 
    */
   async updateCommunityStreet(
+    user: string,
     community: string,
     street: string,
     data: UpdateCommunityStreetDto): Promise<CommunityStreet> {
@@ -1284,7 +1286,8 @@ export class CommunityRepository {
       community: new Types.ObjectId(community)
     }, {
       name: data.name,
-      description: data.description
+      description: data.description,
+      updatedBy: new Types.ObjectId(user)
     }, { returnDocument: 'after' })
   }
 
@@ -3090,6 +3093,38 @@ export class CommunityRepository {
     )
   }
 
+  /**
+   * 
+   * @param user 
+   * @param community 
+   * @param data 
+   */
+  async updateCommunityBuilding(user: string, community: string, building: string, data: UpdateCommunityBuildingDto): Promise<CommunityBuilding> {
+    const result = await this.communityBuildingModel.findOneAndUpdate({
+      community: new Types.ObjectId(community),
+      _id: new Types.ObjectId(building)
+    }, {
+      category: data.category,
+      name: data.name,
+      description: data.description,
+      contactCountry: data.contactCountry,
+      contactEmail: { value: data.contactEmail },
+      contactPerson: data.contactPerson,
+      contactPhone: data.contactPhone,
+      updatedBy: new Types.ObjectId(user)
+    }, { returnDocument: 'after' })
+
+    if (result) return await this.getCommunityBuildingById(community, building)
+
+    else return null
+  }
+
+  /**
+   * 
+   * @param community 
+   * @param paginate 
+   * @returns 
+   */
   async getAllCommunityMemberDrafts(community: string, paginate: PaginationRequestDto): Promise<PaginatedResult<CommunityDraft>> {
     const query: any = {
       community: new Types.ObjectId(community),
