@@ -1253,14 +1253,18 @@ export class CommunityRepository {
       account: { $ne: new Types.ObjectId(user) },
       isAdmin: false,
       $or: [
-        { canSendMessage: true },
-        { canSendMessage: undefined }
-      ],
-      status: ACCOUNT_STATUS.APPROVED
+        { status: ACCOUNT_STATUS.APPROVED },
+        { status: ACCOUNT_STATUS.ACCEPTED }
+      ]
     }
 
-    if (date)
+    if (date) {
       query.updatedAt = { $gt: new Date(date) }
+    }
+
+    if (paginate.status) {
+      query.canSendMessage = paginate.status === 'active' ? true : false
+    }
 
     return await this.paginator.paginate(this.communityMemberModel, buildSearchQuery(query, paginate.search), {
       select: '_id extra.firstName extra.lastName extra.photo extra.isAdmin isAdmin updatedAt createdAt building canSendMessage',
