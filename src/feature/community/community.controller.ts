@@ -445,7 +445,7 @@ export class CommunityController {
   @ApiOperation({ summary: 'Create a community message category' })
   async createCommunityMessageCategory(@User() user: string,
     @ManagedCommunity() community: string,
-    @Body() data: MessageCategoryDto): Promise<MessageCategoryDto> {
+    @Body() data: MessageCategoryDto): Promise<any> {
     return await this.communityService.createCommunityMessageCategory(user, community, data)
   }
 
@@ -464,7 +464,7 @@ export class CommunityController {
   async updateCommunityMessageCategory(@User() user: string,
     @ManagedCommunity() community: string,
     @Param('category') category: string,
-    @Body() data: UpdateMessageCategory): Promise<MessageCategoryDto> {
+    @Body() data: UpdateMessageCategory): Promise<any> {
     if (!isMongoId(category)) throw new BadRequestException()
     return await this.communityService.updateCommunityMessageCategory(user, community, category, data)
   }
