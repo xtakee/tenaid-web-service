@@ -6,23 +6,7 @@ export class MessageTypingDto {
 
   @IsNotEmpty()
   @IsMongoId()
-  id: string
-
-  @IsNotEmpty()
-  @IsMongoId()
   room: string
-
-  @IsNotEmpty()
-  lastName: string
-
-  @IsNotEmpty()
-  firstName: string
-
-  @IsOptional()
-  photo?: string
-
-  @IsNotEmpty()
-  isAdmin: string
 
   @IsNotEmpty()
   @IsMongoId()

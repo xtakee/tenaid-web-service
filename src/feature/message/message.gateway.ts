@@ -14,10 +14,10 @@ import { MessageTypingDto } from "./dto/message.typing.dto"
 import { MessageCacheDto } from "./dto/message.cache"
 import { MessageStatus } from "./util/message.status"
 import { MessageNode } from "./model/message.node"
-import { CacheService } from "src/services/cache/cache.service"
 import { Platform } from "src/core/util/platform"
 import { BadRequestException, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common"
 import { WS_MESSAGE_ERROR, WsExceptionHandler } from "./ws.exception.handler"
+import { ChatMemberInfoDto } from "./dto/chat.member.info"
 
 const EVENT_NAME = 'community-message'
 const EVENT_NAME_ACK = 'community-message-ack'
@@ -49,7 +49,6 @@ class NodeData {
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authGuard: WsJwtAuthGuard,
-    private readonly redisCache: CacheService,
     private readonly messageRepository: MessageRepository,
     private readonly communityRepository: CommunityRepository,
     private readonly notificationService: NotificationService,
@@ -74,14 +73,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const account: string = client.data.user.sub
     const platfom: string = client.data.user.platform
     // 
-    const json = await this.redisCache.get(`${account}-${EVENT_NAME_TYPING}`)
-    const data: MessageTypingDto = JSON.parse(json)
+    // const json = await this.redisCache.get(`${account}-${EVENT_NAME_TYPING}`)
+    // const data: MessageTypingDto = JSON.parse(json)
 
-    if (data)
-      this.server.to(data.room).emit(EVENT_NAME_TYPING, data)
+    // if (data)
+    //   this.server.to(data.room).emit(EVENT_NAME_TYPING, data)
 
-    if (account)
+    if (account) {
       await this.messageRepository.updateMessageNodesDisConnection(account, platfom)
+    }
   }
 
   // handle client connected
@@ -315,13 +315,23 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (authenticated) {
       try {
         const account: string = client.data.user.sub
-        const data = JSON.stringify(message)
 
-        // store account typing event data
-        await this.redisCache.set(`${account}-${EVENT_NAME_TYPING}`, data)
+        const member = await this.communityRepository.getCommunityMemberChatInfo(account, message.community)
+        if (member) {
+          const info: ChatMemberInfoDto = {
+            id: (member as any)._id.toString(),
+            firstName: member.extra?.firstName,
+            lastName: member.extra?.lastName,
+            photo: member.extra?.photo,
+            isAdmin: member.isAdmin,
+            community: message.community,
+            room: message.room,
+            typing: message.typing
+          }
 
-        // send typing event to users
-        client.to(message.room).emit(EVENT_NAME_TYPING, message)
+          // send typing event to users
+          client.to(message.room).emit(EVENT_NAME_TYPING, info)
+        }
       } catch (error) {
         client.emit(WS_MESSAGE_ERROR, error.toString())
       }
