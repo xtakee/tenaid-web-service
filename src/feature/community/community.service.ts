@@ -160,7 +160,7 @@ export class CommunityService {
   async updateCommunityMessageCategory(user: string, community: string, category: string, data: UpdateMessageCategory): Promise<MessageCategoryDto> {
     const result = await this.communityRepository.updateCommunityMessageCategory(user, community, category, data)
     if (result) return {
-      id: (category as any)._id,
+      id: (result as any)._id,
       name: result.name,
       community: community,
       displayName: result.displayName,
