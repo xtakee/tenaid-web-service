@@ -323,6 +323,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             firstName: member.extra?.firstName,
             lastName: member.extra?.lastName,
             photo: member.extra?.photo,
+            account: account,
             isAdmin: member.isAdmin,
             community: message.community,
             room: message.room,
