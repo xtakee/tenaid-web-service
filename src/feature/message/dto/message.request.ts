@@ -86,7 +86,7 @@ export class MessageRequestDto {
   @IsEnum(MessageStatus)
   status?: string
 
-  @IsOptional()
+  @ValidateIf((params) => params.type === MessageType.FILE)
   extension?: string
 
   @IsArray()
