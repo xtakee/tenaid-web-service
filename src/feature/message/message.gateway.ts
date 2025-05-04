@@ -99,7 +99,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       for (const room of rooms) client.leave(room)
 
       if (platform === Platform.WEB) {
-        if (managedRoom) client.join(managedRoom)
+        if (managedRoom) {
+          client.join(managedRoom)
+          client.join(account)
+        }
       } else {
         // join all active community rooms
         for (const room of rooms) client.join(room)
