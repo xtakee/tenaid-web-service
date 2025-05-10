@@ -18,11 +18,11 @@ export class MessageRequestDto {
   community: string
 
   @IsOptional()
-  //@IsMongoId()
+  @IsMongoId()
   account?: string
 
   @IsOptional()
-  //@IsMongoId()
+  @IsMongoId()
   author?: string
 
   @IsNotEmpty()
