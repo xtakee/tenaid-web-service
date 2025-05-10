@@ -154,6 +154,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const room = message.room
       const account: string = client.data.user.sub
       const platform: string = client.data.user.platform
+      message.author = message.author ?? client.data.user.primaryMember
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
@@ -356,6 +357,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const room = message.room
       const account: string = client.data.user.sub
       const platform: string = client.data.user.platform
+      message.author = message.author ?? client.data.user.primaryMember
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
@@ -380,6 +382,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const room = message.room
       const account: string = client.data.user.sub
       const platform: string = client.data.user.platform
+      message.author = message.author ?? client.data.user.primaryMember
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)
@@ -446,6 +449,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const room = message.room
       const platform: string = client.data.user.platform
       const account: string = client.data.user.sub
+
+      message.author = message.author ?? client.data.user.primaryMember
 
       // get total expected audience
       const totalNodes: number = await this.messageRepository.getTotalMessageNodes(room)

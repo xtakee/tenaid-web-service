@@ -21,9 +21,9 @@ export class MessageRequestDto {
   @IsMongoId()
   account?: string
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId()
-  author: string
+  author?: string
 
   @IsNotEmpty()
   body: string

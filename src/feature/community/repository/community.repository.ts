@@ -2588,6 +2588,19 @@ export class CommunityRepository {
 
   /**
    * 
+   * @param user 
+   * @param community 
+   * @returns 
+   */
+  async getAccountMemberCommunity(user: string, community: string): Promise<CommunityMember> {
+    return await this.communityMemberModel.findOne({
+      account: new Types.ObjectId(user),
+      community: new Types.ObjectId(community)
+    })
+  }
+
+  /**
+   * 
    * @param email 
    * @returns 
    */

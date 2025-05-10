@@ -411,6 +411,7 @@ export class AccountService {
         const primaryManagedAccount = managedAccounts.find((data) => data.isPrimary === true)
 
         if (primaryManagedAccount) {
+          //const primaryMemberAccount = await this.communityRepository.getAccountMemberCommunity(user, community)
           const primaryCommunity = primaryManagedAccount.community
 
           accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryCommunity.kycAcknowledged
