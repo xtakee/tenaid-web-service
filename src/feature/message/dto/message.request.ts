@@ -17,12 +17,8 @@ export class MessageRequestDto {
   @IsMongoId()
   community: string
 
-  @IsOptional()
-  @IsMongoId()
   account?: string
 
-  @IsOptional()
-  @IsMongoId()
   author?: string
 
   @IsNotEmpty()
