@@ -432,7 +432,8 @@ export class AccountRepository implements IAccountRepository {
    * @param community 
    */
   async getOwnAccountAuthorizations(user: string): Promise<any[]> {
-    return await this.managedAccountModel.find({ account: new Types.ObjectId(user) }, '_id isActive permissions createdBy isPrimary community')
+    return await this.managedAccountModel.find({ account: new Types.ObjectId(user) },
+      '_id isActive permissions createdBy isPrimary community')
       .populate([
         {
           path: 'createdBy',

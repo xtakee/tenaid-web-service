@@ -411,8 +411,8 @@ export class AccountService {
         const primaryManagedAccount = managedAccounts.find((data) => data.isPrimary === true)
 
         if (primaryManagedAccount) {
-          //const primaryMemberAccount = await this.communityRepository.getAccountMemberCommunity(user, community)
           const primaryCommunity = primaryManagedAccount.community
+          const primaryMemberAccount = await this.communityRepository.getAccountMemberCommunity(user, (primaryCommunity as any)._id.toString())
 
           accountDto.communityKycAcknowledged = accountDto.kyc.profileCompleted && primaryCommunity.kycAcknowledged
           // add account primary community
@@ -433,7 +433,11 @@ export class AccountService {
             data.encryption = undefined
             return data
           })
+
+          accountDto.authorId = (primaryMemberAccount as any)._id.toString()
+          
           primaryCommunity.encryption = await this.e2eeService.encrypt(user, platform, primaryCommunity.encryption)
+          
           communities.push(primaryCommunity)
 
           // update permissions and managed communities

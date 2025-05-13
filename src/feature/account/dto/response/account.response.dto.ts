@@ -45,6 +45,7 @@ export class AccountResponseDto {
   photo: string
   identity: string
   identityType: string
+  authorId?: string
   idNumber: string
   dob?: Date
   permissions?: {}
