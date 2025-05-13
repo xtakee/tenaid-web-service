@@ -17,13 +17,13 @@ export class MessageRequestDto {
   @IsMongoId()
   community: string
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId()
   account?: string
 
   @IsNotEmpty()
   @IsMongoId()
-  author?: string
+  author: string
 
   @IsNotEmpty()
   body: string
@@ -86,7 +86,7 @@ export class MessageRequestDto {
   @IsEnum(MessageStatus)
   status?: string
 
-  @ValidateIf((params) => params.type === MessageType.FILE)
+  @ValidateIf((params) => params.type === MessageType.FILE || params.type === MessageType.VIDEO)
   extension?: string
 
   @IsArray()
