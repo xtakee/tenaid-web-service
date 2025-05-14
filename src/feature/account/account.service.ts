@@ -434,11 +434,10 @@ export class AccountService {
             return data
           })
 
-          accountDto.authorId = (primaryMemberAccount as any)._id.toString()
-          
           primaryCommunity.encryption = await this.e2eeService.encrypt(user, platform, primaryCommunity.encryption)
-          
-          communities.push(primaryCommunity)
+          const activeComminity = {...primaryCommunity.toObject(), messagingAuthor: (primaryMemberAccount as any)._id.toString()}
+
+          communities.push(activeComminity)
 
           // update permissions and managed communities
           accountDto.communities = communities
